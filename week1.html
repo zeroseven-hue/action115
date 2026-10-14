@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>【行動方程式】第 1 週：美麗的海岸線——還原自然</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+  <script src="assets/js/qrcode.min.js"></script>
+</head>
+<body>
+
+  <header class="navbar">
+    <a href="index.html" class="navbar-brand">
+      <span>🌱 行動方程式</span>
+      <span class="navbar-badge">第 1 週</span>
+    </a>
+    <div class="nav-actions">
+      <button type="button" class="btn-nav btn-nav-qr" onclick="showCurrentPageQrModal()">📱 投影派卷 QR Code</button>
+      <span id="saveStatus" class="save-status">💾 本地暫存安全</span>
+      <a href="index.html" class="btn-nav">🏠 回課程首頁</a>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="page-header">
+      <div class="school-title">桃園市楊光國民中學 115 學年度第一學期 彈性學習課程學習單</div>
+      <h1 class="unit-title">【行動方程式】第 1 週：美麗的海岸線——還原自然</h1>
+      <p class="unit-desc">主題：老外愛台灣．淨灘全紀錄 | 海洋廢棄物來源與源頭減塑思辨</p>
+    </div>
+
+    <!-- 學生基本資料卡 -->
+    <div class="card">
+      <h3 class="card-title">👤 學生基本資料 (防呆認證)</h3>
+      
+    <div class="student-bar">
+      <div class="form-group">
+        <label class="form-label required" for="studentClass">班級</label>
+        <select id="studentClass" class="form-control" required>
+          <option value="" disabled selected>載入中...</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label required" for="studentSeat">座號</label>
+        <select id="studentSeat" class="form-control" required>
+          <option value="" disabled selected>載入中...</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label required" for="studentName">姓名</label>
+        <input type="text" id="studentName" class="form-control" placeholder="請輸入全名" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label required" for="studentGroup">組別</label>
+        <select id="studentGroup" class="form-control" required>
+          <option value="" disabled selected>載入中...</option>
+        </select>
+      </div>
+    </div>
+  
+    </div>
+
+    <!-- 任務一 -->
+    <div class="card">
+      <h3 class="card-title">🎬 任務一：影音大偵探——老外愛台灣．淨灘全紀錄</h3>
+      <p class="question-desc">請專注觀賞紀錄片，並回答下列問題：</p>
+      
+      <div class="video-container">
+        <iframe src="https://www.youtube.com/embed/pXVYA8dvUOQ" title="老外愛台灣淨灘紀錄片" allowfullscreen></iframe>
+      </div>
+
+      <div class="question-item">
+        <div class="question-title">1. Daniel 在台灣海灘淨灘時，海灘上最常出現的廢棄物種類有哪些？（請列舉 3 種）</div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.6rem;">
+          <input type="text" id="w1_q1_1" class="form-control" placeholder="廢棄物種類 ① (如：寶特瓶)">
+          <input type="text" id="w1_q1_2" class="form-control" placeholder="廢棄物種類 ② (如：塑膠袋)">
+          <input type="text" id="w1_q1_3" class="form-control" placeholder="廢棄物種類 ③ (如：保麗龍/漁網)">
+        </div>
+      </div>
+
+      <div class="question-item">
+        <div class="question-title">2. 影片中哪一個畫面或哪一句話最觸動你？為什麼？</div>
+        <textarea id="w1_q2" class="form-control" placeholder="請寫下你的具體感受與啟發（建議 20 字以上）..."></textarea>
+      </div>
+    </div>
+
+    <!-- 任務二 -->
+    <div class="card">
+      <h3 class="card-title">🔍 任務二：深度思考——廢棄物去哪裡？</h3>
+      <div class="question-item">
+        <div class="question-title">1. 海岸邊的廢棄物主要來自哪些管道？請寫出至少 2 個主要來源：</div>
+        <textarea id="w1_q3" class="form-control" placeholder="例如：日常生活陸源垃圾經河川沖刷、海上漁業漁網遺留、觀光客亂丟..."></textarea>
+      </div>
+
+      <div class="question-item">
+        <div class="question-title">2. 你認為「單靠淨灘」能夠讓台灣的海岸真正恢復美麗潔淨嗎？為什麼？</div>
+        <textarea id="w1_q4" class="form-control" placeholder="請比較「淨灘 (治標)」與「源頭減塑 (治本)」的差別並說明你的看法..."></textarea>
+      </div>
+    </div>
+
+    <!-- 任務三 -->
+    <div class="card">
+      <h3 class="card-title">🌱 任務三：還原自然——我的源頭減塑宣言</h3>
+      <p class="question-desc">為了還原美麗海岸，我在日常生活中願意落實的行動（請勾選至少 2 項）：</p>
+
+      <div class="checkbox-group">
+        <label class="checkbox-label"><input type="checkbox" name="w1_actions" value="自備水壺"> 🧋 自備環保水壺 / 隨行杯</label>
+        <label class="checkbox-label"><input type="checkbox" name="w1_actions" value="自備環保袋"> 🛍️ 購物自備環保袋，拒絕塑膠袋</label>
+        <label class="checkbox-label"><input type="checkbox" name="w1_actions" value="不用免洗餐具"> 🥢 內用不使用一次性免洗餐具</label>
+        <label class="checkbox-label"><input type="checkbox" name="w1_actions" value="精準分類回收"> ♻️ 做好垃圾精準分類與減量</label>
+        <label class="checkbox-label"><input type="checkbox" name="w1_actions" value="宣導親友減塑"> 🗣️ 向家人與朋友宣導減塑理念</label>
+        <label class="checkbox-label"><input type="checkbox" name="w1_actions" value="支持淨灘"> 🏖️ 假日積極參與或支持淨灘活動</label>
+      </div>
+    </div>
+
+    <!-- 自我檢核表 -->
+    
+    <div class="card">
+      <h3 class="card-title">📝 學習表現自我檢核表</h3>
+      <p class="question-desc">請誠實回顧本節課的學習狀態，為自己進行自評：</p>
+      <table class="check-table">
+        <thead>
+          <tr>
+            <th>檢核項目</th>
+            <th>自評結果</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1. 我能專注觀看影音/聆聽課堂講解，並完成重點摘要。</td>
+            <td>
+              <label><input type="radio" name="check1" value="yes" checked> 是</label>&nbsp;&nbsp;
+              <label><input type="radio" name="check1" value="need_work"> 需加油</label>
+            </td>
+          </tr>
+          <tr>
+            <td>2. 我能認真參與問題討論，尊重並具體提出想法觀點。</td>
+            <td>
+              <label><input type="radio" name="check2" value="yes" checked> 是</label>&nbsp;&nbsp;
+              <label><input type="radio" name="check2" value="need_work"> 需加油</label>
+            </td>
+          </tr>
+          <tr>
+            <td>3. 我願意在日常生活中主動實踐永續減碳與公民責任。</td>
+            <td>
+              <label><input type="radio" name="check3" value="yes" checked> 是</label>&nbsp;&nbsp;
+              <label><input type="radio" name="check3" value="need_work"> 需加油</label>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  
+
+    <!-- 送出按鈕 -->
+    <div class="submit-section">
+      <button id="submitBtn" class="btn-submit" onclick="handleSubmit()">🚀 送出第 1 週學習單</button>
+    </div>
+
+  </div>
+
+  <script src="assets/js/common.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      initStudentInfoForm('1');
+    });
+
+    function handleSubmit() {
+      submitWorksheet('1', (answers) => {
+        let score = 0;
+        let breakdown = [];
+
+        // 任務一客觀關鍵字判定 (30分)
+        let q1Count = [answers.w1_q1_1, answers.w1_q1_2, answers.w1_q1_3].filter(x => x && x.trim().length > 0).length;
+        if (q1Count >= 3) {
+          score += 30;
+          breakdown.push("海廢種類觀察紀錄完整 (+30分)");
+        } else {
+          let s = q1Count * 10;
+          score += s;
+          breakdown.push("海廢種類觀察填寫 " + q1Count + " 項 (+" + s + "分)");
+        }
+
+        // 簡答與深度思考 (30分)
+        let hasQ2 = answers.w1_q2 && answers.w1_q2.trim().length >= 10;
+        let hasQ3 = answers.w1_q3 && answers.w1_q3.trim().length >= 10;
+        let hasQ4 = answers.w1_q4 && answers.w1_q4.trim().length >= 10;
+        let thoughtfulCount = (hasQ2 ? 1 : 0) + (hasQ3 ? 1 : 0) + (hasQ4 ? 1 : 0);
+        let thoughtScore = thoughtfulCount * 10;
+        score += thoughtScore;
+        breakdown.push("深度思考與心得回答認真 (+" + thoughtScore + "分)");
+
+        // 行動宣言 (20分)
+        let actionCount = (answers.w1_actions || []).length;
+        if (actionCount >= 2) {
+          score += 20;
+          breakdown.push("落實源頭減塑承諾達標 (+20分)");
+        } else {
+          let s = actionCount * 10;
+          score += s;
+          breakdown.push("減塑承諾勾選 " + actionCount + " 項 (+" + s + "分)");
+        }
+
+        // 自我檢核表 (20分)
+        if (answers.check1 && answers.check2 && answers.check3) {
+          score += 20;
+          breakdown.push("完成課堂自主學習檢核 (+20分)");
+        }
+
+        return { total: Math.min(100, score), breakdown };
+      });
+    }
+  </script>
+</body>
+</html>

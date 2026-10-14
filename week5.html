@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>【行動方程式】第 5 週：地球公民——環境保育一起來</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+  <script src="assets/js/qrcode.min.js"></script>
+</head>
+<body>
+
+  <header class="navbar">
+    <a href="index.html" class="navbar-brand">
+      <span>🌱 行動方程式</span>
+      <span class="navbar-badge">第 5 週</span>
+    </a>
+    <div class="nav-actions">
+      <button type="button" class="btn-nav btn-nav-qr" onclick="showCurrentPageQrModal()">📱 投影派卷 QR Code</button>
+      <span id="saveStatus" class="save-status">💾 本地暫存安全</span>
+      <a href="index.html" class="btn-nav">🏠 回課程首頁</a>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="page-header">
+      <div class="school-title">桃園市楊光國民中學 115 學年度第一學期 彈性學習課程學習單</div>
+      <h1 class="unit-title">【行動方程式】第 5 週：地球公民——環境保育一起來</h1>
+      <p class="unit-desc">主題：世界地球日與清潔日由來意涵 | 全球綠色行動搜查與團隊分工</p>
+    </div>
+
+    <div class="card">
+      <h3 class="card-title">👤 學生基本資料 (防呆認證)</h3>
+      
+    <div class="student-bar">
+      <div class="form-group">
+        <label class="form-label required" for="studentClass">班級</label>
+        <select id="studentClass" class="form-control" required>
+          <option value="" disabled selected>載入中...</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label required" for="studentSeat">座號</label>
+        <select id="studentSeat" class="form-control" required>
+          <option value="" disabled selected>載入中...</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label required" for="studentName">姓名</label>
+        <input type="text" id="studentName" class="form-control" placeholder="請輸入全名" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label required" for="studentGroup">組別</label>
+        <select id="studentGroup" class="form-control" required>
+          <option value="" disabled selected>載入中...</option>
+        </select>
+      </div>
+    </div>
+  
+    </div>
+
+    <!-- 任務一 -->
+    <div class="card">
+      <h3 class="card-title">🌍 任務一：節日與意涵解密——世界地球日與世界清潔日</h3>
+      <p class="question-desc">專注聆聽課堂講解，寫出兩大國際環境節日的日期與核心意涵：</p>
+
+      <div class="question-item">
+        <div class="question-title">1. 「世界地球日 (Earth Day)」為每年的哪一天？其發起核心精神是什麼？</div>
+        <div style="display: grid; grid-template-columns: 180px 1fr; gap: 0.6rem; margin-bottom: 0.5rem;">
+          <input type="text" id="w5_q1_date" class="form-control" placeholder="日期 (如：4月22日)">
+          <input type="text" id="w5_q1_spirit" class="form-control" placeholder="核心精神 (如：投資我們的星球、跨越國界全民環保)">
+        </div>
+      </div>
+
+      <div class="question-item">
+        <div class="question-title">2. 「世界清潔日 (World Cleanup Day)」舉辦時間與全球萬人參與的目的為何？</div>
+        <div style="display: grid; grid-template-columns: 240px 1fr; gap: 0.6rem;">
+          <input type="text" id="w5_q2_time" class="form-control" placeholder="舉辦時間 (如：9月第三個週六)">
+          <input type="text" id="w5_q2_aim" class="form-control" placeholder="目的 (如：全民動員一天清理全國陸海廢棄物)">
+        </div>
+      </div>
+    </div>
+
+    <!-- 任務二 -->
+    <div class="card">
+      <h3 class="card-title">🔍 任務二：全球綠色行動搜查線——媒體資訊統整</h3>
+      <p class="question-desc">運用媒體資源或書刊報導，記錄一則世界各地對地球保育有益的作為：</p>
+
+      <div class="question-item">
+        <div style="display: grid; grid-template-columns: 180px 1fr; gap: 0.6rem; margin-bottom: 0.8rem;">
+          <input type="text" id="w5_q3_country" class="form-control" placeholder="國家/地區 (如：德國/愛沙尼亞)">
+          <input type="text" id="w5_q3_title" class="form-control" placeholder="行動主題 (如：全面循環押金系統/綠帶造林)">
+        </div>
+        <textarea id="w5_q3_content" class="form-control" placeholder="具體作為與給予我們的啟示（例如：該國如何透過政策或科技成功推動環境永續）..."></textarea>
+      </div>
+    </div>
+
+    <!-- 任務三 -->
+    <div class="card">
+      <h3 class="card-title">🤝 任務三：小組溝通協調——團隊任務分工表</h3>
+      <p class="question-desc">經由小組互動討論與溝通協調，登記本組下週發表會之分工角色：</p>
+
+      <table class="check-table">
+        <thead>
+          <tr>
+            <th>分工角色</th>
+            <th style="width: 200px;">負責同學姓名</th>
+            <th>具體職責描述</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>👑 小組組長 (協調統籌)</strong></td>
+            <td><input type="text" id="w5_leader" class="form-control" placeholder="請輸入姓名"></td>
+            <td>掌控發表進度、安排小組討論與協調組員溝通</td>
+          </tr>
+          <tr>
+            <td><strong>🔍 資訊搜尋員 (資源整合)</strong></td>
+            <td><input type="text" id="w5_searcher" class="form-control" placeholder="請輸入姓名"></td>
+            <td>搜集整理國際案例報導、圖表與數據資訊</td>
+          </tr>
+          <tr>
+            <td><strong>🎤 紀錄發表員 (表達整合)</strong></td>
+            <td><input type="text" id="w5_presenter" class="form-control" placeholder="請輸入姓名"></td>
+            <td>填寫分工彙整成果，代表小組進行報告展示</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    
+    <div class="card">
+      <h3 class="card-title">📝 學習表現自我檢核表</h3>
+      <p class="question-desc">請誠實回顧本節課的學習狀態，為自己進行自評：</p>
+      <table class="check-table">
+        <thead>
+          <tr>
+            <th>檢核項目</th>
+            <th>自評結果</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1. 我能專注觀看影音/聆聽課堂講解，並完成重點摘要。</td>
+            <td>
+              <label><input type="radio" name="check1" value="yes" checked> 是</label>&nbsp;&nbsp;
+              <label><input type="radio" name="check1" value="need_work"> 需加油</label>
+            </td>
+          </tr>
+          <tr>
+            <td>2. 我能認真參與問題討論，尊重並具體提出想法觀點。</td>
+            <td>
+              <label><input type="radio" name="check2" value="yes" checked> 是</label>&nbsp;&nbsp;
+              <label><input type="radio" name="check2" value="need_work"> 需加油</label>
+            </td>
+          </tr>
+          <tr>
+            <td>3. 我願意在日常生活中主動實踐永續減碳與公民責任。</td>
+            <td>
+              <label><input type="radio" name="check3" value="yes" checked> 是</label>&nbsp;&nbsp;
+              <label><input type="radio" name="check3" value="need_work"> 需加油</label>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  
+
+    <div class="submit-section">
+      <button id="submitBtn" class="btn-submit" onclick="handleSubmit()">🚀 送出第 5 週學習單</button>
+    </div>
+
+  </div>
+
+  <script src="assets/js/common.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      initStudentInfoForm('5');
+    });
+
+    function handleSubmit() {
+      submitWorksheet('5', (answers) => {
+        let score = 0;
+        let breakdown = [];
+
+        // 任務一：節日與意涵 (30分)
+        let hasD1 = answers.w5_q1_date && answers.w5_q1_date.length > 0;
+        let hasS1 = answers.w5_q1_spirit && answers.w5_q1_spirit.length > 0;
+        let hasD2 = answers.w5_q2_time && answers.w5_q2_time.length > 0;
+        let hasS2 = answers.w5_q2_aim && answers.w5_q2_aim.length > 0;
+        let count1 = (hasD1 ? 1 : 0) + (hasS1 ? 1 : 0) + (hasD2 ? 1 : 0) + (hasS2 ? 1 : 0);
+        let s1 = Math.round(count1 * 7.5);
+        score += s1;
+        breakdown.push("國際環境節日由來與意涵解密 (+" + s1 + "分)");
+
+        // 任務二：全球案例 (30分)
+        let hasCase = answers.w5_q3_country && answers.w5_q3_title && answers.w5_q3_content && answers.w5_q3_content.length >= 10;
+        let s2 = hasCase ? 30 : (answers.w5_q3_country ? 15 : 0);
+        score += s2;
+        breakdown.push("全球綠色行動搜查資訊統整 (+" + s2 + "分)");
+
+        // 任務三：團隊分工 (20分)
+        let hasRoles = answers.w5_leader && answers.w5_searcher && answers.w5_presenter;
+        let s3 = hasRoles ? 20 : 10;
+        score += s3;
+        breakdown.push("團隊任務分工協調落實 (+" + s3 + "分)");
+
+        if (answers.check1 && answers.check2 && answers.check3) {
+          score += 20;
+          breakdown.push("完成課堂自主學習檢核 (+20分)");
+        }
+
+        return { total: Math.min(100, score), breakdown };
+      });
+    }
+  </script>
+</body>
+</html>

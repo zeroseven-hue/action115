@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>【行動方程式】第 6 週：地球公民——環境保育一起來之『發表會』</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+  <script src="assets/js/qrcode.min.js"></script>
+</head>
+<body>
+
+  <header class="navbar">
+    <a href="index.html" class="navbar-brand">
+      <span>🌱 行動方程式</span>
+      <span class="navbar-badge">第 6 週</span>
+    </a>
+    <div class="nav-actions">
+      <button type="button" class="btn-nav btn-nav-qr" onclick="showCurrentPageQrModal()">📱 投影派卷 QR Code</button>
+      <span id="saveStatus" class="save-status">💾 本地暫存安全</span>
+      <a href="index.html" class="btn-nav">🏠 回課程首頁</a>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="page-header">
+      <div class="school-title">桃園市楊光國民中學 115 學年度第一學期 彈性學習課程學習單</div>
+      <h1 class="unit-title">【行動方程式】第 6 週：地球公民——環境保育一起來之『發表會』</h1>
+      <p class="unit-desc">主題：多元表達 · 任務成果 · 聆聽反饋 | 小組展演與同儕互評交流</p>
+    </div>
+
+    <div class="card">
+      <h3 class="card-title">👤 學生基本資料 (防呆認證)</h3>
+      
+    <div class="student-bar">
+      <div class="form-group">
+        <label class="form-label required" for="studentClass">班級</label>
+        <select id="studentClass" class="form-control" required>
+          <option value="" disabled selected>載入中...</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label required" for="studentSeat">座號</label>
+        <select id="studentSeat" class="form-control" required>
+          <option value="" disabled selected>載入中...</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label required" for="studentName">姓名</label>
+        <input type="text" id="studentName" class="form-control" placeholder="請輸入全名" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label required" for="studentGroup">組別</label>
+        <select id="studentGroup" class="form-control" required>
+          <option value="" disabled selected>載入中...</option>
+        </select>
+      </div>
+    </div>
+  
+    </div>
+
+    <!-- 任務一 -->
+    <div class="card">
+      <h3 class="card-title">🎤 任務一：本組發表與多元表達成果紀錄</h3>
+      <p class="question-desc">紀錄本組在今天發表會中所展現的成果：</p>
+
+      <div class="question-item">
+        <div class="question-title">1. 本組發表的主題名稱：</div>
+        <input type="text" id="w6_my_title" class="form-control" placeholder="例如：歐洲循環杯制度、海洋保護區建立、亞馬遜護林行動...">
+      </div>
+
+      <div class="question-item">
+        <div class="question-title">2. 本組採用的多元表達方式（可複選）：</div>
+        <div class="checkbox-group">
+          <label class="checkbox-label"><input type="checkbox" name="w6_modes" value="PPT簡報"> 💻 PPT 電子簡報</label>
+          <label class="checkbox-label"><input type="checkbox" name="w6_modes" value="海報繪製"> 🎨 手繪/數位海報</label>
+          <label class="checkbox-label"><input type="checkbox" name="w6_modes" value="情境短劇演繹"> 🎭 情境演繹與短劇</label>
+          <label class="checkbox-label"><input type="checkbox" name="w6_modes" value="多媒體短片"> 🎬 影音多媒體短片</label>
+        </div>
+      </div>
+
+      <div class="question-item">
+        <div class="question-title">3. 我在本次發表會中負責的角色與主要任務：</div>
+        <textarea id="w6_my_role" class="form-control" placeholder="請描述你在台上的主講段落、道具操作或投影片播放等具體貢獻..."></textarea>
+      </div>
+    </div>
+
+    <!-- 任務二 -->
+    <div class="card">
+      <h3 class="card-title">👂 任務二：同儕聆聽、提問與反饋紀錄表</h3>
+      <p class="question-desc">專注聆聽全班各組發表，記錄最令你印象深刻的一組：</p>
+
+      <div class="question-item">
+        <div class="question-title">1. 最令我震撼或啟發的小組：</div>
+        <div style="display: grid; grid-template-columns: 180px 1fr; gap: 0.6rem; margin-bottom: 0.8rem;">
+          <select id="w6_target_group" class="form-control">
+            <option value="" disabled selected>請選擇組別</option>
+            <option value="第1組">第 1 組</option>
+            <option value="第2組">第 2 組</option>
+            <option value="第3組">第 3 組</option>
+            <option value="第4組">第 4 組</option>
+            <option value="第5組">第 5 組</option>
+            <option value="第6組">第 6 組</option>
+            <option value="第7組">第 7 組</option>
+            <option value="第8組">第 8 組</option>
+          </select>
+          <input type="text" id="w6_target_title" class="form-control" placeholder="該組發表的主題">
+        </div>
+      </div>
+
+      <div class="question-item">
+        <div class="question-title">2. 我對該組的亮點肯定與建設性提問/反饋：</div>
+        <textarea id="w6_peer_feedback" class="form-control" placeholder="請具體寫出：他們哪裡講得很棒？你想問他們什麼問題？或者有什麼可以更好的建議..."></textarea>
+      </div>
+    </div>
+
+    <!-- 任務三 -->
+    <div class="card">
+      <h3 class="card-title">🌟 任務三：發表會總結省思與地球公民宣言</h3>
+      <div class="question-item">
+        <div class="question-title">1. 參與今天發表會後，我個人最大的收穫是什麼？</div>
+        <textarea id="w6_reflection" class="form-control" placeholder="請從多元表達、團隊合作或國際環境議題角度寫出你的體悟..."></textarea>
+      </div>
+
+      <div class="question-item">
+        <div class="question-title">2. 身為地球公民，我願意在生活中落實的永續行動：</div>
+        <textarea id="w6_action" class="form-control" placeholder="請寫下一項你承諾持續執行的生活綠色行動..."></textarea>
+      </div>
+    </div>
+
+    
+    <div class="card">
+      <h3 class="card-title">📝 學習表現自我檢核表</h3>
+      <p class="question-desc">請誠實回顧本節課的學習狀態，為自己進行自評：</p>
+      <table class="check-table">
+        <thead>
+          <tr>
+            <th>檢核項目</th>
+            <th>自評結果</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1. 我能專注觀看影音/聆聽課堂講解，並完成重點摘要。</td>
+            <td>
+              <label><input type="radio" name="check1" value="yes" checked> 是</label>&nbsp;&nbsp;
+              <label><input type="radio" name="check1" value="need_work"> 需加油</label>
+            </td>
+          </tr>
+          <tr>
+            <td>2. 我能認真參與問題討論，尊重並具體提出想法觀點。</td>
+            <td>
+              <label><input type="radio" name="check2" value="yes" checked> 是</label>&nbsp;&nbsp;
+              <label><input type="radio" name="check2" value="need_work"> 需加油</label>
+            </td>
+          </tr>
+          <tr>
+            <td>3. 我願意在日常生活中主動實踐永續減碳與公民責任。</td>
+            <td>
+              <label><input type="radio" name="check3" value="yes" checked> 是</label>&nbsp;&nbsp;
+              <label><input type="radio" name="check3" value="need_work"> 需加油</label>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  
+
+    <div class="submit-section">
+      <button id="submitBtn" class="btn-submit" onclick="handleSubmit()">🚀 送出第 6 週學習單</button>
+    </div>
+
+  </div>
+
+  <script src="assets/js/common.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      initStudentInfoForm('6');
+    });
+
+    function handleSubmit() {
+      submitWorksheet('6', (answers) => {
+        let score = 0;
+        let breakdown = [];
+
+        // 任務一：本組發表成果 (30分)
+        let hasT1 = answers.w6_my_title && answers.w6_my_title.length > 0;
+        let hasM1 = (answers.w6_modes || []).length > 0;
+        let hasR1 = answers.w6_my_role && answers.w6_my_role.length >= 10;
+        let count1 = (hasT1 ? 10 : 0) + (hasM1 ? 10 : 0) + (hasR1 ? 10 : 0);
+        score += count1;
+        breakdown.push("本組多元表達成果登錄完整 (+" + count1 + "分)");
+
+        // 任務二：同儕聆聽反饋 (30分)
+        let hasTarget = answers.w6_target_group && answers.w6_target_title;
+        let hasFb = answers.w6_peer_feedback && answers.w6_peer_feedback.length >= 15;
+        let s2 = (hasTarget ? 15 : 0) + (hasFb ? 15 : 0);
+        score += s2;
+        breakdown.push("同儕聆聽與建設性反饋紀錄 (+" + s2 + "分)");
+
+        // 任務三：總結省思 (20分)
+        let hasRef = answers.w6_reflection && answers.w6_reflection.length >= 10;
+        let hasAct = answers.w6_action && answers.w6_action.length >= 5;
+        let s3 = (hasRef ? 10 : 0) + (hasAct ? 10 : 0);
+        score += s3;
+        breakdown.push("課後省思與地球公民宣言 (+" + s3 + "分)");
+
+        if (answers.check1 && answers.check2 && answers.check3) {
+          score += 20;
+          breakdown.push("完成課堂自主學習檢核 (+20分)");
+        }
+
+        return { total: Math.min(100, score), breakdown };
+      });
+    }
+  </script>
+</body>
+</html>

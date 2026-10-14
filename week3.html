@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>【行動方程式】第 3 週：環保無國界——雨林·生存臨界點</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+  <script src="assets/js/qrcode.min.js"></script>
+</head>
+<body>
+
+  <header class="navbar">
+    <a href="index.html" class="navbar-brand">
+      <span>🌱 行動方程式</span>
+      <span class="navbar-badge">第 3 週</span>
+    </a>
+    <div class="nav-actions">
+      <button type="button" class="btn-nav btn-nav-qr" onclick="showCurrentPageQrModal()">📱 投影派卷 QR Code</button>
+      <span id="saveStatus" class="save-status">💾 本地暫存安全</span>
+      <a href="index.html" class="btn-nav">🏠 回課程首頁</a>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="page-header">
+      <div class="school-title">桃園市楊光國民中學 115 學年度第一學期 彈性學習課程學習單</div>
+      <h1 class="unit-title">【行動方程式】第 3 週：環保無國界——雨林·生存臨界點</h1>
+      <p class="unit-desc">主題：消失的國界——雨林·生存臨界點 | 國際環境教育與全球碳水循環</p>
+    </div>
+
+    <div class="card">
+      <h3 class="card-title">👤 學生基本資料 (防呆認證)</h3>
+      
+    <div class="student-bar">
+      <div class="form-group">
+        <label class="form-label required" for="studentClass">班級</label>
+        <select id="studentClass" class="form-control" required>
+          <option value="" disabled selected>載入中...</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label required" for="studentSeat">座號</label>
+        <select id="studentSeat" class="form-control" required>
+          <option value="" disabled selected>載入中...</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label required" for="studentName">姓名</label>
+        <input type="text" id="studentName" class="form-control" placeholder="請輸入全名" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label required" for="studentGroup">組別</label>
+        <select id="studentGroup" class="form-control" required>
+          <option value="" disabled selected>載入中...</option>
+        </select>
+      </div>
+    </div>
+  
+    </div>
+
+    <!-- 任務一 -->
+    <div class="card">
+      <h3 class="card-title">🌳 任務一：影音大偵探——消失的國界：雨林臨界點</h3>
+      <p class="question-desc">請觀看國際紀錄片，記錄雨林危機關鍵事實：</p>
+      
+      <div class="video-container">
+        <iframe src="https://www.youtube.com/embed/dp_hfySP_Ts" title="消失的國界：雨林·生存臨界點" allowfullscreen></iframe>
+      </div>
+
+      <div class="question-item">
+        <div class="question-title">1. 紀錄片中指出熱帶雨林遭到大量砍伐與燒毀的主要原因有哪些？（請寫出 2 個）</div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 0.6rem;">
+          <input type="text" id="w3_q1_1" class="form-control" placeholder="原因 ① (如：商業伐木/養牛牧場)">
+          <input type="text" id="w3_q1_2" class="form-control" placeholder="原因 ② (如：大面積種植大豆/棕櫚油)">
+        </div>
+      </div>
+
+      <div class="question-item">
+        <div class="question-title">2. 影片中哪一個畫面或哪一位當地原住民的對話最讓你觸動？為什麼？</div>
+        <textarea id="w3_q2" class="form-control" placeholder="請寫下原住民守護土地的困境或生物棲地喪失帶給你的震撼..."></textarea>
+      </div>
+    </div>
+
+    <!-- 任務二 -->
+    <div class="card">
+      <h3 class="card-title">🌍 任務二：國際議題探究——地球之肺與氣候危機</h3>
+      <div class="question-item">
+        <div class="question-title">1. 為什麼說熱帶雨林是「地球之肺」？當雨林到達「生存臨界點」會對全球造成什麼影響？</div>
+        <textarea id="w3_q3" class="form-control" placeholder="請探討碳匯功能喪失、雨林轉為排碳源、極端氣候加劇等後果..."></textarea>
+      </div>
+
+      <div class="question-item">
+        <div class="question-title">2. 我們在台灣的日常飲食與消費習慣，跟遠在萬里之外的雨林保護有什麼關聯？</div>
+        <textarea id="w3_q4" class="form-control" placeholder="例如：生活食品中的棕櫚油、肉品飼料大豆、紙張木材消耗等與雨林開墾的連結..."></textarea>
+      </div>
+    </div>
+
+    <!-- 任務三 -->
+    <div class="card">
+      <h3 class="card-title">🌱 任務三：環保無國界——我的雨林守護宣言</h3>
+      <p class="question-desc">為幫助保護全球雨林與減緩氣候暖化，我願在日常落實（請勾選至少 2 項）：</p>
+
+      <div class="checkbox-group">
+        <label class="checkbox-label"><input type="checkbox" name="w3_actions" value="珍惜食物減少浪費"> 🍚 減少食物浪費，珍惜每一份資源</label>
+        <label class="checkbox-label"><input type="checkbox" name="w3_actions" value="自備環保餐具"> 🛍️ 自備環保杯與購物袋</label>
+        <label class="checkbox-label"><input type="checkbox" name="w3_actions" value="認證標章消費"> 🏷️ 選擇具永續森林認證商品 (FSC/RSPO)</label>
+        <label class="checkbox-label"><input type="checkbox" name="w3_actions" value="節約用紙雙面列印"> 📄 節約用紙，雙面使用與電子化閱讀</label>
+        <label class="checkbox-label"><input type="checkbox" name="w3_actions" value="節約用電減碳"> 💡 節約日常用電，落實低碳生活</label>
+        <label class="checkbox-label"><input type="checkbox" name="w3_actions" value="關心國際環境新聞"> 📰 主動關心全球環境新聞並與家人分享</label>
+      </div>
+    </div>
+
+    
+    <div class="card">
+      <h3 class="card-title">📝 學習表現自我檢核表</h3>
+      <p class="question-desc">請誠實回顧本節課的學習狀態，為自己進行自評：</p>
+      <table class="check-table">
+        <thead>
+          <tr>
+            <th>檢核項目</th>
+            <th>自評結果</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1. 我能專注觀看影音/聆聽課堂講解，並完成重點摘要。</td>
+            <td>
+              <label><input type="radio" name="check1" value="yes" checked> 是</label>&nbsp;&nbsp;
+              <label><input type="radio" name="check1" value="need_work"> 需加油</label>
+            </td>
+          </tr>
+          <tr>
+            <td>2. 我能認真參與問題討論，尊重並具體提出想法觀點。</td>
+            <td>
+              <label><input type="radio" name="check2" value="yes" checked> 是</label>&nbsp;&nbsp;
+              <label><input type="radio" name="check2" value="need_work"> 需加油</label>
+            </td>
+          </tr>
+          <tr>
+            <td>3. 我願意在日常生活中主動實踐永續減碳與公民責任。</td>
+            <td>
+              <label><input type="radio" name="check3" value="yes" checked> 是</label>&nbsp;&nbsp;
+              <label><input type="radio" name="check3" value="need_work"> 需加油</label>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  
+
+    <div class="submit-section">
+      <button id="submitBtn" class="btn-submit" onclick="handleSubmit()">🚀 送出第 3 週學習單</button>
+    </div>
+
+  </div>
+
+  <script src="assets/js/common.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      initStudentInfoForm('3');
+    });
+
+    function handleSubmit() {
+      submitWorksheet('3', (answers) => {
+        let score = 0;
+        let breakdown = [];
+
+        let q1Count = [answers.w3_q1_1, answers.w3_q1_2].filter(x => x && x.trim().length > 0).length;
+        let s1 = q1Count * 15;
+        score += s1;
+        breakdown.push("雨林破壞成因分析完整 (+" + s1 + "分)");
+
+        let qCount = [answers.w3_q2, answers.w3_q3, answers.w3_q4].filter(x => x && x.trim().length >= 10).length;
+        let s2 = qCount * 10;
+        score += s2;
+        breakdown.push("國際視野與地球之肺思辨論述認真 (+" + s2 + "分)");
+
+        let actionCount = (answers.w3_actions || []).length;
+        let s3 = Math.min(20, actionCount * 10);
+        score += s3;
+        breakdown.push("跨國環保守護承諾達成 (+" + s3 + "分)");
+
+        if (answers.check1 && answers.check2 && answers.check3) {
+          score += 20;
+          breakdown.push("完成課堂自主學習檢核 (+20分)");
+        }
+
+        return { total: Math.min(100, score), breakdown };
+      });
+    }
+  </script>
+</body>
+</html>

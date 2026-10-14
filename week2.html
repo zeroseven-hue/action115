@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>【行動方程式】第 2 週：美麗的海岸線——台灣海底垃圾</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+  <script src="assets/js/qrcode.min.js"></script>
+</head>
+<body>
+
+  <header class="navbar">
+    <a href="index.html" class="navbar-brand">
+      <span>🌱 行動方程式</span>
+      <span class="navbar-badge">第 2 週</span>
+    </a>
+    <div class="nav-actions">
+      <button type="button" class="btn-nav btn-nav-qr" onclick="showCurrentPageQrModal()">📱 投影派卷 QR Code</button>
+      <span id="saveStatus" class="save-status">💾 本地暫存安全</span>
+      <a href="index.html" class="btn-nav">🏠 回課程首頁</a>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="page-header">
+      <div class="school-title">桃園市楊光國民中學 115 學年度第一學期 彈性學習課程學習單</div>
+      <h1 class="unit-title">【行動方程式】第 2 週：美麗的海岸線——台灣海底垃圾</h1>
+      <p class="unit-desc">主題：跟著研究人員尋找台灣海底垃圾 | 幽靈捕撈與沉睡海床的塑膠危機</p>
+    </div>
+
+    <div class="card">
+      <h3 class="card-title">👤 學生基本資料 (防呆認證)</h3>
+      
+    <div class="student-bar">
+      <div class="form-group">
+        <label class="form-label required" for="studentClass">班級</label>
+        <select id="studentClass" class="form-control" required>
+          <option value="" disabled selected>載入中...</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label required" for="studentSeat">座號</label>
+        <select id="studentSeat" class="form-control" required>
+          <option value="" disabled selected>載入中...</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label required" for="studentName">姓名</label>
+        <input type="text" id="studentName" class="form-control" placeholder="請輸入全名" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label required" for="studentGroup">組別</label>
+        <select id="studentGroup" class="form-control" required>
+          <option value="" disabled selected>載入中...</option>
+        </select>
+      </div>
+    </div>
+  
+    </div>
+
+    <!-- 任務一 -->
+    <div class="card">
+      <h3 class="card-title">🤿 任務一：水下實錄——跟著研究人員尋找台灣海底垃圾</h3>
+      <p class="question-desc">請觀看水下調查紀錄片，完成觀察筆記：</p>
+      
+      <div class="video-container">
+        <iframe src="https://www.youtube.com/embed/I5viEZsPuJA" title="跟著研究人員尋找台灣海底垃圾" allowfullscreen></iframe>
+      </div>
+
+      <div class="question-item">
+        <div class="question-title">1. 水下調查研究人員在台灣海底最常發現的廢棄物前 3 名是什麼？</div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.6rem;">
+          <input type="text" id="w2_q1_1" class="form-control" placeholder="海底廢棄物 ① (如：廢棄刺網)">
+          <input type="text" id="w2_q1_2" class="form-control" placeholder="海底廢棄物 ② (如：塑膠袋/瓶罐)">
+          <input type="text" id="w2_q1_3" class="form-control" placeholder="海底廢棄物 ③ (如：輪胎/鐵罐)">
+        </div>
+      </div>
+
+      <div class="question-item">
+        <div class="question-title">2. 影片中哪一個水下鏡頭畫面最讓你震撼或心疼？為什麼？</div>
+        <textarea id="w2_q2" class="form-control" placeholder="請具體描述讓你印象深刻的海洋生態受創畫面..."></textarea>
+      </div>
+    </div>
+
+    <!-- 任務二 -->
+    <div class="card">
+      <h3 class="card-title">🐢 任務二：生態危機解密——幽靈捕撈與塑膠威脅</h3>
+      <div class="question-item">
+        <div class="question-title">1. 什麼是「幽靈捕撈 (Ghost Fishing)」？廢棄刺網對海洋生物會造成什麼可怕後果？</div>
+        <textarea id="w2_q3" class="form-control" placeholder="請解釋刺網如何持續纏繞魚類、海龜與珊瑚礁，形成致命惡性循環..."></textarea>
+      </div>
+
+      <div class="question-item">
+        <div class="question-title">2. 沈在海底的廢棄塑膠袋與瓶罐，對珊瑚礁與海龜會帶來哪些傷害？</div>
+        <textarea id="w2_q4" class="form-control" placeholder="例如：覆蓋珊瑚礁導致缺氧白化、海龜誤食窒息死亡、碎裂成微塑膠進入食物鏈..."></textarea>
+      </div>
+    </div>
+
+    <!-- 任務三 -->
+    <div class="card">
+      <h3 class="card-title">🌊 任務三：守護藍色大海——我的水下無塑宣言</h3>
+      <p class="question-desc">為避免廢棄物流入海底，我在生活中願意承諾（請勾選至少 2 項）：</p>
+
+      <div class="checkbox-group">
+        <label class="checkbox-label"><input type="checkbox" name="w2_actions" value="拒絕一次性吸管塑膠袋"> 🚫 拒絕一次性塑膠袋與吸管</label>
+        <label class="checkbox-label"><input type="checkbox" name="w2_actions" value="自備環保水壺"> 🥤 自備隨身水壺與購物袋</label>
+        <label class="checkbox-label"><input type="checkbox" name="w2_actions" value="支持永續海鮮認證"> 🐟 選擇友善海洋與永續認證產品</label>
+        <label class="checkbox-label"><input type="checkbox" name="w2_actions" value="精準分類防流失"> ♻️ 落實垃圾精準分類，防流入排水溝</label>
+        <label class="checkbox-label"><input type="checkbox" name="w2_actions" value="提醒親友不亂拋"> 📢 提醒親友至海邊遊玩絕不留垃圾</label>
+        <label class="checkbox-label"><input type="checkbox" name="w2_actions" value="支持淨灘淨海"> 🤿 關注並支持水下淨海與志工行動</label>
+      </div>
+    </div>
+
+    
+    <div class="card">
+      <h3 class="card-title">📝 學習表現自我檢核表</h3>
+      <p class="question-desc">請誠實回顧本節課的學習狀態，為自己進行自評：</p>
+      <table class="check-table">
+        <thead>
+          <tr>
+            <th>檢核項目</th>
+            <th>自評結果</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1. 我能專注觀看影音/聆聽課堂講解，並完成重點摘要。</td>
+            <td>
+              <label><input type="radio" name="check1" value="yes" checked> 是</label>&nbsp;&nbsp;
+              <label><input type="radio" name="check1" value="need_work"> 需加油</label>
+            </td>
+          </tr>
+          <tr>
+            <td>2. 我能認真參與問題討論，尊重並具體提出想法觀點。</td>
+            <td>
+              <label><input type="radio" name="check2" value="yes" checked> 是</label>&nbsp;&nbsp;
+              <label><input type="radio" name="check2" value="need_work"> 需加油</label>
+            </td>
+          </tr>
+          <tr>
+            <td>3. 我願意在日常生活中主動實踐永續減碳與公民責任。</td>
+            <td>
+              <label><input type="radio" name="check3" value="yes" checked> 是</label>&nbsp;&nbsp;
+              <label><input type="radio" name="check3" value="need_work"> 需加油</label>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  
+
+    <div class="submit-section">
+      <button id="submitBtn" class="btn-submit" onclick="handleSubmit()">🚀 送出第 2 週學習單</button>
+    </div>
+
+  </div>
+
+  <script src="assets/js/common.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      initStudentInfoForm('2');
+    });
+
+    function handleSubmit() {
+      submitWorksheet('2', (answers) => {
+        let score = 0;
+        let breakdown = [];
+
+        let q1Count = [answers.w2_q1_1, answers.w2_q1_2, answers.w2_q1_3].filter(x => x && x.trim().length > 0).length;
+        let s1 = q1Count * 10;
+        score += s1;
+        breakdown.push("水下海廢前三名觀察紀錄完整 (+" + s1 + "分)");
+
+        let qCount = [answers.w2_q2, answers.w2_q3, answers.w2_q4].filter(x => x && x.trim().length >= 10).length;
+        let s2 = qCount * 10;
+        score += s2;
+        breakdown.push("幽靈捕撈與海洋生態危機解析詳盡 (+" + s2 + "分)");
+
+        let actionCount = (answers.w2_actions || []).length;
+        let s3 = Math.min(20, actionCount * 10);
+        score += s3;
+        breakdown.push("水下無塑承諾落實 (+" + s3 + "分)");
+
+        if (answers.check1 && answers.check2 && answers.check3) {
+          score += 20;
+          breakdown.push("完成課堂自主學習檢核 (+20分)");
+        }
+
+        return { total: Math.min(100, score), breakdown };
+      });
+    }
+  </script>
+</body>
+</html>

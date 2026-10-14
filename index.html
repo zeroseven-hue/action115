@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>桃園市楊光國中 115 學年度【行動方程式】課程總覽儀表板</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+  <script src="assets/js/qrcode.min.js"></script>
+</head>
+<body>
+
+  <!-- 頂部導覽列 -->
+  <header class="navbar">
+    <a href="index.html" class="navbar-brand">
+      <span>🌱 行動方程式</span>
+      <span class="navbar-badge">七年級彈性課程</span>
+    </a>
+    <div class="nav-actions">
+      <a href="dashboard.html" class="btn-nav" style="background: #10B981; border-color: #34D399;">📊 教師即時繳交儀表板</a>
+      <span style="font-size: 0.9rem; color: #CBD5E1;">自然領域教學團隊</span>
+    </div>
+  </header>
+
+  <div class="container">
+    
+    <!-- Hero Banner -->
+    <div class="hero-banner">
+      <h1>【行動方程式】學習單數位平台</h1>
+      <p>桃園市楊光國民中學 115 學年度第一學期 七年級彈性學習課程<br>探索海洋環境、全球雨林臨界點，落實地球公民責任與多元表達展演！</p>
+    </div>
+
+    <!-- 👨‍🏫 教師一鍵課堂派發與 QR Code 產生器面板 -->
+    <section class="dispatch-card">
+      <div class="dispatch-header">
+        <div class="dispatch-title">
+          <span>👨‍🏫 教師一鍵課堂派發與 QR Code 投影面板</span>
+        </div>
+        <span class="dispatch-badge">智慧教室 & 電子白板專用</span>
+      </div>
+      <p style="color: #374151; font-size: 0.95rem; margin-bottom: 1rem;">
+        請選擇本節課要派發的週次學習單，一鍵產生大螢幕 QR Code 投影，供全班學生使用 iPad / 手機 / Chromebook 掃描立即填寫！
+      </p>
+
+      <div class="dispatch-controls">
+        <select id="selectDispatchWeek" class="form-control" style="font-weight: 600; font-size: 1.05rem;">
+          <option value="week1.html" data-title="第 1 週：美麗的海岸線——還原自然">【第 1 週】美麗的海岸線——還原自然 (老外淨灘)</option>
+          <option value="week2.html" data-title="第 2 週：美麗的海岸線——台灣海底垃圾">【第 2 週】美麗的海岸線——台灣海底垃圾 (幽靈捕撈)</option>
+          <option value="week3.html" data-title="第 3 週：環保無國界——雨林·生存臨界點">【第 3 週】環保無國界——雨林·生存臨界點 (消失的國界)</option>
+          <option value="week4.html" data-title="第 4 週：環保無國界——雨林·生存臨界點 (探究篇)">【第 4 週】環保無國界——雨林·生存臨界點 (探究篇)</option>
+          <option value="week5.html" data-title="第 5 週：地球公民——環境保育一起來">【第 5 週】地球公民——環境保育一起來 (節日與分工表)</option>
+          <option value="week6.html" data-title="第 6 週：地球公民——環境保育一起來之『發表會』">【第 6 週】地球公民——環境保育一起來之『發表會』 (同儕互評)</option>
+        </select>
+
+        <button type="button" class="btn-dispatch" onclick="handleGenerateDispatchQR()">
+          📱 投影大螢幕 QR Code
+        </button>
+
+        <button type="button" class="btn-dispatch btn-dispatch-secondary" onclick="handleCopyDispatchUrl(this)">
+          📋 複製派發連結
+        </button>
+      </div>
+
+      <!-- 頁面內建預覽區 -->
+      <div id="dispatchPreviewArea" class="dispatch-preview-area">
+        <div class="qr-box-whiteboard">
+          <div id="dispatchQrcode"></div>
+          <small style="color: var(--text-muted); font-size: 0.8rem; margin-top: 6px;">📷 相機掃碼直接進入</small>
+        </div>
+        <div class="dispatch-info">
+          <div id="dispatchInfoTitle" class="dispatch-info-title">第 1 週：美麗的海岸線——還原自然</div>
+          <p style="font-size: 0.9rem; color: var(--text-muted);">學生派發填答專屬網址：</p>
+          <div id="dispatchInfoUrl" class="dispatch-info-url">...</div>
+          <div style="display: flex; gap: 0.6rem; flex-wrap: wrap;">
+            <button type="button" class="btn-dispatch" onclick="openDispatchModalDirect()">🔍 全螢幕大投影視窗</button>
+            <a id="dispatchDirectLink" href="week1.html" target="_blank" class="btn-secondary" style="font-size: 0.95rem; padding: 0.65rem 1.2rem;">🚀 開啟學習單頁面</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 課程總覽卡片清單 (第 1 ~ 6 週) -->
+    <h2 style="font-size: 1.5rem; font-weight: 800; color: var(--primary); margin-bottom: 1.2rem;">📚 各週學習單列表</h2>
+    <div class="week-grid">
+      
+      <!-- Week 1 -->
+      <div class="week-card">
+        <div>
+          <span class="week-badge">第 1 週 (8/30 - 9/5)</span>
+          <h3 class="week-card-title">美麗的海岸線——還原自然</h3>
+          <p class="week-card-desc">探索老外 Daniel 揮汗淨灘的動人故事，思考海廢來源與「源頭減塑」的真正力量。</p>
+        </div>
+        <div class="week-card-footer">
+          <button type="button" class="btn-card-qr" onclick="showQrModal(getAbsoluteWeekUrl('week1.html'), '【第 1 週】美麗的海岸線——還原自然')">
+            📱 派卷 QR Code
+          </button>
+          <a href="week1.html" class="btn-card-action">進入填寫 ➔</a>
+        </div>
+      </div>
+
+      <!-- Week 2 -->
+      <div class="week-card">
+        <div>
+          <span class="week-badge">第 2 週 (9/6 - 9/12)</span>
+          <h3 class="week-card-title">美麗的海岸線——台灣海底垃圾</h3>
+          <p class="week-card-desc">跟隨研究人員潛入水下，直擊看不見的海底廢棄物真相，解密幽靈捕撈與海洋塑膠危機。</p>
+        </div>
+        <div class="week-card-footer">
+          <button type="button" class="btn-card-qr" onclick="showQrModal(getAbsoluteWeekUrl('week2.html'), '【第 2 週】美麗的海岸線——台灣海底垃圾')">
+            📱 派卷 QR Code
+          </button>
+          <a href="week2.html" class="btn-card-action">進入填寫 ➔</a>
+        </div>
+      </div>
+
+      <!-- Week 3 -->
+      <div class="week-card">
+        <div>
+          <span class="week-badge">第 3 週 (9/13 - 9/19)</span>
+          <h3 class="week-card-title">環保無國界——雨林·生存臨界點</h3>
+          <p class="week-card-desc">觀看《消失的國界》紀錄片，探索熱帶雨林面臨的大規模砍伐與全球氣候臨界點危機。</p>
+        </div>
+        <div class="week-card-footer">
+          <button type="button" class="btn-card-qr" onclick="showQrModal(getAbsoluteWeekUrl('week3.html'), '【第 3 週】環保無國界——雨林·生存臨界點')">
+            📱 派卷 QR Code
+          </button>
+          <a href="week3.html" class="btn-card-action">進入填寫 ➔</a>
+        </div>
+      </div>
+
+      <!-- Week 4 -->
+      <div class="week-card">
+        <div>
+          <span class="week-badge">第 4 週 (9/20 - 9/26)</span>
+          <h3 class="week-card-title">環保無國界——雨林·生存臨界點 (探究篇)</h3>
+          <p class="week-card-desc">深入分析台灣日常消費與遠方雨林的緊密關聯，擬定跨國環境永續與個人減碳承諾。</p>
+        </div>
+        <div class="week-card-footer">
+          <button type="button" class="btn-card-qr" onclick="showQrModal(getAbsoluteWeekUrl('week4.html'), '【第 4 週】環保無國界——雨林·生存臨界點 (探究篇)')">
+            📱 派卷 QR Code
+          </button>
+          <a href="week4.html" class="btn-card-action">進入填寫 ➔</a>
+        </div>
+      </div>
+
+      <!-- Week 5 -->
+      <div class="week-card">
+        <div>
+          <span class="week-badge">第 5 週 (9/27 - 10/3)</span>
+          <h3 class="week-card-title">地球公民——環境保育一起來</h3>
+          <p class="week-card-desc">解密世界地球日與世界清潔日之由來與義涵，搜集全球保育作為並完成團隊任務分工。</p>
+        </div>
+        <div class="week-card-footer">
+          <button type="button" class="btn-card-qr" onclick="showQrModal(getAbsoluteWeekUrl('week5.html'), '【第 5 週】地球公民——環境保育一起來')">
+            📱 派卷 QR Code
+          </button>
+          <a href="week5.html" class="btn-card-action">進入填寫 ➔</a>
+        </div>
+      </div>
+
+      <!-- Week 6 -->
+      <div class="week-card">
+        <div>
+          <span class="week-badge">第 6 週 (10/4 - 10/10)</span>
+          <h3 class="week-card-title">地球公民——環境保育一起來之『發表會』</h3>
+          <p class="week-card-desc">小組成果輪流上台發表，運用多元符號展演，落實同儕建設性提問與相互回饋。</p>
+        </div>
+        <div class="week-card-footer">
+          <button type="button" class="btn-card-qr" onclick="showQrModal(getAbsoluteWeekUrl('week6.html'), '【第 6 週】地球公民——環境保育一起來之『發表會』')">
+            📱 派卷 QR Code
+          </button>
+          <a href="week6.html" class="btn-card-action">進入填寫 ➔</a>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- 底部版權說明 -->
+    <div style="text-align: center; margin-top: 3.5rem; color: var(--text-muted); font-size: 0.9rem;">
+      <p>桃園市楊光國民中學 自然領域教學團隊 設計製作 | 115 學年度七年級彈性學習課程【行動方程式】</p>
+    </div>
+
+  </div>
+
+  <script src="assets/js/common.js"></script>
+  <script>
+    let currentDispatchTargetUrl = "";
+    let currentDispatchTitle = "";
+
+    function updateDispatchInfo() {
+      const select = document.getElementById('selectDispatchWeek');
+      const selectedOption = select.options[select.selectedIndex];
+      const weekFile = selectedOption.value;
+      currentDispatchTitle = selectedOption.getAttribute('data-title');
+      currentDispatchTargetUrl = getAbsoluteWeekUrl(weekFile);
+
+      document.getElementById('dispatchInfoTitle').textContent = currentDispatchTitle;
+      document.getElementById('dispatchInfoUrl').textContent = currentDispatchTargetUrl;
+      document.getElementById('dispatchDirectLink').href = weekFile;
+
+      // 生成 inline QR code
+      const qrContainer = document.getElementById('dispatchQrcode');
+      qrContainer.innerHTML = '';
+      if (typeof QRCode !== 'undefined') {
+        new QRCode(qrContainer, {
+          text: currentDispatchTargetUrl,
+          width: 220,
+          height: 220,
+          colorDark: "#166534",
+          colorLight: "#FFFFFF",
+          correctLevel: QRCode.CorrectLevel.M
+        });
+      } else {
+        const img = document.createElement('img');
+        img.src = 'https://api.qrserver.com/v1/create-qr-code/?size=220x220&color=166534&data=' + encodeURIComponent(currentDispatchTargetUrl);
+        img.alt = 'QR Code';
+        qrContainer.appendChild(img);
+      }
+    }
+
+    function handleGenerateDispatchQR() {
+      const previewArea = document.getElementById('dispatchPreviewArea');
+      previewArea.classList.add('active');
+      updateDispatchInfo();
+      openDispatchModalDirect();
+    }
+
+    function openDispatchModalDirect() {
+      updateDispatchInfo();
+      showQrModal(currentDispatchTargetUrl, currentDispatchTitle);
+    }
+
+    function handleCopyDispatchUrl(btn) {
+      updateDispatchInfo();
+      copyToClipboard(currentDispatchTargetUrl, btn);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('selectDispatchWeek').addEventListener('change', () => {
+        const previewArea = document.getElementById('dispatchPreviewArea');
+        if (previewArea.classList.contains('active')) {
+          updateDispatchInfo();
+        }
+      });
+      // 預設準備好第 1 週
+      updateDispatchInfo();
+    });
+  </script>
+</body>
+</html>

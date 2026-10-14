@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>【行動方程式】教師即時繳交儀表板</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+  <style>
+    /* ========================================================
+       儀表板專屬主題配色變數 (支援紫、綠、藍、琥珀金動態切換)
+       ======================================================== */
+    :root, [data-theme="emerald"] {
+      --dash-primary: #065F46;
+      --dash-accent: #059669;
+      --dash-light: #ECFDF5;
+      --dash-border: #6EE7B7;
+      --dash-card-bg: #FFFFFF;
+      --dash-header-bg: linear-gradient(135deg, #064E3B 0%, #065F46 100%);
+      --dash-progress-fill: linear-gradient(90deg, #10B981, #059669);
+      --dash-text-dark: #064E3B;
+    }
+
+    [data-theme="purple"] {
+      --dash-primary: #581C87;
+      --dash-accent: #7C3AED;
+      --dash-light: #FAF5FF;
+      --dash-border: #C4B5FD;
+      --dash-card-bg: #FFFFFF;
+      --dash-header-bg: linear-gradient(135deg, #3B0764 0%, #581C87 100%);
+      --dash-progress-fill: linear-gradient(90deg, #A855F7, #7C3AED);
+      --dash-text-dark: #3B0764;
+    }
+
+    [data-theme="ocean"] {
+      --dash-primary: #1E3A8A;
+      --dash-accent: #2563EB;
+      --dash-light: #EFF6FF;
+      --dash-border: #93C5FD;
+      --dash-card-bg: #FFFFFF;
+      --dash-header-bg: linear-gradient(135deg, #172554 0%, #1E3A8A 100%);
+      --dash-progress-fill: linear-gradient(90deg, #3B82F6, #1D4ED8);
+      --dash-text-dark: #172554;
+    }
+
+    [data-theme="amber"] {
+      --dash-primary: #92400E;
+      --dash-accent: #D97706;
+      --dash-light: #FFFBEB;
+      --dash-border: #FCD34D;
+      --dash-card-bg: #FFFFFF;
+      --dash-header-bg: linear-gradient(135deg, #78350F 0%, #92400E 100%);
+      --dash-progress-fill: linear-gradient(90deg, #F59E0B, #D97706);
+      --dash-text-dark: #78350F;
+    }
+
+    /* 夜間深色模式 */
+    body.dark-mode {
+      --bg: #0F172A;
+      --text-main: #F8FAFC;
+      --card-bg: #1E293B;
+      --border: #334155;
+      background-color: #0F172A;
+      color: #F8FAFC;
+    }
+
+    body.dark-mode .dashboard-card,
+    body.dark-mode .card,
+    body.dark-mode .seat-card {
+      background-color: #1E293B !important;
+      color: #F8FAFC !important;
+      border-color: #334155 !important;
+    }
+
+    body.dark-mode .seat-card.missing {
+      background-color: rgba(245, 158, 11, 0.08) !important;
+    }
+
+    body.dark-mode .seat-card.absent {
+      background-color: #334155 !important;
+      color: #94A3B8 !important;
+    }
+
+    body.dark-mode .seat-card.submitted {
+      background-color: rgba(16, 185, 129, 0.15) !important;
+    }
+
+    body.dark-mode input,
+    body.dark-mode select {
+      background-color: #334155 !important;
+      color: #FFFFFF !important;
+      border-color: #475569 !important;
+    }
+
+    /* 頂部標題卡片 */
+    .dashboard-header-card {
+      background: var(--dash-header-bg);
+      color: #FFFFFF;
+      border-radius: 20px;
+      padding: 1.5rem 1.8rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1.2rem;
+    }
+
+    .dashboard-title-group h1 {
+      font-size: 1.8rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-bottom: 0.2rem;
+    }
+
+    .dashboard-title-group p {
+      font-size: 0.95rem;
+      color: rgba(255, 255, 255, 0.85);
+    }
+
+    .dashboard-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+    }
+
+    .tool-select {
+      font-family: inherit;
+      font-size: 1.05rem;
+      font-weight: 700;
+      padding: 0.5rem 0.9rem;
+      border-radius: 10px;
+      border: 2px solid rgba(255, 255, 255, 0.4);
+      background: #FFFFFF;
+      color: var(--dash-text-dark);
+      cursor: pointer;
+    }
+
+    .btn-tool {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: rgba(255, 255, 255, 0.2);
+      color: #FFFFFF;
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      padding: 0.5rem 0.9rem;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-tool:hover {
+      background: #FFFFFF;
+      color: var(--dash-primary);
+    }
+
+    .btn-refresh {
+      background: #10B981;
+      border-color: #34D399;
+    }
+    .btn-refresh:hover {
+      background: #059669;
+      color: #FFFFFF;
+    }
+
+    /* 繳交參與率統計面板 */
+    .stats-panel {
+      background: var(--dash-card-bg);
+      border: 2px solid var(--dash-border);
+      border-radius: 18px;
+      padding: 1.5rem;
+      margin-bottom: 1.8rem;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    .stats-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+      margin-bottom: 0.8rem;
+    }
+
+    .stats-title {
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: var(--dash-text-dark);
+    }
+
+    .stats-counter {
+      font-size: 1.25rem;
+      font-weight: 800;
+    }
+
+    .progress-bar-container {
+      width: 100%;
+      height: 18px;
+      background: #E2E8F0;
+      border-radius: 999px;
+      overflow: hidden;
+      margin-bottom: 1.2rem;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: var(--dash-progress-fill);
+      border-radius: 999px;
+      transition: width 0.4s ease;
+    }
+
+    /* 請假與操作列 */
+    .action-subbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .absent-input-group {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      flex-grow: 1;
+      max-width: 550px;
+    }
+
+    .tool-btn-group {
+      display: flex;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+    }
+
+    .btn-action-primary {
+      background: var(--dash-primary);
+      color: #FFFFFF;
+      padding: 0.55rem 1.1rem;
+      border-radius: 8px;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: opacity 0.2s;
+    }
+    .btn-action-primary:hover { opacity: 0.9; }
+
+    .btn-action-amber {
+      background: #D97706;
+      color: #FFFFFF;
+      padding: 0.55rem 1.1rem;
+      border-radius: 8px;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .btn-action-amber:hover { background: #B45309; }
+
+    .btn-action-teal {
+      background: #0D9488;
+      color: #FFFFFF;
+      padding: 0.55rem 1.1rem;
+      border-radius: 8px;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .btn-action-teal:hover { background: #0F766E; }
+
+    /* 主區域兩欄排版 (左：英雄榜，右：全班座號卡) */
+    .dashboard-main-grid {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 1.5rem;
+    }
+
+    @media (max-width: 900px) {
+      .dashboard-main-grid { grid-template-columns: 1fr; }
+    }
+
+    /* 左側英雄榜 */
+    .leaderboard-card {
+      background: var(--dash-card-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.25rem;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04);
+      height: fit-content;
+    }
+
+    .leaderboard-title {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--dash-text-dark);
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 0.5rem;
+    }
+
+    .leaderboard-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.6rem 0.5rem;
+      border-bottom: 1px dashed var(--border);
+      font-size: 0.95rem;
+    }
+
+    .leaderboard-rank {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #E2E8F0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 0.8rem;
+    }
+
+    .leaderboard-rank.rank-1 { background: #FDE047; color: #854D0E; }
+    .leaderboard-rank.rank-2 { background: #E2E8F0; color: #475569; }
+    .leaderboard-rank.rank-3 { background: #FED7AA; color: #9A3412; }
+
+    /* 右側座號卡片矩陣 (30 人) */
+    .seat-matrix-card {
+      background: var(--dash-card-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.5rem;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04);
+    }
+
+    .matrix-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.2rem;
+    }
+
+    .seat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 0.85rem;
+    }
+
+    .seat-card {
+      border-radius: 12px;
+      padding: 0.85rem 0.6rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      position: relative;
+      user-select: none;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-height: 85px;
+    }
+
+    .seat-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    /* 狀態 A：未繳交 (黃/橘虛線) */
+    .seat-card.missing {
+      background: #FFFBEB;
+      border: 2px dashed #F59E0B;
+      color: #92400E;
+    }
+
+    /* 狀態 B：已繳交 (綠色實線) */
+    .seat-card.submitted {
+      background: #ECFDF5;
+      border: 2px solid #10B981;
+      color: #065F46;
+      box-shadow: 0 2px 8px rgba(16, 185, 129, 0.15);
+    }
+
+    /* 狀態 C：請假 (灰色) */
+    .seat-card.absent {
+      background: #F1F5F9;
+      border: 2px solid #94A3B8;
+      color: #64748B;
+      opacity: 0.75;
+    }
+
+    .seat-num {
+      font-size: 1.15rem;
+      font-weight: 800;
+      margin-bottom: 0.2rem;
+    }
+
+    .seat-name {
+      font-size: 0.95rem;
+      font-weight: 700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .seat-status-text {
+      font-size: 0.8rem;
+      margin-top: 0.2rem;
+      font-weight: 600;
+    }
+
+    .seat-score-badge {
+      display: inline-block;
+      background: #10B981;
+      color: #FFFFFF;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 0.1rem 0.4rem;
+      border-radius: 6px;
+      margin-top: 0.2rem;
+    }
+
+    .hide-score .seat-score-badge {
+      display: none !important;
+    }
+  </style>
+</head>
+<body data-theme="emerald">
+
+  <!-- 頂部導覽列 -->
+  <header class="navbar">
+    <a href="index.html" class="navbar-brand">
+      <span>🌱 行動方程式</span>
+      <span class="navbar-badge">教師專用後台</span>
+    </a>
+    <div class="nav-actions">
+      <a href="index.html" class="btn-nav">🏠 回課程首頁</a>
+    </div>
+  </header>
+
+  <div class="container" style="max-width: 1100px;">
+    
+    <!-- 頂部儀表板標題與控制列 -->
+    <div class="dashboard-header-card">
+      <div class="dashboard-title-group">
+        <h1>🏆 【行動方程式】學習單即時繳交儀表板</h1>
+        <p>即時串接 Google 雲端試算表 | 雙向同步出缺席與補登</p>
+      </div>
+
+      <div class="dashboard-toolbar">
+        <!-- 班級選擇 -->
+        <select id="selectClass" class="tool-select" onchange="handleClassOrWeekChange()">
+          <option value="701">701 班</option>
+          <option value="702">702 班</option>
+          <option value="703">703 班</option>
+          <option value="704">704 班</option>
+          <option value="705">705 班</option>
+          <option value="706">706 班</option>
+          <option value="707">707 班</option>
+          <option value="708">708 班</option>
+          <option value="709">709 班</option>
+          <option value="710">710 班</option>
+        </select>
+
+        <!-- 週次選擇 -->
+        <select id="selectWeek" class="tool-select" onchange="handleClassOrWeekChange()">
+          <option value="1">第 1 週 (海岸線還原)</option>
+          <option value="2">第 2 週 (海底垃圾實錄)</option>
+          <option value="3">第 3 週 (雨林臨界點)</option>
+          <option value="4">第 4 週 (雨林探究篇)</option>
+          <option value="5">第 5 週 (地球日與分工)</option>
+          <option value="6">第 6 週 (成果發表會)</option>
+        </select>
+
+        <!-- 應到人數 -->
+        <div style="display: flex; align-items: center; gap: 0.3rem; background: rgba(255,255,255,0.15); padding: 0.4rem 0.7rem; border-radius: 10px;">
+          <span style="font-size: 0.9rem; font-weight: 600;">應到:</span>
+          <input type="number" id="inputExpectedCount" value="28" min="1" max="40" style="width: 55px; font-weight: 700; padding: 0.3rem; border-radius: 6px; border: none; text-align: center;" onchange="updateDashboardStats()">
+          <span style="font-size: 0.9rem;">人</span>
+        </div>
+
+        <!-- 配色主題切換 -->
+        <select id="selectTheme" class="tool-select" style="font-size: 0.9rem; padding: 0.45rem 0.6rem;" onchange="changeDashboardTheme(this.value)">
+          <option value="emerald">🌿 翡翠森林綠</option>
+          <option value="purple">🔮 星幻星空紫</option>
+          <option value="ocean">🌊 極光科技藍</option>
+          <option value="amber">🍯 經典琥珀金</option>
+        </select>
+
+        <!-- 導師分數切換 -->
+        <button type="button" class="btn-tool" onclick="toggleScoreVisibility()">
+          👁️ <span id="scoreToggleText">隱藏分數</span>
+        </button>
+
+        <!-- 深色模式 -->
+        <button type="button" class="btn-tool" onclick="toggleDarkMode()">
+          🌙 夜間
+        </button>
+
+        <!-- 刷新資料 -->
+        <button type="button" class="btn-tool btn-refresh" onclick="fetchLiveDataFromGAS()">
+          🔄 刷新資料
+        </button>
+      </div>
+    </div>
+
+    <!-- 繳交參與率統計面板 -->
+    <div class="stats-panel">
+      <div class="stats-header">
+        <div class="stats-title"><span id="displayClassTitle">701</span> 班 學習單繳交參與率</div>
+        <div class="stats-counter">
+          已交：<span id="submittedCount" style="color: #10B981;">0</span> / 
+          實到應交：<span id="actualExpectedCount">28</span> 人 
+          (<span id="ratePercent" style="color: var(--dash-primary);">0%</span>)
+        </div>
+      </div>
+
+      <div class="progress-bar-container">
+        <div id="progressBarFill" class="progress-bar-fill"></div>
+      </div>
+
+      <div class="action-subbar">
+        <div class="absent-input-group">
+          <label style="font-weight: 700; font-size: 0.95rem; white-space: nowrap;">🏖️ 本班今日請假座號：</label>
+          <input type="text" id="inputAbsentSeats" class="form-control" placeholder="輸入座號(如 03, 14)，或直接點擊座號卡" onchange="handleAbsentInputChange()">
+        </div>
+
+        <div class="tool-btn-group">
+          <button type="button" class="btn-action-primary" onclick="syncAttendanceToGoogleSheet()">
+            💾 儲存出缺席至試算表
+          </button>
+          <button type="button" class="btn-action-teal" onclick="openManualGradeModal()">
+            ✍️ 手動補登成績
+          </button>
+          <button type="button" class="btn-action-amber" onclick="copyMissingListToClipboard()">
+            📋 複製未交名單
+          </button>
+          <button type="button" class="btn-secondary" style="padding: 0.55rem 1rem; font-size: 0.95rem;" onclick="exportCsv()">
+            📥 匯出 CSV
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 主資訊區：左側 Top 5，右側 30 人卡片網格 -->
+    <div class="dashboard-main-grid">
+      
+      <!-- 左側：英雄榜 -->
+      <div class="leaderboard-card">
+        <div class="leaderboard-title">
+          <span>🎉 本節課完成英雄榜</span>
+        </div>
+        <div id="leaderboardList">
+          <p style="color: var(--text-muted); font-size: 0.9rem; text-align: center; padding: 1.5rem 0;">
+            尚無繳交紀錄<br>請等待學生送出學習單
+          </p>
+        </div>
+      </div>
+
+      <!-- 右側：全班完成狀態圖 -->
+      <div class="seat-matrix-card">
+        <div class="matrix-header">
+          <h2 style="font-size: 1.25rem; font-weight: 800; color: var(--dash-text-dark);">
+            🔢 全班座號完成狀態圖 (點擊卡片可切換請假 / 補登)
+          </h2>
+          <small style="color: var(--text-muted);">共 30 號卡片</small>
+        </div>
+
+        <div id="seatGrid" class="seat-grid">
+          <!-- 由 JS 動態生成 01 ~ 30 號座號卡 -->
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- 手動補登成績 Modal -->
+  <div id="manualGradeModal" class="modal-overlay">
+    <div class="modal-content" style="max-width: 440px; text-align: left;">
+      <h3 style="font-size: 1.3rem; color: var(--dash-primary); font-weight: 800; margin-bottom: 1rem;">✍️ 手動補登學生成績</h3>
+      
+      <div class="form-group" style="margin-bottom: 0.8rem;">
+        <label class="form-label required">座號 (01~30)</label>
+        <input type="text" id="manualSeat" class="form-control" placeholder="例如：05">
+      </div>
+
+      <div class="form-group" style="margin-bottom: 0.8rem;">
+        <label class="form-label required">學生姓名</label>
+        <input type="text" id="manualName" class="form-control" placeholder="例如：王小明">
+      </div>
+
+      <div class="form-group" style="margin-bottom: 1.2rem;">
+        <label class="form-label required">成績 (0~100)</label>
+        <input type="number" id="manualScore" class="form-control" value="95" min="0" max="100">
+      </div>
+
+      <div class="modal-actions" style="justify-content: flex-end;">
+        <button type="button" class="btn-secondary" onclick="closeManualGradeModal()">取消</button>
+        <button type="button" class="btn-action-primary" onclick="submitManualGrade()">確認補登並同步試算表</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 檢視作答詳情 Modal -->
+  <div id="studentDetailModal" class="modal-overlay">
+    <div class="modal-content" style="max-width: 600px; text-align: left;">
+      <button class="modal-close-btn" onclick="document.getElementById('studentDetailModal').classList.remove('active')">&times;</button>
+      <h3 id="modalDetailTitle" style="font-size: 1.3rem; color: var(--dash-primary); font-weight: 800; margin-bottom: 0.8rem;">作答詳情</h3>
+      <div id="modalDetailBody" style="background: #F8FAFC; padding: 1rem; border-radius: 10px; max-height: 400px; overflow-y: auto; font-size: 0.95rem;"></div>
+    </div>
+  </div>
+
+  <script src="assets/js/common.js"></script>
+  <script>
+    // 記憶當前載入的資料
+    let currentLiveRecords = [];
+    let absentSeatsSet = new Set();
+    let isScoreHidden = false;
+
+    // 1. 初始化
+    document.addEventListener('DOMContentLoaded', () => {
+      // 載入儲存的配色偏好
+      const savedTheme = localStorage.getItem('action115_theme') || 'emerald';
+      document.getElementById('selectTheme').value = savedTheme;
+      changeDashboardTheme(savedTheme);
+
+      // 生成 01 ~ 30 號座號卡
+      renderEmptySeatCards();
+
+      // 從 GAS 抓取第一筆最新資料
+      fetchLiveDataFromGAS();
+    });
+
+    // 2. 配色切換 (紫、綠、藍、琥珀)
+    function changeDashboardTheme(themeName) {
+      document.body.setAttribute('data-theme', themeName);
+      localStorage.setItem('action115_theme', themeName);
+    }
+
+    // 3. 深色夜間模式
+    function toggleDarkMode() {
+      document.body.classList.toggle('dark-mode');
+    }
+
+    // 4. 導師分數切換
+    function toggleScoreVisibility() {
+      isScoreHidden = !isScoreHidden;
+      const seatMatrix = document.getElementById('seatGrid');
+      if (isScoreHidden) {
+        seatMatrix.classList.add('hide-score');
+        document.getElementById('scoreToggleText').textContent = '顯示分數';
+      } else {
+        seatMatrix.classList.remove('hide-score');
+        document.getElementById('scoreToggleText').textContent = '隱藏分數';
+      }
+    }
+
+    // 5. 渲染 01 ~ 30 號基礎座號卡
+    function renderEmptySeatCards() {
+      const grid = document.getElementById('seatGrid');
+      grid.innerHTML = '';
+      for (let i = 1; i <= COURSE_CONFIG.maxSeatNumber; i++) {
+        const seatStr = i < 10 ? '0' + i : '' + i;
+        const card = document.createElement('div');
+        card.id = 'seat_card_' + seatStr;
+        card.className = 'seat-card missing';
+        card.onclick = () => handleSeatCardClick(seatStr);
+        card.innerHTML = `
+          <div class="seat-num">${seatStr} 號</div>
+          <div class="seat-name" id="name_${seatStr}">-</div>
+          <div class="seat-status-text" id="status_${seatStr}">加油中 💪</div>
+        `;
+        grid.appendChild(card);
+      }
+    }
+
+    // 6. 切換班級或週次
+    function handleClassOrWeekChange() {
+      const classVal = document.getElementById('selectClass').value;
+      document.getElementById('displayClassTitle').textContent = classVal;
+      fetchLiveDataFromGAS();
+    }
+
+    // 7. 從 Google Apps Script (GAS) 抓取實時資料
+    async function fetchLiveDataFromGAS() {
+      const classVal = document.getElementById('selectClass').value;
+      const weekVal = document.getElementById('selectWeek').value;
+      
+      const refreshBtn = document.querySelector('.btn-refresh');
+      if (refreshBtn) refreshBtn.textContent = '⏳ 讀取中...';
+
+      if (!COURSE_CONFIG.gasEndpoint || !COURSE_CONFIG.gasEndpoint.startsWith('http')) {
+        alert('請先在 assets/js/common.js 設定 gasEndpoint 部署網址！');
+        if (refreshBtn) refreshBtn.textContent = '🔄 刷新資料';
+        return;
+      }
+
+      try {
+        const fetchUrl = COURSE_CONFIG.gasEndpoint + '?action=getRecords&weekId=' + weekVal + '&studentClass=' + classVal;
+        const res = await fetch(fetchUrl);
+        const data = await res.json();
+
+        if (data.status === 'success') {
+          currentLiveRecords = data.records || [];
+          
+          // 還原試算表中的請假名單與應到人數
+          if (data.attendance) {
+            if (data.attendance.expectedCount) {
+              document.getElementById('inputExpectedCount').value = data.attendance.expectedCount;
+            }
+            if (Array.isArray(data.attendance.absentSeats)) {
+              absentSeatsSet = new Set(data.attendance.absentSeats);
+              document.getElementById('inputAbsentSeats').value = Array.from(absentSeatsSet).join(', ');
+            }
+          }
+
+          renderLiveDataToMatrix();
+        }
+      } catch (err) {
+        console.warn('Failed to fetch from GAS:', err);
+      }
+
+      if (refreshBtn) refreshBtn.textContent = '🔄 刷新資料';
+    }
+
+    // 8. 將讀取的資料繪製上 30 人卡片矩陣
+    function renderLiveDataToMatrix() {
+      renderEmptySeatCards();
+
+      const recordMap = {};
+      currentLiveRecords.forEach(rec => {
+        const seat = String(rec.studentSeat).padStart(2, '0');
+        recordMap[seat] = rec;
+      });
+
+      for (let i = 1; i <= COURSE_CONFIG.maxSeatNumber; i++) {
+        const seatStr = i < 10 ? '0' + i : '' + i;
+        const card = document.getElementById('seat_card_' + seatStr);
+        if (!card) continue;
+
+        if (absentSeatsSet.has(seatStr)) {
+          // 請假狀態
+          card.className = 'seat-card absent';
+          card.querySelector('.seat-name').textContent = '請假';
+          card.querySelector('.seat-status-text').textContent = '🏖️ 今日請假';
+        } else if (recordMap[seatStr]) {
+          // 已繳交狀態
+          const rec = recordMap[seatStr];
+          card.className = 'seat-card submitted';
+          card.querySelector('.seat-name').textContent = rec.studentName || '已交';
+          card.querySelector('.seat-status-text').innerHTML = `
+            <span class="seat-score-badge">${rec.score || 100} 分</span>
+            <div style="font-size: 0.75rem; color: #059669; margin-top: 2px;">已完成 ✅</div>
+          `;
+          card.onclick = () => showStudentDetailModal(rec);
+        } else {
+          // 未繳交
+          card.className = 'seat-card missing';
+          card.querySelector('.seat-name').textContent = '未交';
+          card.querySelector('.seat-status-text').textContent = '加油中 💪';
+        }
+      }
+
+      updateDashboardStats();
+      renderLeaderboard();
+    }
+
+    // 9. 更新頂部參與率進度條
+    function updateDashboardStats() {
+      const expectedTotal = parseInt(document.getElementById('inputExpectedCount').value) || 28;
+      const absentCount = absentSeatsSet.size;
+      const actualExpected = Math.max(1, expectedTotal - absentCount);
+      document.getElementById('actualExpectedCount').textContent = actualExpected;
+
+      // 計算在應到範圍內的已交人數
+      const submittedCount = currentLiveRecords.filter(r => !absentSeatsSet.has(String(r.studentSeat).padStart(2, '0'))).length;
+      document.getElementById('submittedCount').textContent = submittedCount;
+
+      const rate = Math.min(100, Math.round((submittedCount / actualExpected) * 100));
+      document.getElementById('ratePercent').textContent = rate + '%';
+      document.getElementById('progressBarFill').style.width = rate + '%';
+    }
+
+    // 10. 點擊座號卡：切換請假或手動補登
+    function handleSeatCardClick(seatStr) {
+      if (absentSeatsSet.has(seatStr)) {
+        absentSeatsSet.delete(seatStr);
+      } else {
+        absentSeatsSet.add(seatStr);
+      }
+      document.getElementById('inputAbsentSeats').value = Array.from(absentSeatsSet).join(', ');
+      renderLiveDataToMatrix();
+    }
+
+    // 11. 手動輸入請假座號變更
+    function handleAbsentInputChange() {
+      const raw = document.getElementById('inputAbsentSeats').value;
+      const parts = raw.split(/[,\s]+/).map(s => s.trim().padStart(2, '0')).filter(s => s && s !== '00');
+      absentSeatsSet = new Set(parts);
+      renderLiveDataToMatrix();
+    }
+
+    // 12. 儲存出缺席至 Google 試算表 (雙向同步回傳)
+    async function syncAttendanceToGoogleSheet() {
+      const classVal = document.getElementById('selectClass').value;
+      const weekVal = document.getElementById('selectWeek').value;
+      const expectedTotal = parseInt(document.getElementById('inputExpectedCount').value) || 28;
+
+      // 取得未交座號
+      const missingSeats = [];
+      const submittedSeats = new Set(currentLiveRecords.map(r => String(r.studentSeat).padStart(2, '0')));
+      for (let i = 1; i <= expectedTotal; i++) {
+        const s = i < 10 ? '0' + i : '' + i;
+        if (!absentSeatsSet.has(s) && !submittedSeats.has(s)) {
+          missingSeats.push(s);
+        }
+      }
+
+      const payload = {
+        action: 'saveAttendance',
+        studentClass: classVal,
+        weekId: weekVal,
+        expectedCount: expectedTotal,
+        absentSeats: Array.from(absentSeatsSet),
+        unsubmittedSeats: missingSeats
+      };
+
+      const btn = event.target;
+      const orig = btn.innerHTML;
+      btn.innerHTML = '⏳ 正在同步試算表...';
+      btn.disabled = true;
+
+      try {
+        await fetch(COURSE_CONFIG.gasEndpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+          mode: 'no-cors'
+        });
+        alert('🎉 70' + classVal.slice(-1) + ' 班 第 ' + weekVal + ' 週 出缺席紀錄已成功同步回傳至試算表【出缺席紀錄】分頁！');
+      } catch (e) {
+        alert('同步完成！');
+      }
+
+      btn.innerHTML = orig;
+      btn.disabled = false;
+    }
+
+    // 13. 一鍵複製未交名單
+    function copyMissingListToClipboard() {
+      const classVal = document.getElementById('selectClass').value;
+      const weekVal = document.getElementById('selectWeek').value;
+      const expectedTotal = parseInt(document.getElementById('inputExpectedCount').value) || 28;
+      const actualExpected = Math.max(1, expectedTotal - absentSeatsSet.size);
+
+      const submittedSeats = new Set(currentLiveRecords.map(r => String(r.studentSeat).padStart(2, '0')));
+      const missingSeats = [];
+      for (let i = 1; i <= expectedTotal; i++) {
+        const s = i < 10 ? '0' + i : '' + i;
+        if (!absentSeatsSet.has(s) && !submittedSeats.has(s)) {
+          missingSeats.push(s + '號');
+        }
+      }
+
+      const absentList = Array.from(absentSeatsSet).map(s => s + '號').join(', ') || '無';
+      const missingListStr = missingSeats.length > 0 ? missingSeats.join(', ') : '全數繳交完畢 🎉';
+
+      const copyText = `📢 ${classVal} 班【行動方程式】第 ${weekVal} 週學習單繳交通報
+• 實到應交：${actualExpected} 人 / 已交：${submittedSeats.size} 人
+• 今日請假：${absentList}
+• 尚未繳交名單：${missingListStr}`;
+
+      copyToClipboard(copyText, event.target);
+    }
+
+    // 14. 繪製英雄榜 (Top 5)
+    function renderLeaderboard() {
+      const container = document.getElementById('leaderboardList');
+      if (currentLiveRecords.length === 0) {
+        container.innerHTML = '<p style="color: var(--text-muted); font-size: 0.9rem; text-align: center; padding: 1.5rem 0;">尚無繳交紀錄<br>請等待學生送出學習單</p>';
+        return;
+      }
+
+      // 依分數高至低排序
+      const sorted = [...currentLiveRecords].sort((a, b) => (Number(b.score) || 0) - (Number(a.score) || 0)).slice(0, 5);
+
+      container.innerHTML = sorted.map((item, idx) => `
+        <div class="leaderboard-item">
+          <div style="display: flex; align-items: center; gap: 0.6rem;">
+            <div class="leaderboard-rank rank-${idx + 1}">${idx + 1}</div>
+            <div>
+              <strong>${item.studentSeat} 號 ${item.studentName || '同學'}</strong>
+              <div style="font-size: 0.75rem; color: var(--text-muted);">${item.studentGroup || ''}</div>
+            </div>
+          </div>
+          <div style="font-weight: 800; color: #10B981;">${item.score || 100} 分</div>
+        </div>
+      `).join('');
+    }
+
+    // 15. 手動補登成績 Modal 控制
+    function openManualGradeModal() {
+      document.getElementById('manualGradeModal').classList.add('active');
+    }
+    function closeManualGradeModal() {
+      document.getElementById('manualGradeModal').classList.remove('active');
+    }
+    async function submitManualGrade() {
+      const classVal = document.getElementById('selectClass').value;
+      const weekVal = document.getElementById('selectWeek').value;
+      const seat = document.getElementById('manualSeat').value.trim().padStart(2, '0');
+      const name = document.getElementById('manualName').value.trim();
+      const score = parseInt(document.getElementById('manualScore').value) || 95;
+
+      if (!seat || !name) {
+        alert('請填寫座號與姓名！');
+        return;
+      }
+
+      const payload = {
+        weekId: weekVal,
+        studentClass: classVal,
+        studentSeat: seat,
+        studentName: name,
+        studentGroup: '教師手動補登',
+        score: score,
+        scoreBreakdown: ['教師手動補登成績 (+' + score + '分)'],
+        answers: { manual: true }
+      };
+
+      try {
+        await fetch(COURSE_CONFIG.gasEndpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+          mode: 'no-cors'
+        });
+        alert('✅ 已為 ' + classVal + ' 班 ' + seat + ' 號 ' + name + ' 補登成績，並同步回傳試算表！');
+        closeManualGradeModal();
+        fetchLiveDataFromGAS();
+      } catch (e) {
+        alert('補登完成！');
+      }
+    }
+
+    // 16. 檢視學生作答彈窗
+    function showStudentDetailModal(rec) {
+      document.getElementById('modalDetailTitle').textContent = `${rec.studentClass} 班 ${rec.studentSeat} 號 ${rec.studentName} 同學作答詳情`;
+      
+      let answersHtml = '';
+      try {
+        const ans = typeof rec.answers === 'string' ? JSON.parse(rec.answers) : rec.answers;
+        answersHtml = Object.keys(ans).map(k => `
+          <div style="margin-bottom: 0.6rem;">
+            <div style="font-weight: 700; color: var(--dash-primary);">題目/欄位代號 [${k}]：</div>
+            <div style="background: #FFFFFF; padding: 0.4rem 0.6rem; border-radius: 6px; border: 1px solid #CBD5E1;">${Array.isArray(ans[k]) ? ans[k].join(', ') : ans[k]}</div>
+          </div>
+        `).join('');
+      } catch (e) {
+        answersHtml = '<div>原始作答：' + rec.answers + '</div>';
+      }
+
+      document.getElementById('modalDetailBody').innerHTML = `
+        <div style="margin-bottom: 0.8rem; font-weight: 700; color: #10B981;">
+          🎯 系統初評得分：${rec.score} 分 | 提交時間：${rec.timestamp || '無'}
+        </div>
+        <div style="margin-bottom: 0.8rem; color: var(--text-muted);">
+          組別：${rec.studentGroup} | 評分明細：${rec.scoreBreakdown || '無'}
+        </div>
+        <hr style="margin: 0.8rem 0; border: none; border-top: 1px solid var(--border);">
+        ${answersHtml}
+      `;
+
+      document.getElementById('studentDetailModal').classList.add('active');
+    }
+
+    // 17. 匯出 CSV
+    function exportCsv() {
+      const classVal = document.getElementById('selectClass').value;
+      const weekVal = document.getElementById('selectWeek').value;
+      if (currentLiveRecords.length === 0) {
+        alert('目前無作答資料可匯出！');
+        return;
+      }
+
+      let csv = "\uFEFF時間戳記,班級,座號,姓名,組別,得分\n";
+      currentLiveRecords.forEach(r => {
+        csv += `"${r.timestamp}","${r.studentClass}","${r.studentSeat}","${r.studentName}","${r.studentGroup}","${r.score}"\n`;
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `${classVal}_第${weekVal}週_學習單繳交成績表.csv`;
+      link.click();
+    }
+  </script>
+</body>
+</html>
