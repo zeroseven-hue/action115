@@ -1,7 +1,7 @@
 /**
  * ==========================================================================
  * 桃園市楊光國中 115 學年度【行動方程式】彈性學習課程 
- * 學習單後端 API (GAS) - 支援雙向讀寫、出缺席同步、手動補登
+ * 學習單後端 API (GAS) - 支援雙向讀寫、出缺席同步、手動補登、防重複繳交覆蓋
  * ==========================================================================
  */
 
@@ -119,7 +119,7 @@ function doPost(e) {
       })).setMimeType(ContentService.MimeType.JSON);
     }
 
-    // 模式 B：學生送出作答 或 教師手動補登成績
+    // 模式 B：學生送出作答 或 教師手動補登成績 (具備防重複繳交覆蓋機制)
     var sheetName = "第" + (data.weekId || "1") + "週作答紀錄";
     var sheet = ss.getSheetByName(sheetName);
 
@@ -139,20 +139,43 @@ function doPost(e) {
       sheet.setFrozenRows(1);
     }
 
-    sheet.appendRow([
+    var targetSeat = String(data.studentSeat).padStart(2, '0');
+    var targetClass = String(data.studentClass).trim();
+    var existingRowIndex = -1;
+
+    // 🔍 防重複洗板檢查：檢查同班級、同座號是否已存在
+    if (sheet.getLastRow() > 1) {
+      var existingData = sheet.getRange(2, 2, sheet.getLastRow() - 1, 2).getValues(); // 讀取 班級(欄2), 座號(欄3)
+      for (var r = 0; r < existingData.length; r++) {
+        if (String(existingData[r][0]).trim() === targetClass && String(existingData[r][1]).padStart(2, '0') === targetSeat) {
+          existingRowIndex = r + 2; // 試算表列數 (從第2列開始)
+          break;
+        }
+      }
+    }
+
+    var rowValues = [
       data.timestamp || new Date().toLocaleString('zh-TW', { timeZone: 'Asia/Taipei' }),
       data.studentClass,
-      data.studentSeat,
+      targetSeat,
       data.studentName,
       data.studentGroup || "手動補登",
       data.score,
       Array.isArray(data.scoreBreakdown) ? data.scoreBreakdown.join("； ") : (data.scoreBreakdown || "教師手動補登"),
       typeof data.answers === 'object' ? JSON.stringify(data.answers) : (data.answers || "{}")
-    ]);
+    ];
+
+    if (existingRowIndex > 0) {
+      // 學生重複交卷：自動「更新覆蓋」原有一列，確保試算表每位學生只有一筆最新成績，絕不重複洗板！
+      sheet.getRange(existingRowIndex, 1, 1, 8).setValues([rowValues]);
+    } else {
+      // 全新繳交：新增一列
+      sheet.appendRow(rowValues);
+    }
 
     return ContentService.createTextOutput(JSON.stringify({
       status: "success",
-      message: "資料已成功儲存至試算表！"
+      message: existingRowIndex > 0 ? "已更新此座號之最新繳交紀錄！" : "資料已成功儲存至試算表！"
     })).setMimeType(ContentService.MimeType.JSON);
 
   } catch (error) {

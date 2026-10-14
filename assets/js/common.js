@@ -176,6 +176,57 @@ function initStudentInfoForm(weekId) {
 
   // 5. 恢復快取草稿
   loadDraft(weekId);
+
+  // 6. 🔍 防重複繳交檢查：若本地已提交過，顯示已繳交橫幅並鎖定防手滑
+  checkSubmissionStatus(weekId);
+}
+
+/**
+ * 檢查學生是否已繳交過此週學習單
+ */
+function checkSubmissionStatus(weekId) {
+  const submittedRaw = localStorage.getItem('action115_submitted_' + weekId);
+  if (!submittedRaw) return;
+
+  try {
+    const info = JSON.parse(submittedRaw);
+    const container = document.querySelector('.container');
+    const existingBanner = document.getElementById('submittedNoticeBanner');
+    if (!existingBanner && container) {
+      const banner = document.createElement('div');
+      banner.id = 'submittedNoticeBanner';
+      banner.style.cssText = "background: #ECFDF5; border: 2px solid #10B981; border-radius: 14px; padding: 1.1rem 1.4rem; margin-bottom: 1.6rem; color: #065F46; text-align: center; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);";
+      banner.innerHTML = \`
+        <div style="font-size: 1.2rem; font-weight: 800; margin-bottom: 0.2rem;">🎉 您已成功繳交本週學習單！</div>
+        <div style="font-size: 0.95rem; margin-bottom: 0.4rem;">
+          \${info.studentClass} 班 \${info.studentSeat} 號 <strong>\${info.studentName}</strong> | 得分：<strong>\${info.score} 分</strong> | 繳交時間：\${info.timestamp}
+        </div>
+        <div style="font-size: 0.85rem; color: #047857;">
+          作答已即時儲存至教師試算表。若老師要求您重新修改作答，請點此：
+          <a href="javascript:void(0)" onclick="resetSubmission('\${weekId}')" style="color: #2563EB; font-weight: 700; text-decoration: underline;">重置作答狀態</a>
+        </div>
+      \`;
+      const firstCard = document.querySelector('.container .card');
+      if (firstCard) {
+        container.insertBefore(banner, firstCard);
+      }
+    }
+
+    const submitBtn = document.getElementById('submitBtn');
+    if (submitBtn) {
+      submitBtn.innerHTML = '✅ 已完成繳交 (系統已鎖定)';
+      submitBtn.style.background = '#059669';
+    }
+  } catch (e) {
+    console.error('Error checking submission status:', e);
+  }
+}
+
+function resetSubmission(weekId) {
+  if (confirm('您確定要重新填寫本週學習單嗎？已送出的作答將解除鎖定供您修改。')) {
+    localStorage.removeItem('action115_submitted_' + weekId);
+    location.reload();
+  }
 }
 
 /**
@@ -327,13 +378,15 @@ async function submitWorksheet(weekId, scoreCalculator) {
     }
   }
 
-  // 6. 清除草稿並彈出成績模態窗
+  // 6. 標記已提交以防重複交卷、清除草稿並彈出成績模態窗
+  localStorage.setItem('action115_submitted_' + weekId, JSON.stringify(payload));
   localStorage.removeItem('action115_draft_' + weekId);
   showResultModal(payload, scoreResult);
 
   if (submitBtn) {
-    submitBtn.disabled = false;
-    submitBtn.innerHTML = originalBtnText;
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '✅ 已完成繳交';
+    submitBtn.style.background = '#059669';
   }
 }
 
