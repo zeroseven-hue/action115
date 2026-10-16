@@ -169,47 +169,46 @@
 
     function handleSubmit() {
       submitWorksheet('1', (answers) => {
-        let score = 0;
-        let breakdown = [];
+        let score = 85;
+        let breakdown = ["🎯 學習單完成與提交基礎分 (85分)"];
 
-        // 任務一客觀關鍵字判定 (30分)
-        let q1Count = [answers.w1_q1_1, answers.w1_q1_2, answers.w1_q1_3].filter(x => x && x.trim().length > 0).length;
-        if (q1Count >= 3) {
-          score += 30;
-          breakdown.push("海廢種類觀察紀錄完整 (+30分)");
-        } else {
-          let s = q1Count * 10;
-          score += s;
-          breakdown.push("海廢種類觀察填寫 " + q1Count + " 項 (+" + s + "分)");
-        }
-
-        // 簡答與深度思考 (30分)
+        // 1. 深度思考與心得回答 (認真度加分)
         let hasQ2 = answers.w1_q2 && answers.w1_q2.trim().length >= 10;
         let hasQ3 = answers.w1_q3 && answers.w1_q3.trim().length >= 10;
         let hasQ4 = answers.w1_q4 && answers.w1_q4.trim().length >= 10;
         let thoughtfulCount = (hasQ2 ? 1 : 0) + (hasQ3 ? 1 : 0) + (hasQ4 ? 1 : 0);
-        let thoughtScore = thoughtfulCount * 10;
-        score += thoughtScore;
-        breakdown.push("深度思考與心得回答認真 (+" + thoughtScore + "分)");
 
-        // 行動宣言 (20分)
+        if (thoughtfulCount >= 2) {
+          score += 10;
+          breakdown.push("💡 深度思考與心得回答認真 (+10分)");
+        } else if (thoughtfulCount >= 1) {
+          score += 5;
+          breakdown.push("💡 心得回答具體 (+5分)");
+        }
+
+        // 2. 自我檢核與行動承諾 (加分)
         let actionCount = (answers.w1_actions || []).length;
-        if (actionCount >= 2) {
-          score += 20;
-          breakdown.push("落實源頭減塑承諾達標 (+20分)");
-        } else {
-          let s = actionCount * 10;
-          score += s;
-          breakdown.push("減塑承諾勾選 " + actionCount + " 項 (+" + s + "分)");
+        if (actionCount >= 1 && answers.check1 && answers.check2 && answers.check3) {
+          score += 5;
+          breakdown.push("🌟 課堂自我檢核與減塑承諾落實 (+5分)");
         }
 
-        // 自我檢核表 (20分)
-        if (answers.check1 && answers.check2 && answers.check3) {
-          score += 20;
-          breakdown.push("完成課堂自主學習檢核 (+20分)");
+        // 3. 太誇張（多項核心任務空白）才微扣分
+        let q1Count = [answers.w1_q1_1, answers.w1_q1_2, answers.w1_q1_3].filter(x => x && x.trim().length > 0).length;
+        let missingMajorTasks = 0;
+        if (q1Count === 0) missingMajorTasks++;
+        if (!answers.w1_q2 && !answers.w1_q3 && !answers.w1_q4) missingMajorTasks++;
+        if (actionCount === 0) missingMajorTasks++;
+
+        if (missingMajorTasks >= 2) {
+          score -= 10;
+          breakdown.push("⚠️ 多項任務留白未作答 (-10分)");
+        } else if (missingMajorTasks === 1) {
+          score -= 5;
+          breakdown.push("⚠️ 部分題目未完整填寫 (-5分)");
         }
 
-        return { total: Math.min(100, score), breakdown };
+        return { total: Math.max(75, Math.min(100, score)), breakdown };
       });
     }
   </script>

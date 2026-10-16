@@ -166,30 +166,42 @@
 
     function handleSubmit() {
       submitWorksheet('2', (answers) => {
-        let score = 0;
-        let breakdown = [];
+        let score = 85;
+        let breakdown = ["🎯 學習單完成與提交基礎分 (85分)"];
 
-        let q1Count = [answers.w2_q1_1, answers.w2_q1_2, answers.w2_q1_3].filter(x => x && x.trim().length > 0).length;
-        let s1 = q1Count * 10;
-        score += s1;
-        breakdown.push("水下海廢前三名觀察紀錄完整 (+" + s1 + "分)");
-
+        // 1. 深度思考與心得回答 (認真度加分)
         let qCount = [answers.w2_q2, answers.w2_q3, answers.w2_q4].filter(x => x && x.trim().length >= 10).length;
-        let s2 = qCount * 10;
-        score += s2;
-        breakdown.push("幽靈捕撈與海洋生態危機解析詳盡 (+" + s2 + "分)");
-
-        let actionCount = (answers.w2_actions || []).length;
-        let s3 = Math.min(20, actionCount * 10);
-        score += s3;
-        breakdown.push("水下無塑承諾落實 (+" + s3 + "分)");
-
-        if (answers.check1 && answers.check2 && answers.check3) {
-          score += 20;
-          breakdown.push("完成課堂自主學習檢核 (+20分)");
+        if (qCount >= 2) {
+          score += 10;
+          breakdown.push("💡 幽靈捕撈與生態危機解析深刻 (+10分)");
+        } else if (qCount >= 1) {
+          score += 5;
+          breakdown.push("💡 心得回答具體 (+5分)");
         }
 
-        return { total: Math.min(100, score), breakdown };
+        // 2. 自我檢核與行動承諾 (加分)
+        let actionCount = (answers.w2_actions || []).length;
+        if (actionCount >= 1 && answers.check1 && answers.check2 && answers.check3) {
+          score += 5;
+          breakdown.push("🌟 課堂自我檢核與水下無塑承諾落實 (+5分)");
+        }
+
+        // 3. 太誇張（多項核心任務空白）才微扣分
+        let q1Count = [answers.w2_q1_1, answers.w2_q1_2, answers.w2_q1_3].filter(x => x && x.trim().length > 0).length;
+        let missingMajorTasks = 0;
+        if (q1Count === 0) missingMajorTasks++;
+        if (!answers.w2_q2 && !answers.w2_q3 && !answers.w2_q4) missingMajorTasks++;
+        if (actionCount === 0) missingMajorTasks++;
+
+        if (missingMajorTasks >= 2) {
+          score -= 10;
+          breakdown.push("⚠️ 多項任務留白未作答 (-10分)");
+        } else if (missingMajorTasks === 1) {
+          score -= 5;
+          breakdown.push("⚠️ 部分題目未完整填寫 (-5分)");
+        }
+
+        return { total: Math.max(75, Math.min(100, score)), breakdown };
       });
     }
   </script>

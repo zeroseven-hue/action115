@@ -182,37 +182,46 @@
 
     function handleSubmit() {
       submitWorksheet('6', (answers) => {
-        let score = 0;
-        let breakdown = [];
+        let score = 85;
+        let breakdown = ["🎯 學習單完成與提交基礎分 (85分)"];
 
-        // 任務一：本組發表成果 (30分)
-        let hasT1 = answers.w6_my_title && answers.w6_my_title.length > 0;
-        let hasM1 = (answers.w6_modes || []).length > 0;
-        let hasR1 = answers.w6_my_role && answers.w6_my_role.length >= 10;
-        let count1 = (hasT1 ? 10 : 0) + (hasM1 ? 10 : 0) + (hasR1 ? 10 : 0);
-        score += count1;
-        breakdown.push("本組多元表達成果登錄完整 (+" + count1 + "分)");
-
-        // 任務二：同儕聆聽反饋 (30分)
-        let hasTarget = answers.w6_target_group && answers.w6_target_title;
+        // 1. 深度思考與心得回答 (認真度加分)
         let hasFb = answers.w6_peer_feedback && answers.w6_peer_feedback.length >= 15;
-        let s2 = (hasTarget ? 15 : 0) + (hasFb ? 15 : 0);
-        score += s2;
-        breakdown.push("同儕聆聽與建設性反饋紀錄 (+" + s2 + "分)");
-
-        // 任務三：總結省思 (20分)
         let hasRef = answers.w6_reflection && answers.w6_reflection.length >= 10;
-        let hasAct = answers.w6_action && answers.w6_action.length >= 5;
-        let s3 = (hasRef ? 10 : 0) + (hasAct ? 10 : 0);
-        score += s3;
-        breakdown.push("課後省思與地球公民宣言 (+" + s3 + "分)");
-
-        if (answers.check1 && answers.check2 && answers.check3) {
-          score += 20;
-          breakdown.push("完成課堂自主學習檢核 (+20分)");
+        if (hasFb && hasRef) {
+          score += 10;
+          breakdown.push("💡 同儕反饋與發表省思深刻 (+10分)");
+        } else if (hasFb || hasRef) {
+          score += 5;
+          breakdown.push("💡 心得反饋具體 (+5分)");
         }
 
-        return { total: Math.min(100, score), breakdown };
+        // 2. 自我檢核與成果展演 (加分)
+        let hasT1 = answers.w6_my_title && answers.w6_my_title.length > 0;
+        if (hasT1 && answers.check1 && answers.check2 && answers.check3) {
+          score += 5;
+          breakdown.push("🌟 課堂自我檢核與成果展演落實 (+5分)");
+        }
+
+        // 3. 太誇張（多項核心任務空白）才微扣分
+        let hasTarget = answers.w6_target_group && answers.w6_target_title;
+        let hasAct = answers.w6_action && answers.w6_action.length >= 5;
+        let hasR1 = answers.w6_my_role && answers.w6_my_role.length >= 10;
+
+        let missingMajorTasks = 0;
+        if (!hasT1 && !hasR1) missingMajorTasks++;
+        if (!hasTarget && !hasFb) missingMajorTasks++;
+        if (!hasRef && !hasAct) missingMajorTasks++;
+
+        if (missingMajorTasks >= 2) {
+          score -= 10;
+          breakdown.push("⚠️ 多項任務留白未作答 (-10分)");
+        } else if (missingMajorTasks === 1) {
+          score -= 5;
+          breakdown.push("⚠️ 部分題目未完整填寫 (-5分)");
+        }
+
+        return { total: Math.max(75, Math.min(100, score)), breakdown };
       });
     }
   </script>
