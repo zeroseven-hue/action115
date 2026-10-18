@@ -196,16 +196,16 @@ function checkSubmissionStatus(weekId) {
       const banner = document.createElement('div');
       banner.id = 'submittedNoticeBanner';
       banner.style.cssText = "background: #ECFDF5; border: 2px solid #10B981; border-radius: 14px; padding: 1.1rem 1.4rem; margin-bottom: 1.6rem; color: #065F46; text-align: center; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);";
-      banner.innerHTML = \`
+      banner.innerHTML = `
         <div style="font-size: 1.2rem; font-weight: 800; margin-bottom: 0.2rem;">🎉 您已成功繳交本週學習單！</div>
         <div style="font-size: 0.95rem; margin-bottom: 0.4rem;">
-          \${info.studentClass} 班 \${info.studentSeat} 號 <strong>\${info.studentName}</strong> | 得分：<strong>\${info.score} 分</strong> | 繳交時間：\${info.timestamp}
+          ${info.studentClass} 班 ${info.studentSeat} 號 <strong>${info.studentName}</strong> | 得分：<strong>${info.score} 分</strong> | 繳交時間：${info.timestamp}
         </div>
         <div style="font-size: 0.85rem; color: #047857;">
           作答已即時儲存至教師試算表。若老師要求您重新修改作答，請點此：
-          <a href="javascript:void(0)" onclick="resetSubmission('\${weekId}')" style="color: #2563EB; font-weight: 700; text-decoration: underline;">重置作答狀態</a>
+          <a href="javascript:void(0)" onclick="resetSubmission('${weekId}')" style="color: #2563EB; font-weight: 700; text-decoration: underline;">重置作答狀態</a>
         </div>
-      \`;
+      `;
       const firstCard = document.querySelector('.container .card');
       if (firstCard) {
         container.insertBefore(banner, firstCard);

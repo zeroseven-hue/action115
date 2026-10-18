@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>【行動方程式】第 9 週：還我安靜的環境——噪音對生態環境的影響之『分享會』</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+  <script src="assets/js/qrcode.min.js"></script>
+</head>
+<body>
+
+  <!-- 頂部導覽列 -->
+  <header class="navbar">
+    <a href="index.html" class="navbar-brand">
+      <span>🌱 行動方程式</span>
+      <span class="navbar-badge">第 9 週</span>
+    </a>
+    <div class="nav-actions">
+      <button type="button" class="btn-nav btn-nav-qr" onclick="showCurrentPageQrModal()">📱 投影派卷 QR Code</button>
+      <span id="saveStatus" class="save-status">💾 本地暫存安全</span>
+      <a href="index.html" class="btn-nav">🏠 回課程首頁</a>
+    </div>
+  </header>
+
+  <div class="container">
+
+    <!-- 頁面標題 -->
+    <div class="page-header">
+      <div class="school-title">桃園市楊光國民中學 115 學年度第一學期 彈性學習課程學習單</div>
+      <h1 class="unit-title">【行動方程式】第 9 週：還我安靜的環境——噪音對生態環境的影響之『分享會』</h1>
+      <p class="unit-desc">授課日期：10/25 - 10/31 | 主題：小組專題展演 · 同儕聆聽提問 · 海洋寧靜倡議宣言</p>
+    </div>
+
+    <!-- 學生基本資料卡片 -->
+    <div class="card">
+      <h3 class="card-title">👤 學生基本資料 (防呆認證)</h3>
+      <div class="student-bar">
+        <div class="form-group">
+          <label class="form-label required" for="studentClass">班級</label>
+          <select id="studentClass" class="form-control" required>
+            <option value="" disabled selected>載入中...</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label required" for="studentSeat">座號</label>
+          <select id="studentSeat" class="form-control" required>
+            <option value="" disabled selected>載入中...</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label required" for="studentName">姓名</label>
+          <input type="text" id="studentName" class="form-control" placeholder="請輸入全名" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label required" for="studentGroup">組別</label>
+          <select id="studentGroup" class="form-control" required>
+            <option value="" disabled selected>載入中...</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- 任務一：本組專題成果登錄 -->
+    <div class="card">
+      <h3 class="card-title">🎤 任務一：本組噪音專題分享成果登錄</h3>
+      <p class="question-desc">請記錄本組專案報告的核心成果與降噪倡議解方：</p>
+
+      <div class="question-item">
+        <div class="question-title">1. 本組專案主題名稱：</div>
+        <input type="text" id="w9_topic" class="form-control" placeholder="例如：水下氣泡帷幕減噪實測分析 / 台灣白海豚與航運衝突之解方">
+      </div>
+
+      <div class="question-item">
+        <div class="question-title">2. 本組核心探究焦點面向（可複選）：</div>
+        <div class="checkbox-group">
+          <label class="checkbox-label"><input type="checkbox" name="w9_category" value="離岸風電打樁"> 💥 離岸風電打樁與水下衝擊波</label>
+          <label class="checkbox-label"><input type="checkbox" name="w9_category" value="貨輪航運低頻噪聲"> 🚢 大型商船與貨輪低頻航運噪音</label>
+          <label class="checkbox-label"><input type="checkbox" name="w9_category" value="陸域交通與鳥類"> 🐦 陸域都市交通與鳥類鳴唱變調</label>
+          <label class="checkbox-label"><input type="checkbox" name="w9_category" value="寧靜保護區倡議"> 🏞️ 世界寧靜保護區與台灣聲景保育</label>
+        </div>
+      </div>
+
+      <div class="question-item">
+        <div class="question-title">3. 本組提出的核心發現與友善降噪解方（請條列 2 項）：</div>
+        <div style="display: flex; flex-direction: column; gap: 0.6rem;">
+          <input type="text" id="w9_discovery_1" class="form-control" placeholder="核心發現 ① (例如：雙層氣泡帷幕可降低15dB，能有效避免海豚聽損)">
+          <input type="text" id="w9_discovery_2" class="form-control" placeholder="核心發現 ② / 降噪解方 (例如：在白海豚洄游期劃設強制降速區至10節以下)">
+        </div>
+      </div>
+    </div>
+
+    <!-- 任務二：同儕聆聽反饋與思辨提問 -->
+    <div class="card">
+      <h3 class="card-title">👂 任務二：同儕聆聽反饋與思辨提問</h3>
+      <p class="question-desc">請專注聆聽其他組別的報告，並選擇一組最震撼或最具啟發的小組進行深度回饋：</p>
+
+      <div class="question-item">
+        <div style="display: grid; grid-template-columns: 140px 1fr; gap: 0.8rem; margin-bottom: 0.8rem;">
+          <div>
+            <label style="font-size: 0.85rem; font-weight: 700; color: var(--primary);">聆聽對象組別</label>
+            <select id="w9_peer_group" class="form-control">
+              <option value="" disabled selected>請選擇組別</option>
+              <option value="第 1 組">第 1 組</option>
+              <option value="第 2 組">第 2 組</option>
+              <option value="第 3 組">第 3 組</option>
+              <option value="第 4 組">第 4 組</option>
+              <option value="第 5 組">第 5 組</option>
+              <option value="第 6 組">第 6 組</option>
+              <option value="第 7 組">第 7 組</option>
+              <option value="第 8 組">第 8 組</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size: 0.85rem; font-weight: 700; color: var(--primary);">該組報告主題</label>
+            <input type="text" id="w9_peer_topic" class="form-control" placeholder="請填寫該組專案主題">
+          </div>
+        </div>
+
+        <div style="margin-bottom: 0.8rem;">
+          <div class="question-title">1. 該組最吸引人或論述最扎實的亮點（數據、圖表或台風）：</div>
+          <textarea id="w9_peer_highlight" class="form-control" placeholder="請具體寫出他們哪一點讓你印象最深刻（建議 15 字以上）..."></textarea>
+        </div>
+
+        <div>
+          <div class="question-title">2. 我想向該組提出的一個深入問題或建設性回饋：</div>
+          <textarea id="w9_peer_question" class="form-control" placeholder="請提出一個促進討論的好問題（例如施工成本如何負擔？民眾如何配合？建議 15 字以上）..."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- 任務三：我的生活寧靜與海洋守護宣言 -->
+    <div class="card">
+      <h3 class="card-title">🌱 任務三：我的生活寧靜與海洋守護宣言</h3>
+      <p class="question-desc">安靜是大自然最珍貴的資源。為了支持陸域與水下生態寧靜，我願意承諾（請勾選至少 2 項）：</p>
+
+      <div class="checkbox-group">
+        <label class="checkbox-label"><input type="checkbox" name="w9_actions" value="建立聲景素養"> 🔇 建立聲景素養：不在安靜場所喧嘩，搭乘大眾運輸配戴耳機，尊重彼此聽覺空間</label>
+        <label class="checkbox-label"><input type="checkbox" name="w9_actions" value="支持友善減噪工法"> 🐬 支持友善減噪工法：向親友推廣離岸風電氣泡帷幕與綠色減速航道的重要性</label>
+        <label class="checkbox-label"><input type="checkbox" name="w9_actions" value="選擇低碳安靜運具"> 🚲 選擇低碳安靜運具：多搭乘大眾運輸、騎單車或步行，減少燃油引擎與排氣管噪音</label>
+        <label class="checkbox-label"><input type="checkbox" name="w9_actions" value="遵守專題繳交承諾"> 📜 遵守專題繳交承諾：今日準時將小組書面專題資料整齊彙整並繳交予任課教師</label>
+      </div>
+    </div>
+
+    <!-- 自我檢核表 -->
+    <div class="card">
+      <h3 class="card-title">📝 學習表現自我檢核表</h3>
+      <p class="question-desc">請誠實回顧本節課的學習狀態，為自己進行自評：</p>
+      <table class="check-table">
+        <thead>
+          <tr>
+            <th>檢核項目</th>
+            <th>自評結果</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1. 我能在小組發表時積極分工合作，以良好的台風與多元符號清楚表達。</td>
+            <td>
+              <label><input type="radio" name="check1" value="yes" checked> 是</label>&nbsp;&nbsp;
+              <label><input type="radio" name="check1" value="need_work"> 需加油</label>
+            </td>
+          </tr>
+          <tr>
+            <td>2. 我能專注聆聽他組報告，並給予尊重、肯定且具備建設性的回饋提問。</td>
+            <td>
+              <label><input type="radio" name="check2" value="yes" checked> 是</label>&nbsp;&nbsp;
+              <label><input type="radio" name="check2" value="need_work"> 需加油</label>
+            </td>
+          </tr>
+          <tr>
+            <td>3. 我能體會環境噪音對生命之危害，並願意在日常中實踐寧靜生活素養。</td>
+            <td>
+              <label><input type="radio" name="check3" value="yes" checked> 是</label>&nbsp;&nbsp;
+              <label><input type="radio" name="check3" value="need_work"> 需加油</label>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 送出按鈕 -->
+    <div class="submit-section">
+      <button id="submitBtn" class="btn-submit" onclick="handleSubmit()">🚀 送出第 9 週學習單</button>
+    </div>
+
+  </div>
+
+  <script src="assets/js/common.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      initStudentInfoForm('9');
+    });
+
+    function handleSubmit() {
+      submitWorksheet('9', (answers) => {
+        let score = 85;
+        let breakdown = ["🎯 學習單完成與提交基礎分 (85分)"];
+
+        // 1. 深度思考與心得回答 (認真度加分)
+        let hasH = answers.w9_peer_highlight && answers.w9_peer_highlight.trim().length >= 10;
+        let hasQ = answers.w9_peer_question && answers.w9_peer_question.trim().length >= 10;
+        let thoughtfulCount = (hasH ? 1 : 0) + (hasQ ? 1 : 0);
+
+        if (thoughtfulCount >= 2) {
+          score += 10;
+          breakdown.push("💡 同儕反饋深入且提問具思辨性 (+10分)");
+        } else if (thoughtfulCount >= 1) {
+          score += 5;
+          breakdown.push("💡 聆聽反饋具體 (+5分)");
+        }
+
+        // 2. 自我檢核與寧靜宣言 (加分)
+        let actionCount = (answers.w9_actions || []).length;
+        if (actionCount >= 1 && answers.check1 && answers.check2 && answers.check3) {
+          score += 5;
+          breakdown.push("🌟 課堂自我檢核與生活寧靜宣言落實 (+5分)");
+        }
+
+        // 3. 太誇張（多項核心任務空白）才微扣分
+        let hasTopic = answers.w9_topic && answers.w9_topic.trim().length > 0;
+        let hasDisc = answers.w9_discovery_1 || answers.w9_discovery_2;
+        
+        let missingMajorTasks = 0;
+        if (!hasTopic && !hasDisc) missingMajorTasks++;
+        if (!hasH && !hasQ) missingMajorTasks++;
+        if (actionCount === 0) missingMajorTasks++;
+
+        if (missingMajorTasks >= 2) {
+          score -= 10;
+          breakdown.push("⚠️ 多項任務留白未作答 (-10分)");
+        } else if (missingMajorTasks === 1) {
+          score -= 5;
+          breakdown.push("⚠️ 部分題目未完整填寫 (-5分)");
+        }
+
+        return { total: Math.max(75, Math.min(100, score)), breakdown };
+      });
+    }
+  </script>
+</body>
+</html>

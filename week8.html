@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>【行動方程式】第 8 週：還我安靜的環境——噪音對生態環境的影響</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+  <script src="assets/js/qrcode.min.js"></script>
+</head>
+<body>
+
+  <!-- 頂部導覽列 -->
+  <header class="navbar">
+    <a href="index.html" class="navbar-brand">
+      <span>🌱 行動方程式</span>
+      <span class="navbar-badge">第 8 週</span>
+    </a>
+    <div class="nav-actions">
+      <button type="button" class="btn-nav btn-nav-qr" onclick="showCurrentPageQrModal()">📱 投影派卷 QR Code</button>
+      <span id="saveStatus" class="save-status">💾 本地暫存安全</span>
+      <a href="index.html" class="btn-nav">🏠 回課程首頁</a>
+    </div>
+  </header>
+
+  <div class="container">
+
+    <!-- 頁面標題 -->
+    <div class="page-header">
+      <div class="school-title">桃園市楊光國民中學 115 學年度第一學期 彈性學習課程學習單</div>
+      <h1 class="unit-title">【行動方程式】第 8 週：還我安靜的環境——噪音對生態環境的影響</h1>
+      <p class="unit-desc">授課日期：10/18 - 10/24 | 主題：水下噪音危機 · 中華白海豚與露脊鼠海豚 · 科技友善解方</p>
+    </div>
+
+    <!-- 學生基本資料卡片 -->
+    <div class="card">
+      <h3 class="card-title">👤 學生基本資料 (防呆認證)</h3>
+      <div class="student-bar">
+        <div class="form-group">
+          <label class="form-label required" for="studentClass">班級</label>
+          <select id="studentClass" class="form-control" required>
+            <option value="" disabled selected>載入中...</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label required" for="studentSeat">座號</label>
+          <select id="studentSeat" class="form-control" required>
+            <option value="" disabled selected>載入中...</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label required" for="studentName">姓名</label>
+          <input type="text" id="studentName" class="form-control" placeholder="請輸入全名" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label required" for="studentGroup">組別</label>
+          <select id="studentGroup" class="form-control" required>
+            <option value="" disabled selected>載入中...</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- 任務一：影音大偵探 -->
+    <div class="card">
+      <h3 class="card-title">🎬 任務一：影音大偵探——水下世界的聲音風暴</h3>
+      <p class="question-desc">請專注觀看公視《我們的島》新聞專題紀錄片，觀察人為水下噪音對西海岸鯨豚之衝擊：</p>
+
+      <!-- 嵌入 YouTube 播放器 -->
+      <div class="video-container">
+        <iframe src="https://www.youtube.com/embed/uBiric8uhkw" title="公視我們的島：無法迴避的噪音鄰居" allowfullscreen></iframe>
+      </div>
+
+      <div class="question-item">
+        <div class="question-title">1. 水中音速科學大探索：</div>
+        <p style="font-size: 0.95rem; color: var(--text-muted); margin-bottom: 0.5rem;">聲音在海水中的傳播速度約每秒多少公尺？約是空氣中音速的幾倍？</p>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.8rem;">
+          <div>
+            <label style="font-size: 0.85rem; font-weight: 700; color: var(--primary);">海水傳播速度 (m/s)</label>
+            <input type="text" id="w8_speed" class="form-control" placeholder="例如：約 1500 公尺/秒">
+          </div>
+          <div>
+            <label style="font-size: 0.85rem; font-weight: 700; color: var(--primary);">約為空氣中音速的倍數</label>
+            <input type="text" id="w8_multiple" class="form-control" placeholder="例如：約 4.4 倍">
+          </div>
+        </div>
+      </div>
+
+      <div class="question-item">
+        <div class="question-title">2. 人為水下三大噪音來源搜查：</div>
+        <p style="font-size: 0.95rem; color: var(--text-muted); margin-bottom: 0.5rem;">紀錄片中提到哪 3 種持續干擾台灣西海岸海洋哺乳動物的人為聲音來源？</p>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.6rem;">
+          <input type="text" id="w8_noise_1" class="form-control" placeholder="噪音來源 ① (如：離岸風電打樁)">
+          <input type="text" id="w8_noise_2" class="form-control" placeholder="噪音來源 ② (如：大型貨輪引擎震動)">
+          <input type="text" id="w8_noise_3" class="form-control" placeholder="噪音來源 ③ (如：地質探測聲納/抽砂)">
+        </div>
+      </div>
+
+      <div class="question-item">
+        <div class="question-title">3. 海豚的生存感知之眼：</div>
+        <p style="font-size: 0.95rem; color: var(--text-muted); margin-bottom: 0.5rem;">在混濁的海水中，白海豚與露脊鼠海豚最仰賴哪一種機制來覓食、導航與辨識同伴？</p>
+        <div style="display: flex; flex-direction: column; gap: 0.4rem;">
+          <label class="checkbox-label"><input type="radio" name="w8_sense" value="A"> (A) 敏銳的雙眼視力</label>
+          <label class="checkbox-label"><input type="radio" name="w8_sense" value="B"> (B) 水中嗅覺氣味辨識</label>
+          <label class="checkbox-label"><input type="radio" name="w8_sense" value="C" checked> (C) 前額回聲定位系統 (Echolocation)</label>
+          <label class="checkbox-label"><input type="radio" name="w8_sense" value="D"> (D) 吻端皮膚觸覺鬍鬚</label>
+        </div>
+      </div>
+    </div>
+
+    <!-- 任務二：深度思考 -->
+    <div class="card">
+      <h3 class="card-title">🌊 任務二：深度思考——當海豚的「耳朵」被蒙上</h3>
+      
+      <div class="question-item">
+        <div class="question-title">1. 什麼是「聲學遮蔽效應 (Auditory Masking)」？它會對海豚母子聯絡或覓食帶來什麼嚴重的生存危機？</div>
+        <textarea id="w8_masking" class="form-control" placeholder="請描述人為低頻噪聲如何淹沒海豚的叫聲？母豚呼喚幼豚聽不見會如何？請寫下你的深入分析（建議 15 字以上）..."></textarea>
+      </div>
+
+      <div class="question-item">
+        <div class="question-title">2. 綠能發展 vs 生態保育兩難解方：</div>
+        <p style="font-size: 0.95rem; color: var(--text-muted); margin-bottom: 0.5rem;">離岸風力發電能減少陸上燃煤空污，但打樁巨響卻威脅白海豚生存。為了兩全其美，科學家與工程團隊研發了什麼友善減噪措施？（請簡述至少 1 項，例如：雙層氣泡帷幕 Bubble Curtain、海洋哺乳動物觀測員 MMO、減速航行等）：</p>
+        <textarea id="w8_solution" class="form-control" placeholder="請說明該項技術或管理措施的原理與保護效果（建議 15 字以上）..."></textarea>
+      </div>
+    </div>
+
+    <!-- 任務三：我的生活降噪與守護承諾 -->
+    <div class="card">
+      <h3 class="card-title">🌱 任務三：還我安靜海洋——我的生活降噪與守護承諾</h3>
+      <p class="question-desc">身為負責任的地球公民，為了守護海洋與陸域環境的寧靜，我願意在生活中落實（請勾選至少 2 項）：</p>
+
+      <div class="checkbox-group">
+        <label class="checkbox-label"><input type="checkbox" name="w8_actions" value="關注海保政策"> 🐬 關注離岸風場環評動態與海洋保育法（海保法），支持生態友善工法</label>
+        <label class="checkbox-label"><input type="checkbox" name="w8_actions" value="綠色低碳生活"> 🚢 減少過度非必要消費與跨國快遞，減輕大型貨輪航運與碳排負擔</label>
+        <label class="checkbox-label"><input type="checkbox" name="w8_actions" value="陸域環境降噪"> 🔇 在公共場所與校園放低交談與載具音量，建立尊重生命的寧靜素養</label>
+        <label class="checkbox-label"><input type="checkbox" name="w8_actions" value="宣導白海豚困境"> 🗣️ 向家人或同儕宣導白海豚面臨水下噪音危機，讓更多人聽見海的嘆息</label>
+      </div>
+    </div>
+
+    <!-- 自我檢核表 -->
+    <div class="card">
+      <h3 class="card-title">📝 學習表現自我檢核表</h3>
+      <p class="question-desc">請誠實回顧本節課的學習狀態，為自己進行自評：</p>
+      <table class="check-table">
+        <thead>
+          <tr>
+            <th>檢核項目</th>
+            <th>自評結果</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1. 我能專注觀看《我們的島》紀錄片，理解水下聲音傳播與人為噪音來源。</td>
+            <td>
+              <label><input type="radio" name="check1" value="yes" checked> 是</label>&nbsp;&nbsp;
+              <label><input type="radio" name="check1" value="need_work"> 需加油</label>
+            </td>
+          </tr>
+          <tr>
+            <td>2. 我能同理海洋哺乳動物之聽覺困境，並積極參與小組討論與科技降噪解方。</td>
+            <td>
+              <label><input type="radio" name="check2" value="yes" checked> 是</label>&nbsp;&nbsp;
+              <label><input type="radio" name="check2" value="need_work"> 需加油</label>
+            </td>
+          </tr>
+          <tr>
+            <td>3. 我願意落實生活降噪行動，並在下週積極投入專題分享與倡議。</td>
+            <td>
+              <label><input type="radio" name="check3" value="yes" checked> 是</label>&nbsp;&nbsp;
+              <label><input type="radio" name="check3" value="need_work"> 需加油</label>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 送出按鈕 -->
+    <div class="submit-section">
+      <button id="submitBtn" class="btn-submit" onclick="handleSubmit()">🚀 送出第 8 週學習單</button>
+    </div>
+
+  </div>
+
+  <script src="assets/js/common.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      initStudentInfoForm('8');
+    });
+
+    function handleSubmit() {
+      submitWorksheet('8', (answers) => {
+        let score = 85;
+        let breakdown = ["🎯 學習單完成與提交基礎分 (85分)"];
+
+        // 1. 深度思考與心得回答 (認真度加分)
+        let hasM = answers.w8_masking && answers.w8_masking.trim().length >= 10;
+        let hasS = answers.w8_solution && answers.w8_solution.trim().length >= 10;
+        let thoughtfulCount = (hasM ? 1 : 0) + (hasS ? 1 : 0);
+
+        if (thoughtfulCount >= 2) {
+          score += 10;
+          breakdown.push("💡 聲學遮蔽與友善工程思辨深刻 (+10分)");
+        } else if (thoughtfulCount >= 1) {
+          score += 5;
+          breakdown.push("💡 減噪解方分析具體 (+5分)");
+        }
+
+        // 2. 自我檢核與守護承諾 (加分)
+        let actionCount = (answers.w8_actions || []).length;
+        if (actionCount >= 1 && answers.check1 && answers.check2 && answers.check3) {
+          score += 5;
+          breakdown.push("🌟 課堂自我檢核與海洋寧靜承諾落實 (+5分)");
+        }
+
+        // 3. 太誇張（多項核心任務空白）才微扣分
+        let hasSpeed = answers.w8_speed && answers.w8_speed.trim().length > 0;
+        let noiseCount = [answers.w8_noise_1, answers.w8_noise_2, answers.w8_noise_3].filter(x => x && x.trim().length > 0).length;
+        
+        let missingMajorTasks = 0;
+        if (!hasSpeed && noiseCount === 0) missingMajorTasks++;
+        if (!hasM && !hasS) missingMajorTasks++;
+        if (actionCount === 0) missingMajorTasks++;
+
+        if (missingMajorTasks >= 2) {
+          score -= 10;
+          breakdown.push("⚠️ 多項任務留白未作答 (-10分)");
+        } else if (missingMajorTasks === 1) {
+          score -= 5;
+          breakdown.push("⚠️ 部分題目未完整填寫 (-5分)");
+        }
+
+        return { total: Math.max(75, Math.min(100, score)), breakdown };
+      });
+    }
+  </script>
+</body>
+</html>
