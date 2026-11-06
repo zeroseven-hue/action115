@@ -516,6 +516,11 @@
           🌙 夜間
         </button>
 
+        <!-- API 連線設定 -->
+        <button type="button" class="btn-tool" onclick="promptApiUrlSetting()" title="檢視或自訂 Google 試算表 GAS 串接網址">
+          🔗 雲端連線
+        </button>
+
         <!-- 刷新資料 -->
         <button type="button" class="btn-tool btn-refresh" onclick="fetchLiveDataFromGAS()">
           🔄 刷新資料
@@ -701,22 +706,61 @@
       fetchLiveDataFromGAS();
     }
 
+    // 取得當前使用的 GAS 端點 (優先讀取自訂快取，否則使用 common.js 預設)
+    function getActiveGasEndpoint() {
+      return localStorage.getItem('action115_gas_override') || COURSE_CONFIG.gasEndpoint;
+    }
+
+    // 彈出 API 網址設定對話框
+    function promptApiUrlSetting() {
+      const current = getActiveGasEndpoint();
+      const input = prompt(
+        "【Google 試算表 GAS 串接網址設定】\n\n目前連線網址：\n" + current + "\n\n⚠️ 重要提醒：\n1. 網址結尾必須為 /exec，不可為 /dev (否則會被 CORS 阻擋)\n2. 部署時「誰可以存取」須設為「所有人」\n\n如需更改請貼上新網址（留空確認可還原為預設）：",
+        current
+      );
+
+      if (input !== null) {
+        const trimmed = input.trim();
+        if (trimmed.endsWith('/dev')) {
+          alert("⚠️ 錯誤：網址結尾不可為 /dev！\n\nGoogle 規定 /dev 僅供開發者預覽測試，會被跨來源 (CORS) 阻擋。\n請在 Google Apps Script 中點選「部署 ➔ 新增部署作業 ➔ 網頁應用程式 ➔ 誰可以存取：所有人」，取得結尾為 /exec 的正式網址！");
+          return;
+        }
+
+        if (trimmed && trimmed.startsWith('http')) {
+          localStorage.setItem('action115_gas_override', trimmed);
+          alert("✅ 已更新雲端串接網址！系統將立即為您刷新資料。");
+          fetchLiveDataFromGAS();
+        } else if (trimmed === '') {
+          localStorage.removeItem('action115_gas_override');
+          alert("✅ 已還原為系統預設部署網址！");
+          fetchLiveDataFromGAS();
+        }
+      }
+    }
+
     // 7. 從 Google Apps Script (GAS) 抓取實時資料
     async function fetchLiveDataFromGAS() {
       const classVal = document.getElementById('selectClass').value;
       const weekVal = document.getElementById('selectWeek').value;
+      const gasUrl = getActiveGasEndpoint();
       
       const refreshBtn = document.querySelector('.btn-refresh');
       if (refreshBtn) refreshBtn.textContent = '⏳ 讀取中...';
 
-      if (!COURSE_CONFIG.gasEndpoint || !COURSE_CONFIG.gasEndpoint.startsWith('http')) {
-        alert('請先在 assets/js/common.js 設定 gasEndpoint 部署網址！');
+      if (!gasUrl || !gasUrl.startsWith('http')) {
+        alert('請先設定有效的 Google Apps Script 部署網址！');
+        if (refreshBtn) refreshBtn.textContent = '🔄 刷新資料';
+        return;
+      }
+
+      if (gasUrl.endsWith('/dev')) {
+        alert('⚠️ 偵測到目前的連線網址為 /dev 測試網址！\n\n/dev 網址無法在儀表板中使用，請在 Google Apps Script 中點選「部署 ➔ 新增部署作業 ➔ 誰可以存取：所有人」，取得 /exec 結尾之正式網址。');
         if (refreshBtn) refreshBtn.textContent = '🔄 刷新資料';
         return;
       }
 
       try {
-        const fetchUrl = COURSE_CONFIG.gasEndpoint + '?action=getRecords&weekId=' + weekVal + '&studentClass=' + classVal;
+        const fetchUrl = gasUrl + '?action=getRecords&weekId=' + weekVal + '&studentClass=' + classVal;
         const res = await fetch(fetchUrl);
         const data = await res.json();
 
@@ -738,6 +782,7 @@
         }
       } catch (err) {
         console.warn('Failed to fetch from GAS:', err);
+        alert('⚠️ 讀取試算表資料失敗！\n\n可能原因：\n1. 網址權限未設為「所有人 (Anyone)」\n2. 網路暫態斷線\n\n目前使用網址：' + gasUrl);
       }
 
       if (refreshBtn) refreshBtn.textContent = '🔄 刷新資料';
@@ -851,7 +896,7 @@
       btn.disabled = true;
 
       try {
-        await fetch(COURSE_CONFIG.gasEndpoint, {
+        await fetch(getActiveGasEndpoint(), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
@@ -949,7 +994,7 @@
       };
 
       try {
-        await fetch(COURSE_CONFIG.gasEndpoint, {
+        await fetch(getActiveGasEndpoint(), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
