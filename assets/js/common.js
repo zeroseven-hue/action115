@@ -198,12 +198,12 @@ function checkSubmissionStatus(weekId) {
       banner.style.cssText = "background: #ECFDF5; border: 2px solid #10B981; border-radius: 14px; padding: 1.1rem 1.4rem; margin-bottom: 1.6rem; color: #065F46; text-align: center; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);";
       banner.innerHTML = `
         <div style="font-size: 1.2rem; font-weight: 800; margin-bottom: 0.2rem;">🎉 您已成功繳交本週學習單！</div>
-        <div style="font-size: 0.95rem; margin-bottom: 0.4rem;">
-          ${info.studentClass} 班 ${info.studentSeat} 號 <strong>${info.studentName}</strong> | 得分：<strong>${info.score} 分</strong> | 繳交時間：${info.timestamp}
+        <div style="font-size: 0.95rem; margin-bottom: 0.5rem;">
+          ${info.studentClass} 班 ${info.studentSeat} 號 <strong>${info.studentName}</strong> | 初評得分：<strong>${info.score} 分</strong> | 繳交時間：${info.timestamp}
         </div>
-        <div style="font-size: 0.85rem; color: #047857;">
-          作答已即時儲存至教師試算表。若老師要求您重新修改作答，請點此：
-          <a href="javascript:void(0)" onclick="resetSubmission('${weekId}')" style="color: #2563EB; font-weight: 700; text-decoration: underline;">重置作答狀態</a>
+        <div style="display: flex; gap: 0.8rem; justify-content: center; align-items: center; flex-wrap: wrap; font-size: 0.85rem; margin-top: 0.4rem;">
+          <button id="resyncBtn" onclick="resyncSubmission('${weekId}')" style="background: #059669; color: #fff; border: none; border-radius: 6px; padding: 0.35rem 0.8rem; font-size: 0.85rem; font-weight: 600; cursor: pointer;">🔄 若老師未看見成績，點此重新同步雲端</button>
+          <a href="javascript:void(0)" onclick="resetSubmission('${weekId}')" style="color: #2563EB; font-weight: 700; text-decoration: underline;">重置作答狀態 (重新修改填寫)</a>
         </div>
       `;
       const firstCard = document.querySelector('.container .card');
@@ -219,6 +219,47 @@ function checkSubmissionStatus(weekId) {
     }
   } catch (e) {
     console.error('Error checking submission status:', e);
+  }
+}
+
+/**
+ * 重新將本地快取的繳交紀錄同步至 Google 試算表（解決 Wi-Fi 暫態斷線造成漏登）
+ */
+async function resyncSubmission(weekId) {
+  const submittedRaw = localStorage.getItem('action115_submitted_' + weekId);
+  if (!submittedRaw) {
+    alert('⚠️ 查無本地繳交紀錄，請重新填寫送出！');
+    return;
+  }
+
+  const resyncBtn = document.getElementById('resyncBtn');
+  const oldText = resyncBtn ? resyncBtn.innerHTML : '';
+  if (resyncBtn) {
+    resyncBtn.disabled = true;
+    resyncBtn.innerHTML = '⏳ 正在重新連線同步中...';
+  }
+
+  try {
+    const payload = JSON.parse(submittedRaw);
+    if (COURSE_CONFIG.gasEndpoint && COURSE_CONFIG.gasEndpoint.startsWith('http')) {
+      await fetch(COURSE_CONFIG.gasEndpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+        mode: 'no-cors'
+      });
+    }
+    alert('✅ 重新同步成功！資料已成功送達雲端試算表，請請老師重新整理儀表板查看。');
+    if (resyncBtn) {
+      resyncBtn.disabled = false;
+      resyncBtn.innerHTML = '✅ 剛剛已重新同步成功！';
+    }
+  } catch (err) {
+    alert('❌ 同步失敗：請檢查平板 Wi-Fi 網路連線是否通暢！');
+    if (resyncBtn) {
+      resyncBtn.disabled = false;
+      resyncBtn.innerHTML = oldText;
+    }
   }
 }
 
@@ -327,6 +368,22 @@ async function submitWorksheet(weekId, scoreCalculator) {
     return;
   }
 
+  // 1.5 🔍 重複繳交防呆確認 (純前端本地檢查，0 延遲、0 網路伺服器負擔)
+  const existingSubmission = localStorage.getItem('action115_submitted_' + weekId);
+  if (existingSubmission) {
+    try {
+      const prev = JSON.parse(existingSubmission);
+      const prevTime = prev.timestamp || '先前';
+      const prevScore = (prev.score !== undefined) ? `${prev.score} 分` : '已計分';
+      const confirmResubmit = confirm(
+        `⚠️ 系統提示：\n\n您先前已於【${prevTime}】送出過本週學習單（初評成績：${prevScore}）。\n\n您確定要再次送出，並以「最新的作答內容與分數」覆蓋雲端試算表嗎？`
+      );
+      if (!confirmResubmit) {
+        return; // 學生取消送出，終止後續動作
+      }
+    } catch (e) {}
+  }
+
   // 2. 收集所有作答資料
   const answers = {};
   const formElements = document.querySelectorAll('input, select, textarea');
@@ -365,17 +422,40 @@ async function submitWorksheet(weekId, scoreCalculator) {
     answers: answers
   };
 
+  let uploadSuccess = true;
   if (COURSE_CONFIG.gasEndpoint && COURSE_CONFIG.gasEndpoint.startsWith('http')) {
-    try {
-      await fetch(COURSE_CONFIG.gasEndpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-        mode: 'no-cors'
-      });
-    } catch (e) {
-      console.warn('GAS submission error (local will succeed):', e);
+    let sendOk = false;
+    for (let attempt = 1; attempt <= 2; attempt++) {
+      try {
+        await fetch(COURSE_CONFIG.gasEndpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+          mode: 'no-cors'
+        });
+        sendOk = true;
+        break;
+      } catch (e) {
+        console.warn(`第 ${attempt} 次連線同步失敗:`, e);
+        if (attempt < 2) {
+          await new Promise(r => setTimeout(r, 1200)); // 間隔 1.2 秒後自動重試
+        }
+      }
     }
+    if (!sendOk) {
+      uploadSuccess = false;
+    }
+  }
+
+  // 5.5 若網路完全中斷，主動提醒學生，不鎖死表單，確保分數不漏失
+  if (!uploadSuccess) {
+    alert('⚠️ 雲端同步失敗（學校 Wi-Fi 訊號不穩或暫時斷線）！\n\n請不要離開此畫面，確認平板 Wi-Fi 連線正常後，再次點擊「重新送出學習單」！\n（您的所有作答內容均完整保存在畫面上，不會遺失）');
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = '🔄 重新送出學習單';
+      submitBtn.style.background = '#EA580C'; // 醒目橘色提醒重試
+    }
+    return;
   }
 
   // 6. 標記已提交以防重複交卷、清除草稿並彈出成績模態窗
