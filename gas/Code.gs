@@ -143,25 +143,35 @@ function doPost(e) {
       formatWeekSheet(sheet);
     }
 
-    var targetSeat = String(data.studentSeat).padStart(2, '0');
-    var targetClass = String(data.studentClass).trim();
+    // 確保座號一定是兩位數字串 (如 "01", "02")，並以單引號開頭寫入避免 Google Sheets 自動轉數值抹除前導 0
+    var rawSeatNum = parseInt(data.studentSeat, 10);
+    var targetSeat = (!isNaN(rawSeatNum) && rawSeatNum > 0) 
+      ? String(rawSeatNum).padStart(2, '0') 
+      : String(data.studentSeat || "").padStart(2, '0');
+    var targetClass = String(data.studentClass || "").trim();
     var existingRowIndex = -1;
 
     // 🔍 防重複洗板檢查：檢查同班級、同座號是否已存在
     if (sheet.getLastRow() > 1) {
       var existingData = sheet.getRange(2, 2, sheet.getLastRow() - 1, 2).getValues(); // 班級(欄2), 座號(欄3)
       for (var r = 0; r < existingData.length; r++) {
-        if (String(existingData[r][0]).trim() === targetClass && String(existingData[r][1]).padStart(2, '0') === targetSeat) {
+        var rowClass = String(existingData[r][0]).trim();
+        var rowSeatNum = parseInt(existingData[r][1], 10);
+        var rowSeatStr = (!isNaN(rowSeatNum) && rowSeatNum > 0) ? String(rowSeatNum).padStart(2, '0') : String(existingData[r][1]).trim();
+        if (rowClass === targetClass && rowSeatStr === targetSeat) {
           existingRowIndex = r + 2; // 試算表列數 (從第2列開始)
           break;
         }
       }
     }
 
+    // 💡 關鍵：座號加上單引號 "'" 強制 Google Sheets 視為純文字保留 01~35 前導 0
+    var displaySeat = "'" + targetSeat;
+
     var rowValues = [
       data.timestamp || new Date().toLocaleString('zh-TW', { timeZone: 'Asia/Taipei' }),
       data.studentClass,
-      targetSeat,
+      displaySeat,
       data.studentName,
       data.studentGroup || "手動補登",
       data.score,
@@ -180,10 +190,22 @@ function doPost(e) {
     // 📊 依「班級 (升冪)」與「座號 (升冪)」自動排序，並套用美化格式
     try {
       if (sheet.getLastRow() > 2) {
-        var dataRange = sheet.getRange(2, 1, sheet.getLastRow() - 1, 8);
+        var numRows = sheet.getLastRow() - 1;
+        // 先將 C 欄 (座號) 所有現存座號統一修復為兩位數純文字 ("01"~"35")，防止歷史或舊格式變成數值亂序
+        var seatRange = sheet.getRange(2, 3, numRows, 1);
+        var seatVals = seatRange.getValues();
+        for (var sIdx = 0; sIdx < seatVals.length; sIdx++) {
+          var sNum = parseInt(seatVals[sIdx][0], 10);
+          if (!isNaN(sNum) && sNum > 0) {
+            seatVals[sIdx][0] = "'" + String(sNum).padStart(2, '0');
+          }
+        }
+        seatRange.setValues(seatVals);
+
+        var dataRange = sheet.getRange(2, 1, numRows, 8);
         dataRange.sort([
           { column: 2, ascending: true }, // 依班級排序
-          { column: 3, ascending: true }  // 依座號排序
+          { column: 3, ascending: true }  // 依座號排序 (純文字 01~35 字典序即自然數序)
         ]);
       }
       formatWeekSheet(sheet);
@@ -315,10 +337,21 @@ function formatAllSheets() {
     var s = sheets[i];
     var name = s.getName();
     if (name.indexOf("作答紀錄") !== -1) {
-      // 依班級與座號排序
+      // 依班級與座號排序（修復座號為 01~35 格式）
       if (s.getLastRow() > 2) {
         try {
-          s.getRange(2, 1, s.getLastRow() - 1, 8).sort([
+          var nRows = s.getLastRow() - 1;
+          var sRange = s.getRange(2, 3, nRows, 1);
+          var sVals = sRange.getValues();
+          for (var k = 0; k < sVals.length; k++) {
+            var valNum = parseInt(sVals[k][0], 10);
+            if (!isNaN(valNum) && valNum > 0) {
+              sVals[k][0] = "'" + String(valNum).padStart(2, '0');
+            }
+          }
+          sRange.setValues(sVals);
+
+          s.getRange(2, 1, nRows, 8).sort([
             { column: 2, ascending: true },
             { column: 3, ascending: true }
           ]);

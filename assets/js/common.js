@@ -8,8 +8,8 @@ const COURSE_CONFIG = {
   // 班級陣列：未來若有新增或修改班級，直接在此陣列加入字串即可！
   classes: ['701', '702', '703', '704', '705', '706', '707', '708', '709', '710'],
   
-  // 座號上限：固定 1 ~ 30 號
-  maxSeatNumber: 30,
+  // 座號上限：固定 1 ~ 35 號
+  maxSeatNumber: 35,
 
   // 組別選項：第 1 組 ~ 第 8 組
   groups: ['第 1 組', '第 2 組', '第 3 組', '第 4 組', '第 5 組', '第 6 組', '第 7 組', '第 8 組'],
@@ -144,10 +144,11 @@ function initStudentInfoForm(weekId) {
     });
   }
 
-  // 2. 動態填充座號選單 (01 ~ 30 號)
+  // 2. 動態填充座號選單 (01 ~ 35 號)
   if (seatSelect) {
     seatSelect.innerHTML = '<option value="" disabled selected>請選擇座號</option>';
-    for (let i = 1; i <= COURSE_CONFIG.maxSeatNumber; i++) {
+    const maxSeat = COURSE_CONFIG.maxSeatNumber || 35;
+    for (let i = 1; i <= maxSeat; i++) {
       const opt = document.createElement('option');
       const seatVal = i < 10 ? '0' + i : '' + i;
       opt.value = seatVal;
@@ -174,51 +175,184 @@ function initStudentInfoForm(weekId) {
     el.addEventListener('change', () => saveDraft(weekId));
   });
 
+  // 4.5 檢查 URL 參數是否包含換人重置指令 (?reset=1 或 ?fresh=1)
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('reset') === '1' || urlParams.get('fresh') === '1') {
+    localStorage.removeItem('action115_draft_' + weekId);
+    localStorage.removeItem('action115_submitted_' + weekId);
+    // 移除 URL 參數以保持乾淨
+    window.history.replaceState({}, document.title, window.location.pathname);
+  }
+
   // 5. 恢復快取草稿
   loadDraft(weekId);
 
-  // 6. 🔍 防重複繳交檢查：若本地已提交過，顯示已繳交橫幅並鎖定防手滑
-  checkSubmissionStatus(weekId);
+  // 6. 🔍 檢查本地狀態（是否為上一位學生留存，或已繳交）
+  checkStudentIdentityAndStatus(weekId);
 }
 
 /**
- * 檢查學生是否已繳交過此週學習單
+ * 檢查身分與繳交狀態 (比照生物平台：防上一個同學沒關網頁導致錯交/覆蓋)
  */
-function checkSubmissionStatus(weekId) {
+function checkStudentIdentityAndStatus(weekId) {
   const submittedRaw = localStorage.getItem('action115_submitted_' + weekId);
-  if (!submittedRaw) return;
+  const draftRaw = localStorage.getItem('action115_draft_' + weekId);
 
-  try {
-    const info = JSON.parse(submittedRaw);
-    const container = document.querySelector('.container');
-    const existingBanner = document.getElementById('submittedNoticeBanner');
-    if (!existingBanner && container) {
-      const banner = document.createElement('div');
-      banner.id = 'submittedNoticeBanner';
-      banner.style.cssText = "background: #ECFDF5; border: 2px solid #10B981; border-radius: 14px; padding: 1.1rem 1.4rem; margin-bottom: 1.6rem; color: #065F46; text-align: center; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);";
-      banner.innerHTML = `
-        <div style="font-size: 1.2rem; font-weight: 800; margin-bottom: 0.2rem;">🎉 您已成功繳交本週學習單！</div>
-        <div style="font-size: 0.95rem; margin-bottom: 0.5rem;">
-          ${info.studentClass} 班 ${info.studentSeat} 號 <strong>${info.studentName}</strong> | 初評得分：<strong>${info.score} 分</strong> | 繳交時間：${info.timestamp}
+  // 狀況 A：本地有已繳交的紀錄
+  if (submittedRaw) {
+    try {
+      const info = JSON.parse(submittedRaw);
+      showSubmittedBanner(weekId, info);
+      showIdentityVerifyModal(weekId, info, true);
+      return;
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  // 狀況 B：本地無已繳交，但有正在填寫的草稿基本資料
+  if (draftRaw) {
+    try {
+      const draft = JSON.parse(draftRaw);
+      if (draft.studentName && draft.studentClass && draft.studentSeat) {
+        showIdentityVerifyModal(weekId, draft, false);
+      }
+    } catch (e) {}
+  }
+}
+
+/**
+ * 彈出身分覆核對話框（下課跑班平板車核心防呆：防止接續前一位作答）
+ */
+function showIdentityVerifyModal(weekId, prevData, isSubmitted) {
+  let modal = document.getElementById('identityVerifyModal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'identityVerifyModal';
+    modal.className = 'modal-overlay';
+    document.body.appendChild(modal);
+  }
+
+  const cls = prevData.studentClass || '';
+  const seat = prevData.studentSeat || '';
+  const name = prevData.studentName || '';
+
+  modal.innerHTML = `
+    <div class="modal-content" style="max-width: 520px; border-top: 6px solid #2563EB;">
+      <div style="font-size: 2.8rem; margin-bottom: 0.5rem;">👋</div>
+      <h2 style="font-size: 1.4rem; color: #1E293B; font-weight: 800; margin-bottom: 0.4rem;">
+        請確認使用身分
+      </h2>
+      <p style="color: #64748B; font-size: 0.95rem; margin-bottom: 1.2rem;">
+        本平板目前留存上一位同學的作答紀錄：
+      </p>
+
+      <div style="background: #EFF6FF; border: 2px dashed #93C5FD; border-radius: 12px; padding: 1rem; margin-bottom: 1.5rem; text-align: center;">
+        <span style="font-size: 1.25rem; font-weight: 800; color: #1D4ED8;">
+          ${cls} 班 ${seat} 號 ${name}
+        </span>
+        <div style="font-size: 0.85rem; color: #3B82F6; margin-top: 0.3rem;">
+          ${isSubmitted ? '✅ 該生已成功完成繳交' : '📝 該生尚有未送出的填寫草稿'}
         </div>
-        <div style="display: flex; gap: 0.8rem; justify-content: center; align-items: center; flex-wrap: wrap; font-size: 0.85rem; margin-top: 0.4rem;">
-          <button id="resyncBtn" onclick="resyncSubmission('${weekId}')" style="background: #059669; color: #fff; border: none; border-radius: 6px; padding: 0.35rem 0.8rem; font-size: 0.85rem; font-weight: 600; cursor: pointer;">🔄 若老師未看見成績，點此重新同步雲端</button>
-          <a href="javascript:void(0)" onclick="resetSubmission('${weekId}')" style="color: #2563EB; font-weight: 700; text-decoration: underline;">重置作答狀態 (重新修改填寫)</a>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+        <button type="button" class="btn-submit" onclick="confirmSelfIdentity('${weekId}')" style="background: #2563EB; width: 100%; padding: 0.85rem;">
+          🙋‍♂️ 我就是 ${name}（繼續檢視我的作答）
+        </button>
+        <button type="button" class="btn-secondary" onclick="startFreshWorksheet('${weekId}')" style="background: #FEE2E2; color: #DC2626; border: 1.5px solid #FCA5A5; width: 100%; padding: 0.85rem; font-weight: 800;">
+          🔄 不是我，我是新同學（清空上一位，開始全新作答）
+        </button>
+      </div>
+    </div>
+  `;
+
+  modal.classList.add('active');
+}
+
+function confirmSelfIdentity(weekId) {
+  const modal = document.getElementById('identityVerifyModal');
+  if (modal) modal.classList.remove('active');
+}
+
+/**
+ * 徹底清空上一位學生紀錄，乾淨重新開局
+ */
+function startFreshWorksheet(weekId) {
+  if (confirm('確定要開始全新填寫嗎？\n\n（點擊「確定」將清空此平板畫面上留存的上一位座號、姓名與答案，前一位同學已送出的成績不受任何影響）')) {
+    localStorage.removeItem('action115_draft_' + weekId);
+    localStorage.removeItem('action115_submitted_' + weekId);
+    location.reload();
+  }
+}
+
+/**
+ * 顯示已成功繳交橫幅 (含明顯換人按鈕與扣分警告)
+ */
+function showSubmittedBanner(weekId, info) {
+  const container = document.querySelector('.container');
+  const existingBanner = document.getElementById('submittedNoticeBanner');
+  if (existingBanner) existingBanner.remove();
+
+  if (container) {
+    // 檢查是否有扣分警示
+    let hasPenalty = false;
+    let penaltyTexts = [];
+    if (info.scoreBreakdown) {
+      const items = Array.isArray(info.scoreBreakdown) ? info.scoreBreakdown : [info.scoreBreakdown];
+      penaltyTexts = items.filter(b => typeof b === 'string' && (b.includes('🚨') || b.includes('⚠️') || b.includes('(-')));
+      if (penaltyTexts.length > 0) hasPenalty = true;
+    }
+    if (info.score !== undefined && info.score < 80) {
+      hasPenalty = true;
+    }
+
+    const banner = document.createElement('div');
+    banner.id = 'submittedNoticeBanner';
+
+    if (hasPenalty) {
+      banner.style.cssText = "background: #FEF2F2; border: 2px solid #EF4444; border-radius: 14px; padding: 1.2rem 1.4rem; margin-bottom: 1.6rem; color: #991B1B; text-align: center; box-shadow: 0 4px 14px rgba(239, 68, 68, 0.15);";
+      banner.innerHTML = `
+        <div style="font-size: 1.25rem; font-weight: 800; margin-bottom: 0.3rem;">⚠️ 您已繳交本週學習單，但系統初評偵測到扣分提醒！</div>
+        <div style="font-size: 1rem; margin-bottom: 0.4rem;">
+          ${info.studentClass} 班 ${info.studentSeat} 號 <strong>${info.studentName}</strong> | 初評得分：<strong style="color: #DC2626; font-size: 1.25rem;">${info.score} 分</strong> | 繳交時間：${info.timestamp}
+        </div>
+        ${penaltyTexts.length > 0 ? `
+          <div style="background: #FEE2E2; border-radius: 8px; padding: 0.6rem 0.9rem; margin: 0.5rem auto 0.8rem; max-width: 650px; text-align: left; font-size: 0.88rem; font-weight: 700; color: #B91C1C;">
+            <div style="margin-bottom: 0.2rem;">🚨 扣分警告項目：</div>
+            ${penaltyTexts.map(t => `<div>• ${t}</div>`).join('')}
+          </div>
+        ` : ''}
+        <div style="display: flex; gap: 0.8rem; justify-content: center; align-items: center; flex-wrap: wrap; margin-top: 0.6rem;">
+          <button onclick="resetSubmission('${weekId}')" style="background: #EA580C; color: #fff; border: none; border-radius: 8px; padding: 0.5rem 1.1rem; font-size: 0.9rem; font-weight: 800; cursor: pointer;">✏️ 重新修改填寫（消除扣分爭取高分）</button>
+          <button id="resyncBtn" onclick="resyncSubmission('${weekId}')" style="background: #059669; color: #fff; border: none; border-radius: 8px; padding: 0.5rem 1rem; font-size: 0.9rem; font-weight: 700; cursor: pointer;">🔄 重新同步雲端</button>
+          <button onclick="startFreshWorksheet('${weekId}')" style="background: #DC2626; color: #fff; border: none; border-radius: 8px; padding: 0.5rem 1.1rem; font-size: 0.9rem; font-weight: 800; cursor: pointer; box-shadow: 0 2px 6px rgba(220,38,38,0.25);">🔄 換下一位同學填寫</button>
         </div>
       `;
-      const firstCard = document.querySelector('.container .card');
-      if (firstCard) {
-        container.insertBefore(banner, firstCard);
-      }
+    } else {
+      banner.style.cssText = "background: #ECFDF5; border: 2px solid #10B981; border-radius: 14px; padding: 1.2rem 1.4rem; margin-bottom: 1.6rem; color: #065F46; text-align: center; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.15);";
+      banner.innerHTML = `
+        <div style="font-size: 1.25rem; font-weight: 800; margin-bottom: 0.3rem;">🎉 您已成功繳交本週學習單！</div>
+        <div style="font-size: 1rem; margin-bottom: 0.6rem;">
+          ${info.studentClass} 班 ${info.studentSeat} 號 <strong>${info.studentName}</strong> | 初評得分：<strong>${info.score} 分</strong> | 繳交時間：${info.timestamp}
+        </div>
+        <div style="display: flex; gap: 0.8rem; justify-content: center; align-items: center; flex-wrap: wrap; margin-top: 0.6rem;">
+          <button id="resyncBtn" onclick="resyncSubmission('${weekId}')" style="background: #059669; color: #fff; border: none; border-radius: 8px; padding: 0.5rem 1rem; font-size: 0.9rem; font-weight: 700; cursor: pointer;">🔄 若老師未看見成績，點此重新同步雲端</button>
+          <button onclick="startFreshWorksheet('${weekId}')" style="background: #DC2626; color: #fff; border: none; border-radius: 8px; padding: 0.5rem 1.1rem; font-size: 0.9rem; font-weight: 800; cursor: pointer; box-shadow: 0 2px 6px rgba(220,38,38,0.25);">🔄 換下一位同學填寫（清除本機紀錄）</button>
+        </div>
+      `;
     }
 
-    const submitBtn = document.getElementById('submitBtn');
-    if (submitBtn) {
-      submitBtn.innerHTML = '✅ 已完成繳交 (系統已鎖定)';
-      submitBtn.style.background = '#059669';
+    const firstCard = document.querySelector('.container .card');
+    if (firstCard) {
+      container.insertBefore(banner, firstCard);
     }
-  } catch (e) {
-    console.error('Error checking submission status:', e);
+  }
+
+  const submitBtn = document.getElementById('submitBtn');
+  if (submitBtn) {
+    submitBtn.innerHTML = '✅ 已完成繳交 (系統已鎖定)';
+    submitBtn.style.background = '#059669';
   }
 }
 
@@ -334,6 +468,479 @@ function loadDraft(weekId) {
 }
 
 /**
+ * 檢查文字是否為敷衍、重複亂碼、語音雜訊或離題詞彙
+ */
+function checkIsNonsense(rawText) {
+  if (!rawText) return false;
+  const text = String(rawText).trim();
+  if (text.length === 0) return false;
+
+  // 1. 連續 3 個以上相同字元 (例如：高高高、給給給、？？？、喔喔喔、哈哈哈哈)
+  if (/(.)\1{2,}/u.test(text)) {
+    return true;
+  }
+
+  // 2. 敷衍／語音雜訊／同儕聊天／離題黑名單詞彙
+  const nonsenseBlacklist = [
+    '不知道', '隨便', '沒意見', '看手機', '猜誰', '去玩', '笑死', '無言', 
+    '不知道寫啥', '不知寫啥', '哈哈', '啦啦', '喔喔', '誒誒', '欸欸', 
+    '可可去誒', '給給高', '隨便寫', '隨便填', '不想寫', '跳過', '無聊',
+    '快去誒', '看誒給給', '猜猜看', '我是誰', '沒有', '沒想法', '不知道啦'
+  ];
+  for (const word of nonsenseBlacklist) {
+    if (text.includes(word)) {
+      return true;
+    }
+  }
+
+  // 3. 字元多樣性檢驗 (長度>=8 但不同字元太少，例如「高給高給給高高」)
+  if (text.length >= 8) {
+    const cleanChars = text.replace(/[\s\p{P}]/gu, '');
+    const uniqueChars = new Set(cleanChars).size;
+    if (uniqueChars <= 3) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+/**
+ * 桃園市楊光國中【行動方程式】各單元專屬學術評分規準與關鍵字庫
+ */
+const UNIT_EVALUATION_CONFIG = {
+  '1': {
+    name: '第 1 週：美麗的海岸線——還原自然',
+    baseScore: 78,
+    questions: [
+      {
+        id: 'w1_q1',
+        name: '任務一 [常見廢棄物種類]',
+        isCombo: true,
+        subIds: ['w1_q1_1', 'w1_q1_2', 'w1_q1_3'],
+        keywords: ['寶特瓶', '塑膠', '保麗龍', '漁網', '吸管', '瓶蓋', '鐵罐', '玻璃', '菸蒂', '免洗餐具', '袋'],
+        weight: 2
+      },
+      {
+        id: 'w1_q2',
+        name: '任務一 [觸動畫面與省思]',
+        minLen: 15,
+        keywords: ['淨灘', '老外', 'Daniel', '海洋', '心痛', '感動', '責任', '汗水', '撿', '守護', '污染', '美麗', '垃圾', '台灣'],
+        weight: 3.5
+      },
+      {
+        id: 'w1_q3',
+        name: '任務二 [廢棄物來源管道]',
+        minLen: 12,
+        keywords: ['河川', '溪流', '陸地', '漁業', '漁船', '觀光', '遊客', '亂丟', '沖刷', '生活', '排水', '雨水'],
+        weight: 3.5
+      },
+      {
+        id: 'w1_q4',
+        name: '任務二 [淨灘治標 vs 減塑治本]',
+        minLen: 15,
+        keywords: ['治標', '治本', '源頭', '減塑', '習慣', '減量', '根本', '循環', '撿不完', '塑膠袋', '自備', '一次性', '回收'],
+        weight: 4
+      }
+    ],
+    actionsId: 'w1_actions'
+  },
+
+  '2': {
+    name: '第 2 週：美麗的海岸線——台灣海底垃圾',
+    baseScore: 78,
+    questions: [
+      {
+        id: 'w2_q1',
+        name: '任務一 [海底廢棄物前3名]',
+        isCombo: true,
+        subIds: ['w2_q1_1', 'w2_q1_2', 'w2_q1_3'],
+        keywords: ['刺網', '廢棄', '漁網', '塑膠', '袋', '瓶', '輪胎', '鐵罐', '保麗龍', '垃圾'],
+        weight: 2
+      },
+      {
+        id: 'w2_q2',
+        name: '任務一 [水下震撼心疼畫面]',
+        minLen: 15,
+        keywords: ['海底', '珊瑚', '魚', '海龜', '纏繞', '覆蓋', '窒息', '死亡', '黑暗', '垃圾海', '白化', '受困', '心疼'],
+        weight: 3.5
+      },
+      {
+        id: 'w2_q3',
+        name: '任務二 [幽靈捕撈惡性循環]',
+        minLen: 15,
+        keywords: ['刺網', '幽靈捕撈', '纏繞', '誘餌', '死亡', '溺斃', '惡性循環', '獵捕', '無法掙脫', '廢棄'],
+        weight: 4
+      },
+      {
+        id: 'w2_q4',
+        name: '任務二 [海底垃圾對珊瑚與海龜傷害]',
+        minLen: 15,
+        keywords: ['珊瑚', '白化', '覆蓋', '缺氧', '海龜', '誤食', '塑膠袋', '水母', '窒息', '微塑膠', '食物鏈', '致死'],
+        weight: 3.5
+      }
+    ],
+    actionsId: 'w2_actions'
+  },
+
+  '3': {
+    name: '第 3 週：環保無國界——雨林·生存臨界點',
+    baseScore: 78,
+    questions: [
+      {
+        id: 'w3_q1',
+        name: '任務一 [雨林縮減氣候影響]',
+        isCombo: true,
+        subIds: ['w3_q1_1', 'w3_q1_2'],
+        keywords: ['碳排放', '二氧化碳', '溫室效應', '降雨', '乾旱', '氣溫', '極端氣候', '火災', '暖化', '臨界點'],
+        weight: 2
+      },
+      {
+        id: 'w3_q2',
+        name: '任務一 [護林者與原住民信念]',
+        minLen: 15,
+        keywords: ['守護', '保護', '勇敢', '原住民', '護林員', '土地', '犧牲', '堅持', '威脅', '生命', '家園', '捍衛'],
+        weight: 4
+      },
+      {
+        id: 'w3_q3',
+        name: '任務二 [碳循環與地球之肺運作]',
+        minLen: 15,
+        keywords: ['光合作用', '二氧化碳', '氧氣', '吸收', '呼吸', '碳儲存', '地球之肺', '調節', '暖化'],
+        weight: 3.5
+      },
+      {
+        id: 'w3_q4',
+        name: '任務二 [跨國公民守護責任]',
+        minLen: 15,
+        keywords: ['跨國', '責任', '消費', '減少', '木材', '牛肉', '國際', '地球公民', '關注', '永續', '行動'],
+        weight: 3.5
+      }
+    ],
+    actionsId: 'w3_actions'
+  },
+
+  '4': {
+    name: '第 4 週：環保無國界——雨林·生存臨界點 (探究篇)',
+    baseScore: 78,
+    questions: [
+      {
+        id: 'w4_q1',
+        name: '任務一 [全球性氣候影響]',
+        isCombo: true,
+        subIds: ['w4_q1_1', 'w4_q1_2'],
+        keywords: ['碳排放', '二氧化碳', '溫室效應', '降雨', '乾旱', '循環', '極端氣候', '暖化', '臨界點'],
+        weight: 2
+      },
+      {
+        id: 'w4_q2',
+        name: '任務一 [護林者捍衛土地啟發]',
+        minLen: 15,
+        keywords: ['守護', '保護', '勇敢', '信念', '原住民', '土地', '堅持', '犧牲', '生命', '啟發', '家園', '感動'],
+        weight: 4
+      },
+      {
+        id: 'w4_q3',
+        name: '任務二 [生活商品成分探究]',
+        minLen: 12,
+        keywords: ['棕櫚油', '大豆', '大豆油', '紙漿', '木材', '牛肉', '砍伐', '森林', '棲地', '零食', '洗髮精'],
+        weight: 3.5
+      },
+      {
+        id: 'w4_q4',
+        name: '任務二 [國中生綠色倡議力量]',
+        minLen: 15,
+        keywords: ['FSC', '標章', '認證', '綠色消費', '抵制', '倡議', '企業', '校園', '自備', '永續', '選擇', '少用'],
+        weight: 3.5
+      }
+    ],
+    actionsId: 'w4_actions'
+  },
+
+  '5': {
+    name: '第 5 週：地球公民——環境保育一起來',
+    baseScore: 78,
+    questions: [
+      {
+        id: 'w5_q1',
+        name: '任務一 [世界地球日由來與意涵]',
+        minLen: 12,
+        keywords: ['地球日', '4月22', '環保', '意識', '行動', '守護', '綠色', '節日'],
+        weight: 3
+      },
+      {
+        id: 'w5_q2',
+        name: '任務一 [世界清潔日由來與意涵]',
+        minLen: 12,
+        keywords: ['清潔日', '9月', '淨灘', '打掃', '清理', '垃圾', '團結', '公民'],
+        weight: 3
+      },
+      {
+        id: 'w5_q3_content',
+        name: '任務二 [全球綠色案例資訊統整]',
+        minLen: 15,
+        keywords: ['案例', '政策', '禁塑', '減塑', '能源', '太陽能', '風電', '回收', '減碳', '法律', '國家', '永續'],
+        weight: 4
+      },
+      {
+        id: 'w5_roles',
+        name: '任務三 [小組團隊角色分工]',
+        isRoleCheck: true,
+        roleKeys: ['w5_leader', 'w5_searcher', 'w5_presenter'],
+        weight: 3
+      }
+    ],
+    actionsId: null
+  },
+
+  '6': {
+    name: '第 6-7 週：地球公民——環境保育一起來之『發表會』',
+    baseScore: 78,
+    questions: [
+      {
+        id: 'w6_my_title',
+        name: '任務一 [本組發表成果]',
+        minLen: 5,
+        keywords: ['報告', '發表', '主題', '環保', '分工', '分享', '多元表達'],
+        weight: 2
+      },
+      {
+        id: 'w6_peer_feedback',
+        name: '任務二 [同儕亮點學習反饋]',
+        minLen: 15,
+        keywords: ['優點', '認真', '清楚', '簡報', '表達', '精彩', '學習', '條理', '內容', '生動', '完整'],
+        weight: 4
+      },
+      {
+        id: 'w6_peer_question',
+        name: '任務二 [思辨提問與同儕討論]',
+        minLen: 10,
+        keywords: ['提問', '請問', '為什麼', '如何', '做法', '困難', '建議', '想法', '問題'],
+        weight: 3.5
+      },
+      {
+        id: 'w6_reflection',
+        name: '任務三 [發表總結省思與實踐]',
+        minLen: 15,
+        keywords: ['收穫', '合作', '進步', '溝通', '表達', '地球公民', '實踐', '永續', '未來', '改善'],
+        weight: 3.5
+      }
+    ],
+    actionsId: null
+  },
+
+  '8': {
+    name: '第 8 週：還我安靜的環境——噪音對生態環境的影響',
+    baseScore: 78,
+    questions: [
+      {
+        id: 'w8_q1',
+        name: '任務一 [水下噪音來源管道]',
+        isCombo: true,
+        subIds: ['w8_q1_1', 'w8_q1_2', 'w8_q1_3'],
+        keywords: ['離岸風電', '打樁', '船隻', '引擎', '螺旋槳', '聲納', '爆破', '施工', '探勘', '噪音'],
+        weight: 2
+      },
+      {
+        id: 'w8_q2',
+        name: '任務一 [受創畫面觀察與心疼]',
+        minLen: 15,
+        keywords: ['海豚', '白海豚', '露脊鼠海豚', '驚嚇', '逃跑', '擱淺', '迷航', '聽力', '受損', '叫聲', '心疼'],
+        weight: 3.5
+      },
+      {
+        id: 'w8_masking',
+        name: '任務二 [聲學遮蔽致命影響]',
+        minLen: 15,
+        keywords: ['聲學遮蔽', '回聲定位', '導航', '覓食', '溝通', '聽覺', '遮蓋', '聽不見', '障礙', '迷失', '受損'],
+        weight: 4
+      },
+      {
+        id: 'w8_solution',
+        name: '任務二 [工程減噪友善解方]',
+        minLen: 15,
+        keywords: ['氣泡幕', '減速', '減噪', '監測', '觀察員', '友善', '降噪', '替代工法', '緩衝'],
+        weight: 3.5
+      }
+    ],
+    actionsId: 'w8_actions'
+  },
+
+  '9': {
+    name: '第 9 週：還我安靜的環境——噪音專題分享與寧靜生活',
+    baseScore: 78,
+    questions: [
+      {
+        id: 'w9_topic_title',
+        name: '任務一 [本組噪音專題分享成果]',
+        minLen: 8,
+        keywords: ['專題', '噪音', '生態', '分貝', '實驗', '數據', '調查', '影響', '報告'],
+        weight: 3
+      },
+      {
+        id: 'w9_peer_highlight',
+        name: '任務二 [聆聽同儕發表亮點]',
+        minLen: 15,
+        keywords: ['優點', '精彩', '深入', '清楚', '簡報', '數據', '例子', '說明', '條理', '生動'],
+        weight: 3.5
+      },
+      {
+        id: 'w9_peer_question',
+        name: '任務二 [思辨提問與同儕討論]',
+        minLen: 10,
+        keywords: ['提問', '請問', '為什麼', '測量', '改善', '影響', '方法', '可能性', '建議'],
+        weight: 3.5
+      },
+      {
+        id: 'w9_reflection',
+        name: '任務三 [寧靜生活守護省思]',
+        minLen: 15,
+        keywords: ['安靜', '寧靜', '尊重', '耳朵', '噪音', '習慣', '音量', '耳機', '友善', '實踐'],
+        weight: 3
+      }
+    ],
+    actionsId: 'w9_actions'
+  }
+};
+
+/**
+ * 素養導向全單元標準評量計分引擎
+ * 核心規則：
+ * 1. 基礎繳交分 78 分
+ * 2. 敷衍／重複疊字／語音雜訊 🚨 扣 10 分
+ * 3. 留白未填 ⚠️ 扣 5 分
+ * 4. 關鍵字與字數階梯給分 (有回答且切題才給分)
+ * 5. 🛡️【嚴格守門機制】：非全題特優者，分數嚴格封頂在 93 分以下，絕不輕易給 94 分以上！
+ */
+function evaluateUnitWorksheet(weekId, answers) {
+  const cfg = UNIT_EVALUATION_CONFIG[String(weekId)];
+  if (!cfg) {
+    // 預設容錯
+    return { total: 80, breakdown: ["🎯 學習單完成與提交基礎分 (80分)"] };
+  }
+
+  let score = cfg.baseScore || 78;
+  let breakdown = [`🎯 學習單完成與提交基礎分 (${score}分)`];
+  let bonus = 0;
+  let penalty = 0;
+  let excellentCount = 0;
+  let coreQuestionsCount = 0;
+
+  // 1. 逐題進行深度評量
+  cfg.questions.forEach(q => {
+    // 組合填空題 (如 w1_q1_1, w1_q1_2, w1_q1_3)
+    if (q.isCombo && q.subIds) {
+      coreQuestionsCount++;
+      let filledCount = 0;
+      let hasNonsense = false;
+      q.subIds.forEach(sId => {
+        const val = (answers[sId] || "").trim();
+        if (checkIsNonsense(val)) hasNonsense = true;
+        if (val.length >= 2) filledCount++;
+      });
+
+      if (hasNonsense) {
+        penalty += 10;
+        breakdown.push(`🚨 ${q.name} 偵測到敷衍/語音無意義文字 (-10分)`);
+      } else if (filledCount === q.subIds.length) {
+        bonus += q.weight || 2;
+        excellentCount++;
+        breakdown.push(`💡 ${q.name} 觀察記錄確實完整 (+${q.weight || 2}分)`);
+      } else if (filledCount > 0) {
+        bonus += 1;
+        breakdown.push(`📝 ${q.name} 部分記錄填寫 (+1分)`);
+      } else {
+        penalty += 5;
+        breakdown.push(`⚠️ ${q.name} 未填寫留白 (-5分)`);
+      }
+      return;
+    }
+
+    // 團隊分工檢核題 (w5_roles)
+    if (q.isRoleCheck && q.roleKeys) {
+      coreQuestionsCount++;
+      const allRolesFilled = q.roleKeys.every(k => (answers[k] || "").trim().length >= 2);
+      if (allRolesFilled) {
+        bonus += q.weight || 3;
+        excellentCount++;
+        breakdown.push(`🤝 ${q.name} 團隊職責分工明確確實 (+${q.weight || 3}分)`);
+      } else {
+        breakdown.push(`⚠️ ${q.name} 未完整填寫團隊角色 (+0分)`);
+      }
+      return;
+    }
+
+    // 一般問答/簡答題
+    coreQuestionsCount++;
+    const text = (answers[q.id] || "").trim();
+
+    // A. 敷衍／語音雜訊檢驗
+    if (checkIsNonsense(text)) {
+      penalty += 10;
+      breakdown.push(`🚨 ${q.name} 偵測到敷衍/非相關文字 (-10分)`);
+      return;
+    }
+
+    // B. 空白未填
+    if (!text || text.length === 0) {
+      penalty += 5;
+      breakdown.push(`⚠️ ${q.name} 未作答留白 (-5分)`);
+      return;
+    }
+
+    // C. 關鍵字命中計算
+    const hitKeywords = (q.keywords || []).filter(kw => text.includes(kw));
+    const hitCount = hitKeywords.length;
+    const minRequiredLen = q.minLen || 12;
+
+    // D. 階梯計分
+    if (hitCount >= 2 && text.length >= (minRequiredLen + 6)) {
+      // 特優等級 (命中2個關鍵字且字數充實)
+      bonus += q.weight || 3.5;
+      excellentCount++;
+      breakdown.push(`🌟 ${q.name} 核心概念深刻且論述完整 (+${q.weight || 3.5}分)`);
+    } else if (hitCount >= 1 && text.length >= minRequiredLen) {
+      // 良好等級 (命中1個關鍵字且字數達標)
+      const gWeight = Math.max(1.5, (q.weight || 3.5) - 1.5);
+      bonus += gWeight;
+      breakdown.push(`💡 ${q.name} 切中主題核心重點 (+${gWeight}分)`);
+    } else if (text.length >= 15) {
+      // 具體但未命中核心關鍵字
+      bonus += 1;
+      breakdown.push(`📝 ${q.name} 回答具體但核心概念可更深入 (+1分)`);
+    } else {
+      // 簡略回答 (無關鍵字且字數少)
+      breakdown.push(`📝 ${q.name} 簡略作答 (+0分)`);
+    }
+  });
+
+  // 2. 檢核表與生活行動加分 (最多 +3 分)
+  if (answers.check1 === 'yes' && answers.check2 === 'yes' && answers.check3 === 'yes') {
+    bonus += 2;
+    breakdown.push("🌟 課堂自我檢核落實 (+2分)");
+  }
+  if (cfg.actionsId && Array.isArray(answers[cfg.actionsId]) && answers[cfg.actionsId].length >= 2) {
+    bonus += 1;
+    breakdown.push("🌱 具體實踐承諾落實 (+1分)");
+  }
+
+  // 3. 🛡️【嚴格守門：不輕易超過 94 分】機制
+  let rawScore = Math.round(score + bonus - penalty);
+
+  if (rawScore > 94) {
+    // 只要有任何一題未達特優，或曾有扣分，嚴格封頂在 93 分！
+    if (excellentCount < coreQuestionsCount || penalty > 0) {
+      rawScore = 93;
+      breakdown.push("📌 (需所有問答皆達特優深入水準，總分方可超過 94 分)");
+    }
+  }
+
+  // 4. 最低保底 60，最高 100
+  let finalScore = Math.max(60, Math.min(100, rawScore));
+  return { total: finalScore, breakdown };
+}
+
+/**
  * 提交學習單與自動評分
  */
 async function submitWorksheet(weekId, scoreCalculator) {
@@ -368,7 +975,62 @@ async function submitWorksheet(weekId, scoreCalculator) {
     return;
   }
 
-  // 1.5 🔍 重複繳交防呆確認 (純前端本地檢查，0 延遲、0 網路伺服器負擔)
+  // 1.5 🔍 雙重送出確認對話框 (顯示班級、座號、姓名確認，防手滑與防冒名)
+  const confirmSubmit = await new Promise(resolve => {
+    let confirmModal = document.getElementById('submitConfirmModal');
+    if (!confirmModal) {
+      confirmModal = document.createElement('div');
+      confirmModal.id = 'submitConfirmModal';
+      confirmModal.className = 'modal-overlay';
+      document.body.appendChild(confirmModal);
+    }
+
+    confirmModal.innerHTML = `
+      <div class="modal-content" style="max-width: 480px; text-align: center;">
+        <div style="font-size: 2.8rem; margin-bottom: 0.5rem;">📋</div>
+        <h2 style="font-size: 1.35rem; color: #1E293B; font-weight: 800; margin-bottom: 0.3rem;">準備交卷確認</h2>
+        <p style="color: #64748B; font-size: 0.95rem; margin-bottom: 1.2rem;">請仔細核對您的身分資料是否正確：</p>
+
+        <div style="background: #F8FAFC; border: 2px solid #E2E8F0; border-radius: 12px; padding: 1.1rem; margin-bottom: 1.5rem;">
+          <div style="font-size: 1.35rem; font-weight: 800; color: #0F172A; margin-bottom: 0.3rem;">
+            ${classVal} 班 <span style="color: #059669;">${seatVal} 號</span>
+          </div>
+          <div style="font-size: 1.2rem; font-weight: 800; color: #2563EB;">
+            ${nameVal} <span style="font-size: 0.95rem; font-weight: 500; color: #64748B;">(${groupVal})</span>
+          </div>
+          <p style="font-size: 0.85rem; color: #DC2626; margin-top: 0.6rem; font-weight: 600;">
+            ⚠️ 請確認這是您本人的資料！若非本人請點「返回修改」。
+          </p>
+        </div>
+
+        <div style="display: flex; gap: 0.75rem; justify-content: center;">
+          <button type="button" id="confirmSubmitBtnYes" class="btn-submit" style="flex: 1; padding: 0.85rem; background: #059669; font-weight: 800;">
+            🚀 確認是我，正式送出
+          </button>
+          <button type="button" id="confirmSubmitBtnNo" class="btn-secondary" style="flex: 1; padding: 0.85rem; font-weight: 700;">
+            返回修改
+          </button>
+        </div>
+      </div>
+    `;
+
+    confirmModal.classList.add('active');
+
+    document.getElementById('confirmSubmitBtnYes').onclick = () => {
+      confirmModal.classList.remove('active');
+      resolve(true);
+    };
+    document.getElementById('confirmSubmitBtnNo').onclick = () => {
+      confirmModal.classList.remove('active');
+      resolve(false);
+    };
+  });
+
+  if (!confirmSubmit) {
+    return; // 學生取消交卷
+  }
+
+  // 1.8 重複繳交防呆確認 (若先前已繳交過)
   const existingSubmission = localStorage.getItem('action115_submitted_' + weekId);
   if (existingSubmission) {
     try {
@@ -471,7 +1133,7 @@ async function submitWorksheet(weekId, scoreCalculator) {
 }
 
 /**
- * 顯示即時計分與完成彈窗
+ * 顯示即時計分與完成彈窗 (若有扣分直接醒目突顯原因以示警惕)
  */
 function showResultModal(payload, scoreResult) {
   let modal = document.getElementById('resultModal');
@@ -482,27 +1144,68 @@ function showResultModal(payload, scoreResult) {
     document.body.appendChild(modal);
   }
 
+  const breakdownList = scoreResult.breakdown || [];
+  const penaltyItems = breakdownList.filter(b => typeof b === 'string' && (b.includes('🚨') || b.includes('⚠️') || b.includes('(-')));
+  const hasPenalties = penaltyItems.length > 0;
+
   modal.innerHTML = `
-    <div class="modal-content">
-      <div class="modal-icon">🎉</div>
-      <h2 class="modal-title">學習單送出成功！</h2>
+    <div class="modal-content" style="max-width: 520px;">
+      <div class="modal-icon">
+        ${hasPenalties ? '🚨' : '🎉'}
+      </div>
+      <h2 class="modal-title" style="${hasPenalties ? 'color: #DC2626;' : ''}">
+        ${hasPenalties ? '學習單已送出（初評含扣分警告）' : '學習單送出成功！'}
+      </h2>
       <p style="color: var(--text-muted); font-size: 0.95rem;">
         ${payload.studentClass} 班 ${payload.studentSeat} 號 <strong>${payload.studentName}</strong> 同學
       </p>
 
-      <div class="modal-score-box">
-        <div class="modal-score-val">${scoreResult.total} <span style="font-size: 1.2rem;">分</span></div>
-        <div class="modal-score-label">本節課完成度與系統初評分數</div>
+      <div class="modal-score-box" style="${hasPenalties ? 'background: #FEF2F2; border: 2px solid #EF4444;' : ''}">
+        <div class="modal-score-val" style="${hasPenalties ? 'color: #DC2626;' : ''}">
+          ${scoreResult.total} <span style="font-size: 1.2rem;">分</span>
+        </div>
+        <div class="modal-score-label" style="${hasPenalties ? 'color: #991B1B;' : ''}">
+          ${hasPenalties ? '本次初評得分（含扣分項目提醒）' : '本節課完成度與系統初評分數'}
+        </div>
       </div>
 
-      <div class="modal-msg" style="text-align: left; background: #F8FAFC; padding: 0.8rem; border-radius: 8px; font-size: 0.9rem;">
+      ${hasPenalties ? `
+        <div style="background: #FEF2F2; border: 2px solid #EF4444; border-radius: 12px; padding: 1rem; margin-bottom: 0.9rem; text-align: left;">
+          <div style="font-weight: 800; color: #991B1B; font-size: 1rem; margin-bottom: 0.4rem; display: flex; align-items: center; gap: 0.4rem;">
+            <span>🚨 扣分警告項目（請務必警惕）：</span>
+          </div>
+          <div style="color: #B91C1C; font-size: 0.92rem; line-height: 1.6; font-weight: 700;">
+            ${penaltyItems.map(p => `<div>• ${p}</div>`).join('')}
+          </div>
+          <div style="font-size: 0.84rem; color: #7F1D1D; margin-top: 0.6rem; background: #FEE2E2; padding: 0.5rem 0.75rem; border-radius: 6px; line-height: 1.45;">
+            📢 <strong>教師後台即時提示：</strong>老師已在後台儀表板同步檢視您的完整作答。若您剛才是語音輸入誤填、隨意湊字或留白，<strong>請立即點擊下方橘色按鈕重新修改訂正</strong>，以免影響平時成績！
+          </div>
+        </div>
+      ` : ''}
+
+      <div class="modal-msg" style="text-align: left; background: #F8FAFC; padding: 0.8rem; border-radius: 8px; font-size: 0.9rem; margin-bottom: 1rem;">
         <div>📌 <strong>評分明細：</strong></div>
-        ${scoreResult.breakdown.map(b => '<div>• ' + b + '</div>').join('')}
+        ${breakdownList.map(b => {
+          if (penaltyItems.includes(b)) {
+            return `<div style="color: #DC2626; font-weight: 700;">• ${b}</div>`;
+          }
+          return `<div>• ${b}</div>`;
+        }).join('')}
       </div>
 
-      <div class="modal-actions">
-        <button class="btn-secondary" onclick="document.getElementById('resultModal').classList.remove('active')">查看作答內容</button>
-        <a href="index.html" class="btn-submit" style="padding: 0.7rem 1.5rem; text-decoration: none; width: auto; font-size: 1rem;">返回課程總覽</a>
+      <div class="modal-actions" style="flex-direction: column; gap: 0.6rem;">
+        ${hasPenalties ? `
+          <button type="button" class="btn-submit" style="width: 100%; background: #EA580C; font-weight: 800; padding: 0.8rem; font-size: 1rem; margin-bottom: 0.2rem;" onclick="resetSubmission('${payload.weekId}')">
+            ✏️ 立即重新修改作答（消除扣分爭取高分）
+          </button>
+        ` : ''}
+        <div style="display: flex; gap: 0.75rem; width: 100%;">
+          <button class="btn-secondary" style="flex: 1;" onclick="document.getElementById('resultModal').classList.remove('active')">檢視本次作答</button>
+          <a href="index.html" class="btn-submit" style="flex: 1; padding: 0.7rem 1.2rem; text-decoration: none; font-size: 0.95rem; background: #059669;">回課程首頁</a>
+        </div>
+        <button type="button" onclick="startFreshWorksheet('${payload.weekId}')" style="width: 100%; background: #FEE2E2; color: #DC2626; border: 1.5px solid #FCA5A5; border-radius: 10px; padding: 0.75rem; font-weight: 800; font-size: 0.95rem; cursor: pointer;">
+          🔄 換下一位同學作答（清除本機紀錄）
+        </button>
       </div>
     </div>
   `;

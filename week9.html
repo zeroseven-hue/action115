@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
@@ -199,47 +199,7 @@
 
     function handleSubmit() {
       submitWorksheet('9', (answers) => {
-        let score = 85;
-        let breakdown = ["🎯 學習單完成與提交基礎分 (85分)"];
-
-        // 1. 深度思考與心得回答 (認真度加分)
-        let hasH = answers.w9_peer_highlight && answers.w9_peer_highlight.trim().length >= 10;
-        let hasQ = answers.w9_peer_question && answers.w9_peer_question.trim().length >= 10;
-        let thoughtfulCount = (hasH ? 1 : 0) + (hasQ ? 1 : 0);
-
-        if (thoughtfulCount >= 2) {
-          score += 10;
-          breakdown.push("💡 同儕反饋深入且提問具思辨性 (+10分)");
-        } else if (thoughtfulCount >= 1) {
-          score += 5;
-          breakdown.push("💡 聆聽反饋具體 (+5分)");
-        }
-
-        // 2. 自我檢核與寧靜宣言 (加分)
-        let actionCount = (answers.w9_actions || []).length;
-        if (actionCount >= 1 && answers.check1 && answers.check2 && answers.check3) {
-          score += 5;
-          breakdown.push("🌟 課堂自我檢核與生活寧靜宣言落實 (+5分)");
-        }
-
-        // 3. 太誇張（多項核心任務空白）才微扣分
-        let hasTopic = answers.w9_topic && answers.w9_topic.trim().length > 0;
-        let hasDisc = answers.w9_discovery_1 || answers.w9_discovery_2;
-        
-        let missingMajorTasks = 0;
-        if (!hasTopic && !hasDisc) missingMajorTasks++;
-        if (!hasH && !hasQ) missingMajorTasks++;
-        if (actionCount === 0) missingMajorTasks++;
-
-        if (missingMajorTasks >= 2) {
-          score -= 10;
-          breakdown.push("⚠️ 多項任務留白未作答 (-10分)");
-        } else if (missingMajorTasks === 1) {
-          score -= 5;
-          breakdown.push("⚠️ 部分題目未完整填寫 (-5分)");
-        }
-
-        return { total: Math.max(75, Math.min(100, score)), breakdown };
+        return evaluateUnitWorksheet('9', answers);
       });
     }
   </script>

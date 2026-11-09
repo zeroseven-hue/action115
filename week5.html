@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
@@ -185,47 +185,7 @@
 
     function handleSubmit() {
       submitWorksheet('5', (answers) => {
-        let score = 85;
-        let breakdown = ["🎯 學習單完成與提交基礎分 (85分)"];
-
-        // 1. 深度思考與心得回答 (認真度加分)
-        let hasCase = answers.w5_q3_country && answers.w5_q3_title && answers.w5_q3_content && answers.w5_q3_content.length >= 10;
-        if (hasCase) {
-          score += 10;
-          breakdown.push("💡 全球綠色行動搜查資訊統整詳實 (+10分)");
-        } else if (answers.w5_q3_country || answers.w5_q3_title) {
-          score += 5;
-          breakdown.push("💡 案例資料收集具體 (+5分)");
-        }
-
-        // 2. 自我檢核與團隊分工 (加分)
-        let hasRoles = answers.w5_leader && answers.w5_searcher && answers.w5_presenter;
-        if (hasRoles && answers.check1 && answers.check2 && answers.check3) {
-          score += 5;
-          breakdown.push("🌟 課堂自我檢核與團隊任務分工落實 (+5分)");
-        }
-
-        // 3. 太誇張（多項核心任務空白）才微扣分
-        let hasD1 = answers.w5_q1_date && answers.w5_q1_date.length > 0;
-        let hasS1 = answers.w5_q1_spirit && answers.w5_q1_spirit.length > 0;
-        let hasD2 = answers.w5_q2_time && answers.w5_q2_time.length > 0;
-        let hasS2 = answers.w5_q2_aim && answers.w5_q2_aim.length > 0;
-        let count1 = (hasD1 ? 1 : 0) + (hasS1 ? 1 : 0) + (hasD2 ? 1 : 0) + (hasS2 ? 1 : 0);
-
-        let missingMajorTasks = 0;
-        if (count1 === 0) missingMajorTasks++;
-        if (!answers.w5_q3_country && !answers.w5_q3_content) missingMajorTasks++;
-        if (!answers.w5_leader && !answers.w5_presenter) missingMajorTasks++;
-
-        if (missingMajorTasks >= 2) {
-          score -= 10;
-          breakdown.push("⚠️ 多項任務留白未作答 (-10分)");
-        } else if (missingMajorTasks === 1) {
-          score -= 5;
-          breakdown.push("⚠️ 部分題目未完整填寫 (-5分)");
-        }
-
-        return { total: Math.max(75, Math.min(100, score)), breakdown };
+        return evaluateUnitWorksheet('5', answers);
       });
     }
   </script>

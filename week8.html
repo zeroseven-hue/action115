@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
@@ -194,47 +194,7 @@
 
     function handleSubmit() {
       submitWorksheet('8', (answers) => {
-        let score = 85;
-        let breakdown = ["🎯 學習單完成與提交基礎分 (85分)"];
-
-        // 1. 深度思考與心得回答 (認真度加分)
-        let hasM = answers.w8_masking && answers.w8_masking.trim().length >= 10;
-        let hasS = answers.w8_solution && answers.w8_solution.trim().length >= 10;
-        let thoughtfulCount = (hasM ? 1 : 0) + (hasS ? 1 : 0);
-
-        if (thoughtfulCount >= 2) {
-          score += 10;
-          breakdown.push("💡 聲學遮蔽與友善工程思辨深刻 (+10分)");
-        } else if (thoughtfulCount >= 1) {
-          score += 5;
-          breakdown.push("💡 減噪解方分析具體 (+5分)");
-        }
-
-        // 2. 自我檢核與守護承諾 (加分)
-        let actionCount = (answers.w8_actions || []).length;
-        if (actionCount >= 1 && answers.check1 && answers.check2 && answers.check3) {
-          score += 5;
-          breakdown.push("🌟 課堂自我檢核與海洋寧靜承諾落實 (+5分)");
-        }
-
-        // 3. 太誇張（多項核心任務空白）才微扣分
-        let hasSpeed = answers.w8_speed && answers.w8_speed.trim().length > 0;
-        let noiseCount = [answers.w8_noise_1, answers.w8_noise_2, answers.w8_noise_3].filter(x => x && x.trim().length > 0).length;
-        
-        let missingMajorTasks = 0;
-        if (!hasSpeed && noiseCount === 0) missingMajorTasks++;
-        if (!hasM && !hasS) missingMajorTasks++;
-        if (actionCount === 0) missingMajorTasks++;
-
-        if (missingMajorTasks >= 2) {
-          score -= 10;
-          breakdown.push("⚠️ 多項任務留白未作答 (-10分)");
-        } else if (missingMajorTasks === 1) {
-          score -= 5;
-          breakdown.push("⚠️ 部分題目未完整填寫 (-5分)");
-        }
-
-        return { total: Math.max(75, Math.min(100, score)), breakdown };
+        return evaluateUnitWorksheet('8', answers);
       });
     }
   </script>
