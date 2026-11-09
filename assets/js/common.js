@@ -168,7 +168,13 @@ function initStudentInfoForm(weekId) {
     });
   }
 
-  // 4. 綁定變更自動儲存
+  // 4. 綁定變更自動儲存與換班偵測
+  if (classSelect) {
+    classSelect.addEventListener('change', () => {
+      handleClassChangeDetection(weekId, classSelect.value);
+    });
+  }
+
   const formElements = document.querySelectorAll('input, select, textarea');
   formElements.forEach(el => {
     el.addEventListener('input', () => saveDraft(weekId));
@@ -180,15 +186,67 @@ function initStudentInfoForm(weekId) {
   if (urlParams.get('reset') === '1' || urlParams.get('fresh') === '1') {
     localStorage.removeItem('action115_draft_' + weekId);
     localStorage.removeItem('action115_submitted_' + weekId);
+    localStorage.removeItem('action115_timestamp_' + weekId);
     // 移除 URL 參數以保持乾淨
     window.history.replaceState({}, document.title, window.location.pathname);
   }
+
+  // 4.8 ⏰ 課堂超時自動偵測 (40 分鐘推車換節判定：超過 40 分鐘自動銷毀舊草稿)
+  checkSessionTimeout(weekId);
 
   // 5. 恢復快取草稿
   loadDraft(weekId);
 
   // 6. 🔍 檢查本地狀態（是否為上一位學生留存，或已繳交）
   checkStudentIdentityAndStatus(weekId);
+}
+
+/**
+ * ⏰ 課堂超時過期檢查（專為 10 分鐘下課推平板車設計）
+ * 若上一次填答或交卷時間超過 40 分鐘，判定為下一個班級，自動清空本機暫存
+ */
+function checkSessionTimeout(weekId) {
+  const lastTimeRaw = localStorage.getItem('action115_timestamp_' + weekId);
+  if (!lastTimeRaw) return;
+
+  const lastTime = parseInt(lastTimeRaw, 10);
+  const now = Date.now();
+  const diffMinutes = (now - lastTime) / (1000 * 60);
+
+  // 若超過 40 分鐘（一堂課結束推車換班）
+  if (diffMinutes > 40) {
+    console.log(`[Session Guard] 距離上次操作已超過 ${Math.round(diffMinutes)} 分鐘，自動清空舊班級暫存！`);
+    localStorage.removeItem('action115_draft_' + weekId);
+    localStorage.removeItem('action115_submitted_' + weekId);
+    localStorage.removeItem('action115_timestamp_' + weekId);
+  }
+}
+
+/**
+ * 🚨 跨班級防滑鎖：當手動更換班級時，自動提示並清空上一班作答
+ */
+function handleClassChangeDetection(weekId, newClass) {
+  const draftRaw = localStorage.getItem('action115_draft_' + weekId);
+  if (!draftRaw) return;
+
+  try {
+    const draft = JSON.parse(draftRaw);
+    if (draft.studentClass && draft.studentClass !== newClass) {
+      if (confirm(`⚠️ 系統偵測到班級已切換為【${newClass} 班】！\n\n是否清空上一班（${draft.studentClass} 班）所留存的座號姓名與作答內容，讓您全新填寫？`)) {
+        localStorage.removeItem('action115_draft_' + weekId);
+        localStorage.removeItem('action115_submitted_' + weekId);
+        // 保留新班級，清空其他欄位
+        document.getElementById('studentSeat').value = '';
+        document.getElementById('studentName').value = '';
+        document.getElementById('studentGroup').value = '';
+        document.querySelectorAll('textarea, input[type="text"]').forEach(input => {
+          if (input.id !== 'studentClass') input.value = '';
+        });
+        document.querySelectorAll('input[type="checkbox"], input[type="radio"]').forEach(cb => cb.checked = false);
+        saveDraft(weekId);
+      }
+    }
+  } catch (e) {}
 }
 
 /**
@@ -423,6 +481,7 @@ function saveDraft(weekId) {
   });
 
   localStorage.setItem('action115_draft_' + weekId, JSON.stringify(data));
+  localStorage.setItem('action115_timestamp_' + weekId, String(Date.now()));
   
   const statusEl = document.getElementById('saveStatus');
   if (statusEl) {
@@ -662,17 +721,17 @@ const UNIT_EVALUATION_CONFIG = {
     baseScore: 78,
     questions: [
       {
-        id: 'w5_q1',
-        name: '任務一 [世界地球日由來與意涵]',
+        id: 'w5_q1_spirit',
+        name: '任務一 [世界地球日由來與精神]',
         minLen: 12,
-        keywords: ['地球日', '4月22', '環保', '意識', '行動', '守護', '綠色', '節日'],
+        keywords: ['地球日', '4月22', '環保', '意識', '行動', '守護', '綠色', '節日', '草根'],
         weight: 3
       },
       {
-        id: 'w5_q2',
-        name: '任務一 [世界清潔日由來與意涵]',
+        id: 'w5_q2_aim',
+        name: '任務一 [世界環境日時間與主旨]',
         minLen: 12,
-        keywords: ['清潔日', '9月', '淨灘', '打掃', '清理', '垃圾', '團結', '公民'],
+        keywords: ['環境日', '6月5', '聯合國', '塑膠', '污染', '氣候', '永續', '倡議'],
         weight: 3
       },
       {
@@ -712,17 +771,17 @@ const UNIT_EVALUATION_CONFIG = {
         weight: 4
       },
       {
-        id: 'w6_peer_question',
-        name: '任務二 [思辨提問與同儕討論]',
-        minLen: 10,
-        keywords: ['提問', '請問', '為什麼', '如何', '做法', '困難', '建議', '想法', '問題'],
+        id: 'w6_reflection',
+        name: '任務三 [發表會最大收穫與體悟]',
+        minLen: 12,
+        keywords: ['收穫', '合作', '進步', '溝通', '表達', '地球公民', '實踐', '永續', '未來', '改善'],
         weight: 3.5
       },
       {
-        id: 'w6_reflection',
-        name: '任務三 [發表總結省思與實踐]',
-        minLen: 15,
-        keywords: ['收穫', '合作', '進步', '溝通', '表達', '地球公民', '實踐', '永續', '未來', '改善'],
+        id: 'w6_action',
+        name: '任務三 [生活綠色永續行動承諾]',
+        minLen: 10,
+        keywords: ['生活', '行動', '減塑', '隨手', '自備', '省水', '節能', '宣傳', '堅持', '習慣'],
         weight: 3.5
       }
     ],
@@ -734,19 +793,19 @@ const UNIT_EVALUATION_CONFIG = {
     baseScore: 78,
     questions: [
       {
-        id: 'w8_q1',
-        name: '任務一 [水下噪音來源管道]',
-        isCombo: true,
-        subIds: ['w8_q1_1', 'w8_q1_2', 'w8_q1_3'],
-        keywords: ['離岸風電', '打樁', '船隻', '引擎', '螺旋槳', '聲納', '爆破', '施工', '探勘', '噪音'],
+        id: 'w8_speed',
+        name: '任務一 [水中音速科學數據探索]',
+        minLen: 4,
+        keywords: ['1500', '公尺', '4', '倍', '速度', '快', '傳播'],
         weight: 2
       },
       {
-        id: 'w8_q2',
-        name: '任務一 [受創畫面觀察與心疼]',
-        minLen: 15,
-        keywords: ['海豚', '白海豚', '露脊鼠海豚', '驚嚇', '逃跑', '擱淺', '迷航', '聽力', '受損', '叫聲', '心疼'],
-        weight: 3.5
+        id: 'w8_noise',
+        name: '任務一 [人為水下三大噪音來源]',
+        isCombo: true,
+        subIds: ['w8_noise_1', 'w8_noise_2', 'w8_noise_3'],
+        keywords: ['離岸風電', '打樁', '船隻', '引擎', '螺旋槳', '聲納', '爆破', '施工', '探勘', '噪音'],
+        weight: 2.5
       },
       {
         id: 'w8_masking',
@@ -759,7 +818,7 @@ const UNIT_EVALUATION_CONFIG = {
         id: 'w8_solution',
         name: '任務二 [工程減噪友善解方]',
         minLen: 15,
-        keywords: ['氣泡幕', '減速', '減噪', '監測', '觀察員', '友善', '降噪', '替代工法', '緩衝'],
+        keywords: ['氣泡', '帷幕', '減速', '減噪', '監測', '觀測員', '友善', '降噪', '替代工法', '緩衝'],
         weight: 3.5
       }
     ],
@@ -771,10 +830,18 @@ const UNIT_EVALUATION_CONFIG = {
     baseScore: 78,
     questions: [
       {
-        id: 'w9_topic_title',
-        name: '任務一 [本組噪音專題分享成果]',
-        minLen: 8,
-        keywords: ['專題', '噪音', '生態', '分貝', '實驗', '數據', '調查', '影響', '報告'],
+        id: 'w9_topic',
+        name: '任務一 [本組噪音專題分享名稱]',
+        minLen: 5,
+        keywords: ['專題', '噪音', '生態', '分貝', '實驗', '數據', '調查', '影響', '報告', '減噪', '海豚'],
+        weight: 2
+      },
+      {
+        id: 'w9_discovery',
+        name: '任務一 [核心發現與友善降噪解方]',
+        isCombo: true,
+        subIds: ['w9_discovery_1', 'w9_discovery_2'],
+        keywords: ['發現', '降低', '分貝', '氣泡', '減速', '航線', '避開', '保護區', '解方'],
         weight: 3
       },
       {
@@ -788,15 +855,8 @@ const UNIT_EVALUATION_CONFIG = {
         id: 'w9_peer_question',
         name: '任務二 [思辨提問與同儕討論]',
         minLen: 10,
-        keywords: ['提問', '請問', '為什麼', '測量', '改善', '影響', '方法', '可能性', '建議'],
+        keywords: ['提問', '請問', '為什麼', '測量', '改善', '影響', '方法', '可能性', '建議', '如何'],
         weight: 3.5
-      },
-      {
-        id: 'w9_reflection',
-        name: '任務三 [寧靜生活守護省思]',
-        minLen: 15,
-        keywords: ['安靜', '寧靜', '尊重', '耳朵', '噪音', '習慣', '音量', '耳機', '友善', '實踐'],
-        weight: 3
       }
     ],
     actionsId: 'w9_actions'
@@ -1211,4 +1271,24 @@ function showResultModal(payload, scoreResult) {
   `;
 
   modal.classList.add('active');
+}
+
+// 支援全域與模組環境掛載
+if (typeof window !== 'undefined') {
+  window.COURSE_CONFIG = COURSE_CONFIG;
+  window.UNIT_EVALUATION_CONFIG = UNIT_EVALUATION_CONFIG;
+  window.checkIsNonsense = checkIsNonsense;
+  window.evaluateUnitWorksheet = evaluateUnitWorksheet;
+  window.submitWorksheet = submitWorksheet;
+  window.initStudentInfoForm = initStudentInfoForm;
+}
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = {
+    COURSE_CONFIG,
+    UNIT_EVALUATION_CONFIG,
+    checkIsNonsense,
+    evaluateUnitWorksheet,
+    submitWorksheet,
+    initStudentInfoForm
+  };
 }

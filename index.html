@@ -314,7 +314,9 @@
       const selectedOption = select.options[select.selectedIndex];
       const weekFile = selectedOption.value;
       currentDispatchTitle = selectedOption.getAttribute('data-title');
-      currentDispatchTargetUrl = getAbsoluteWeekUrl(weekFile);
+      const rawUrl = getAbsoluteWeekUrl(weekFile);
+      // 派發專屬連結自動帶上 ?reset=1，確保下一個班級掃碼時自動清空前一個學生的暫存
+      currentDispatchTargetUrl = rawUrl + (rawUrl.includes('?') ? '&reset=1' : '?reset=1');
 
       document.getElementById('dispatchInfoTitle').textContent = currentDispatchTitle;
       document.getElementById('dispatchInfoUrl').textContent = currentDispatchTargetUrl;
