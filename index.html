@@ -370,7 +370,7 @@
   </script>
 
 <!-- 🔒 教師安全防護 PIN 密碼解鎖 Modal -->
-<div id="pinLockModal" class="pin-modal-overlay hidden">
+<div id="pinLockModal" class="pin-modal-overlay">
   <div class="pin-modal-card">
     <div class="pin-icon">🔒</div>
     <h2>行動方程式 彈性課程平台 安全鎖</h2>
@@ -411,10 +411,10 @@
       return;
     }
 
-      // 學生及公開訪問完全不彈窗，預設保持隱藏
-      modal.classList.add('hidden');
-      document.body.style.overflow = 'auto';
-      // if (pinInput) setTimeout(() => pinInput.focus(), 200);
+      // 未驗證：強制鎖定大廳首頁
+      modal.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+      if (pinInput) setTimeout(() => pinInput.focus(), 200);
 
     function verifyPin() {
       const entered = (pinInput ? pinInput.value.trim() : '');
