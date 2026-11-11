@@ -641,7 +641,7 @@
         <button type="button" id="btnAutoRefresh" class="btn-tool" onclick="toggleAutoRefresh()" title="點擊暫停或恢復自動同步" style="background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16, 185, 129, 0.4); color: #10b981; font-weight: 700; display: inline-flex; align-items: center; gap: 5px;">
           <span id="autoRefreshIcon">🟢</span>
           <span id="autoRefreshStatus">即時同步</span>
-          <span id="autoRefreshCountdown" style="background: rgba(16, 185, 129, 0.25); padding: 1px 7px; border-radius: 6px; font-variant-numeric: tabular-nums;">10s</span>
+          <span id="autoRefreshCountdown" style="background: rgba(16, 185, 129, 0.25); padding: 1px 7px; border-radius: 6px; font-variant-numeric: tabular-nums;">5s</span>
         </button>
 
         <!-- 立即刷新資料 -->
@@ -765,8 +765,8 @@
     let absentSeatsSet = new Set();
     let isScoreHidden = false;
 
-    // ⏱️ 自動定時更新狀態管理 (預設每 10 秒即時輪詢一次)
-    const AUTO_REFRESH_INTERVAL_SECONDS = 10;
+    // ⏱️ 自動定時更新狀態管理 (預設每 5 秒即時輪詢一次)
+    const AUTO_REFRESH_INTERVAL_SECONDS = 5;
     let autoRefreshCountdown = AUTO_REFRESH_INTERVAL_SECONDS;
     let isAutoRefreshPaused = false;
     let autoRefreshTimerId = null;
