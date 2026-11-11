@@ -1164,7 +1164,11 @@
       document.getElementById('submittedCount').textContent = submittedCount;
 
       const rate = Math.min(100, Math.round((submittedCount / actualExpected) * 100));
-      document.getElementById('ratePercent').textContent = rate + '%';
+      if (rate >= 100 && submittedCount >= actualExpected && actualExpected > 0) {
+        document.getElementById('ratePercent').innerHTML = `100% <span style="font-size: 0.82rem; background: #10B981; color: white; padding: 2px 8px; border-radius: 6px; margin-left: 4px; font-weight: 800;">🎉 全班到齊全數繳交！</span>`;
+      } else {
+        document.getElementById('ratePercent').textContent = rate + '%';
+      }
       document.getElementById('progressBarFill').style.width = rate + '%';
     }
 
