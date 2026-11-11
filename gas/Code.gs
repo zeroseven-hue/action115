@@ -63,7 +63,7 @@ function doGet(e) {
         status: "success",
         weekId: weekId,
         studentClass: classId,
-        records: records,
+        records: deduplicateRecordsList(records),
         attendance: attendance
       })).setMimeType(ContentService.MimeType.JSON);
     }
@@ -149,18 +149,30 @@ function doPost(e) {
       ? String(rawSeatNum).padStart(2, '0') 
       : String(data.studentSeat || "").padStart(2, '0');
     var targetClass = String(data.studentClass || "").trim();
+    var targetName = String(data.studentName || "").trim();
     var existingRowIndex = -1;
 
-    // 🔍 防重複洗板檢查：檢查同班級、同座號是否已存在
+    // 🔍 防重複洗板與錯位覆蓋檢查：
+    // 比對條件：同班級下，若「座號相同」或「姓名相同（防止改座號重複洗板殘留幽靈列）」，皆視為同一位學生的更新！
     if (sheet.getLastRow() > 1) {
-      var existingData = sheet.getRange(2, 2, sheet.getLastRow() - 1, 2).getValues(); // 班級(欄2), 座號(欄3)
+      var existingData = sheet.getRange(2, 2, sheet.getLastRow() - 1, 3).getValues(); // 班級(欄2), 座號(欄3), 姓名(欄4)
       for (var r = 0; r < existingData.length; r++) {
         var rowClass = String(existingData[r][0]).trim();
         var rowSeatNum = parseInt(existingData[r][1], 10);
         var rowSeatStr = (!isNaN(rowSeatNum) && rowSeatNum > 0) ? String(rowSeatNum).padStart(2, '0') : String(existingData[r][1]).trim();
-        if (rowClass === targetClass && rowSeatStr === targetSeat) {
-          existingRowIndex = r + 2; // 試算表列數 (從第2列開始)
-          break;
+        var rowName = String(existingData[r][2] || "").trim();
+
+        if (rowClass === targetClass) {
+          // 1. 若同班且姓名相符：學生修正座號重交，優先覆蓋此列，避免在舊座號殘留幽靈紀錄！
+          if (targetName && rowName === targetName) {
+            existingRowIndex = r + 2;
+            break;
+          }
+          // 2. 若同班且座號相符：同座號更新或教師手動補登
+          if (rowSeatStr === targetSeat) {
+            existingRowIndex = r + 2;
+            break;
+          }
         }
       }
     }
@@ -370,11 +382,239 @@ function formatAllSheets() {
 }
 
 /**
+ * 伺服器端資料去重與錯位修正：確保同班級同姓名只有最新座號，同座號只有最新學生
+ */
+function deduplicateRecordsList(records) {
+  if (!Array.isArray(records) || records.length === 0) return [];
+
+  var valid = records.filter(function(r) {
+    if (!r || typeof r !== 'object') return false;
+    var s = parseInt(r.studentSeat, 10);
+    return !isNaN(s) && s >= 1 && s <= 35;
+  });
+
+  var enriched = valid.map(function(r) {
+    var seat = String(r.studentSeat).padStart(2, '0');
+    try {
+      var parsed = typeof r.answers === 'string' ? JSON.parse(r.answers) : r.answers;
+      if (parsed && parsed.studentSeat) {
+        var innerSeat = parseInt(parsed.studentSeat, 10);
+        if (!isNaN(innerSeat) && innerSeat >= 1 && innerSeat <= 35) {
+          seat = String(innerSeat).padStart(2, '0');
+        }
+      }
+    } catch (e) {}
+
+    var timeMs = 0;
+    if (r.timestamp) {
+      timeMs = Date.parse(r.timestamp) || 0;
+      if (timeMs === 0) {
+        var cleaned = String(r.timestamp).replace('上午', 'AM ').replace('下午', 'PM ');
+        timeMs = Date.parse(cleaned) || 0;
+      }
+    }
+
+    return {
+      raw: r,
+      cls: String(r.studentClass || '').trim(),
+      seat: seat,
+      name: String(r.studentName || '').trim(),
+      timeMs: timeMs
+    };
+  });
+
+  enriched.sort(function(a, b) { return a.timeMs - b.timeMs; });
+
+  var studentLatest = {};
+  enriched.forEach(function(rec) {
+    if (rec.name) {
+      studentLatest[rec.cls + '_' + rec.name] = rec;
+    }
+  });
+
+  var seatMap = {};
+  Object.keys(studentLatest).forEach(function(k) {
+    var rec = studentLatest[k];
+    var seatKey = rec.cls + '_' + rec.seat;
+    if (seatMap[seatKey]) {
+      if (rec.timeMs >= seatMap[seatKey].timeMs) {
+        seatMap[seatKey] = rec;
+      }
+    } else {
+      seatMap[seatKey] = rec;
+    }
+  });
+
+  enriched.forEach(function(rec) {
+    if (!rec.name) {
+      var seatKey = rec.cls + '_' + rec.seat;
+      if (!seatMap[seatKey] || rec.timeMs >= seatMap[seatKey].timeMs) {
+        seatMap[seatKey] = rec;
+      }
+    }
+  });
+
+  var res = Object.keys(seatMap).map(function(k) {
+    var item = seatMap[k];
+    var r = item.raw;
+    r.studentSeat = item.seat;
+    return r;
+  });
+
+  res.sort(function(a, b) {
+    var sa = parseInt(a.studentSeat, 10);
+    var sb = parseInt(b.studentSeat, 10);
+    return sa - sb;
+  });
+
+  return res;
+}
+
+/**
+ * ==========================================================================
+ * 🧹 一鍵清除與修復全試算表重複錯位紀錄 (Google Sheets 專用管理維護工具)
+ * 自動掃描所有「第X週作答紀錄」工作表，清除跨座號幽靈列、保留最新有效作答，
+ * 並依班級、座號 ('01~'35) 重新排序且套用高雅綠美化格式！
+ * ==========================================================================
+ */
+function cleanAllSheetsDuplicates() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheets = ss.getSheets();
+  var totalCleanedCount = 0;
+  var sheetsFixedCount = 0;
+
+  for (var i = 0; i < sheets.length; i++) {
+    var s = sheets[i];
+    var name = s.getName();
+    if (name.indexOf("作答紀錄") !== -1 && s.getLastRow() > 1) {
+      var lastRow = s.getLastRow();
+      var dataRange = s.getRange(2, 1, lastRow - 1, 8);
+      var rawRows = dataRange.getValues();
+
+      if (rawRows.length === 0) continue;
+
+      var parsedRecords = [];
+      for (var rIdx = 0; rIdx < rawRows.length; rIdx++) {
+        var r = rawRows[rIdx];
+        var cls = String(r[1] || "").trim();
+        var rawSeatNum = parseInt(r[2], 10);
+        var seatStr = (!isNaN(rawSeatNum) && rawSeatNum > 0) ? String(rawSeatNum).padStart(2, '0') : String(r[2] || "").trim();
+        var studentName = String(r[3] || "").trim();
+
+        // 檢查答案 JSON 中是否有修正後的座號
+        try {
+          var ansObj = typeof r[7] === 'string' ? JSON.parse(r[7]) : r[7];
+          if (ansObj && ansObj.studentSeat) {
+            var innerSeatNum = parseInt(ansObj.studentSeat, 10);
+            if (!isNaN(innerSeatNum) && innerSeatNum > 0 && innerSeatNum <= 35) {
+              seatStr = String(innerSeatNum).padStart(2, '0');
+            }
+          }
+        } catch (e) {}
+
+        var timeMs = 0;
+        if (r[0]) {
+          timeMs = Date.parse(r[0]) || 0;
+          if (timeMs === 0) {
+            var cleanedTimeStr = String(r[0]).replace('上午', 'AM ').replace('下午', 'PM ');
+            timeMs = Date.parse(cleanedTimeStr) || 0;
+          }
+        }
+
+        parsedRecords.push({
+          raw: r,
+          cls: cls,
+          seat: seatStr,
+          name: studentName,
+          timeMs: timeMs || rIdx
+        });
+      }
+
+      // 依時間舊到新排序
+      parsedRecords.sort(function(a, b) { return a.timeMs - b.timeMs; });
+
+      // 規則 1：同班級每位姓名只保留最新一次的提交座號
+      var studentLatest = {};
+      parsedRecords.forEach(function(rec) {
+        if (rec.name) {
+          studentLatest[rec.cls + '_' + rec.name] = rec;
+        }
+      });
+
+      // 規則 2：映射至座號，確保每班每個座號只有一位最新合法學生
+      var seatMap = {};
+      Object.keys(studentLatest).forEach(function(k) {
+        var rec = studentLatest[k];
+        var seatKey = rec.cls + '_' + rec.seat;
+        if (seatMap[seatKey]) {
+          if (rec.timeMs >= seatMap[seatKey].timeMs) {
+            seatMap[seatKey] = rec;
+          }
+        } else {
+          seatMap[seatKey] = rec;
+        }
+      });
+
+      // 補入手動補登或無名紀錄
+      parsedRecords.forEach(function(rec) {
+        if (!rec.name) {
+          var seatKey = rec.cls + '_' + rec.seat;
+          if (!seatMap[seatKey] || rec.timeMs >= seatMap[seatKey].timeMs) {
+            seatMap[seatKey] = rec;
+          }
+        }
+      });
+
+      // 輸出排序後乾淨資料
+      var cleanList = Object.keys(seatMap).map(function(k) { return seatMap[k]; });
+      cleanList.sort(function(a, b) {
+        if (a.cls !== b.cls) return a.cls.localeCompare(b.cls);
+        var sa = parseInt(a.seat, 10);
+        var sb = parseInt(b.seat, 10);
+        return sa - sb;
+      });
+
+      var rowsDiff = rawRows.length - cleanList.length;
+      if (rowsDiff > 0 || cleanList.length > 0) {
+        // 清除原有資料區域
+        s.getRange(2, 1, lastRow - 1, 8).clearContent();
+
+        // 重新填入去重後的純淨資料
+        var newValues = cleanList.map(function(item) {
+          var rowCopy = item.raw.slice();
+          rowCopy[2] = "'" + item.seat; // 保留 '01 前導 0
+          return rowCopy;
+        });
+
+        if (newValues.length > 0) {
+          s.getRange(2, 1, newValues.length, 8).setValues(newValues);
+        }
+
+        formatWeekSheet(s);
+        if (rowsDiff > 0) {
+          totalCleanedCount += rowsDiff;
+          sheetsFixedCount++;
+        }
+      }
+    }
+  }
+
+  try {
+    SpreadsheetApp.getActiveSpreadsheet().toast(
+      "已完成全試算表深度去重檢核！共修復清理 " + totalCleanedCount + " 筆重複/幽靈錯位紀錄，涵蓋 " + sheetsFixedCount + " 個工作表。",
+      "🧹 清理與修復成功",
+      8
+    );
+  } catch (e) {}
+}
+
+/**
  * 試算表開啟時自動掛載自訂選單
  */
 function onOpen() {
   SpreadsheetApp.getUi()
     .createMenu('🌱 行動方程式工具')
     .addItem('✨ 一鍵美化所有工作表 (套用第3週樣式)', 'formatAllSheets')
+    .addItem('🧹 一鍵清理與修復重複錯位紀錄 (去重修復)', 'cleanAllSheetsDuplicates')
     .addToUi();
 }

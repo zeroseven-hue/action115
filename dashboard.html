@@ -614,9 +614,16 @@
           🔗 雲端連線
         </button>
 
-        <!-- 刷新資料 -->
-        <button type="button" class="btn-tool btn-refresh" onclick="fetchLiveDataFromGAS()">
-          🔄 刷新資料
+        <!-- 自動同步開關與倒數計時晶片 -->
+        <button type="button" id="btnAutoRefresh" class="btn-tool" onclick="toggleAutoRefresh()" title="點擊暫停或恢復自動同步" style="background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16, 185, 129, 0.4); color: #10b981; font-weight: 700; display: inline-flex; align-items: center; gap: 5px;">
+          <span id="autoRefreshIcon">🟢</span>
+          <span id="autoRefreshStatus">即時同步</span>
+          <span id="autoRefreshCountdown" style="background: rgba(16, 185, 129, 0.25); padding: 1px 7px; border-radius: 6px; font-variant-numeric: tabular-nums;">10s</span>
+        </button>
+
+        <!-- 立即刷新資料 -->
+        <button type="button" class="btn-tool btn-refresh" onclick="fetchLiveDataFromGAS(false)">
+          🔄 立即刷新
         </button>
       </div>
     </div>
@@ -735,6 +742,12 @@
     let absentSeatsSet = new Set();
     let isScoreHidden = false;
 
+    // ⏱️ 自動定時更新狀態管理 (預設每 10 秒即時輪詢一次)
+    const AUTO_REFRESH_INTERVAL_SECONDS = 10;
+    let autoRefreshCountdown = AUTO_REFRESH_INTERVAL_SECONDS;
+    let isAutoRefreshPaused = false;
+    let autoRefreshTimerId = null;
+
     // 1. 初始化
     document.addEventListener('DOMContentLoaded', () => {
       // 載入儲存的配色偏好
@@ -746,8 +759,78 @@
       renderEmptySeatCards();
 
       // 從 GAS 抓取第一筆最新資料
-      fetchLiveDataFromGAS();
+      fetchLiveDataFromGAS(false);
+
+      // 啟動 10 秒即時自動同步輪詢
+      initAutoRefresh();
     });
+
+    // ⏱️ 啟動每秒倒數計時器
+    function initAutoRefresh() {
+      if (autoRefreshTimerId) clearInterval(autoRefreshTimerId);
+      autoRefreshCountdown = AUTO_REFRESH_INTERVAL_SECONDS;
+      updateAutoRefreshUi();
+
+      autoRefreshTimerId = setInterval(() => {
+        // 若點擊暫停，或教師正在檢視作答詳情/手動補登/門禁密碼彈窗，則自動凍結輪詢
+        const isModalActive = document.getElementById('studentDetailModal')?.classList.contains('active') ||
+                              document.getElementById('manualGradeModal')?.classList.contains('active') ||
+                              !document.getElementById('pinLockModal')?.classList.contains('hidden');
+        if (isAutoRefreshPaused || isModalActive) {
+          return;
+        }
+
+        autoRefreshCountdown--;
+        if (autoRefreshCountdown <= 0) {
+          autoRefreshCountdown = AUTO_REFRESH_INTERVAL_SECONDS;
+          updateAutoRefreshUi();
+          fetchLiveDataFromGAS(true); // 靜默自動輪詢，不閃爍干擾操作
+        } else {
+          updateAutoRefreshUi();
+        }
+      }, 1000);
+    }
+
+    // ⏱️ 切換自動同步開啟 / 暫停
+    function toggleAutoRefresh() {
+      isAutoRefreshPaused = !isAutoRefreshPaused;
+      if (!isAutoRefreshPaused) {
+        autoRefreshCountdown = AUTO_REFRESH_INTERVAL_SECONDS;
+        fetchLiveDataFromGAS(true);
+      }
+      updateAutoRefreshUi();
+    }
+
+    // ⏱️ 更新工具列倒數按鈕視覺
+    function updateAutoRefreshUi() {
+      const icon = document.getElementById('autoRefreshIcon');
+      const status = document.getElementById('autoRefreshStatus');
+      const count = document.getElementById('autoRefreshCountdown');
+      const btn = document.getElementById('btnAutoRefresh');
+      if (!icon || !status || !count) return;
+
+      if (isAutoRefreshPaused) {
+        icon.textContent = '⏸️';
+        status.textContent = '暫停同步';
+        count.textContent = '點擊恢復';
+        if (btn) {
+          btn.style.background = 'rgba(239, 68, 68, 0.15)';
+          btn.style.borderColor = 'rgba(239, 68, 68, 0.4)';
+          btn.style.color = '#ef4444';
+          btn.title = '目前已暫停自動同步，點擊即可重新恢復 10 秒自動輪詢';
+        }
+      } else {
+        icon.textContent = '🟢';
+        status.textContent = '即時同步';
+        count.textContent = autoRefreshCountdown + 's';
+        if (btn) {
+          btn.style.background = 'rgba(16, 185, 129, 0.2)';
+          btn.style.borderColor = 'rgba(16, 185, 129, 0.4)';
+          btn.style.color = '#10b981';
+          btn.title = '每 10 秒自動從 Google 試算表抓取最新繳交成績，點擊可暫停';
+        }
+      }
+    }
 
     // 2. 配色切換 (紫、綠、藍、琥珀)
     function changeDashboardTheme(themeName) {
@@ -796,7 +879,9 @@
     function handleClassOrWeekChange() {
       const classVal = document.getElementById('selectClass').value;
       document.getElementById('displayClassTitle').textContent = classVal;
-      fetchLiveDataFromGAS();
+      autoRefreshCountdown = AUTO_REFRESH_INTERVAL_SECONDS;
+      updateAutoRefreshUi();
+      fetchLiveDataFromGAS(false);
     }
 
     // 取得當前使用的 GAS 端點 (優先讀取自訂快取，否則使用 common.js 預設)
@@ -822,33 +907,33 @@
         if (trimmed && trimmed.startsWith('http')) {
           localStorage.setItem('action115_gas_override', trimmed);
           alert("✅ 已更新雲端串接網址！系統將立即為您刷新資料。");
-          fetchLiveDataFromGAS();
+          fetchLiveDataFromGAS(false);
         } else if (trimmed === '') {
           localStorage.removeItem('action115_gas_override');
           alert("✅ 已還原為系統預設部署網址！");
-          fetchLiveDataFromGAS();
+          fetchLiveDataFromGAS(false);
         }
       }
     }
 
-    // 7. 從 Google Apps Script (GAS) 抓取實時資料
-    async function fetchLiveDataFromGAS() {
+    // 7. 從 Google Apps Script (GAS) 抓取實時資料 (支援靜默後台自動輪詢與前台手動刷新)
+    async function fetchLiveDataFromGAS(isSilent = false) {
       const classVal = document.getElementById('selectClass').value;
       const weekVal = document.getElementById('selectWeek').value;
       const gasUrl = getActiveGasEndpoint();
       
       const refreshBtn = document.querySelector('.btn-refresh');
-      if (refreshBtn) refreshBtn.textContent = '⏳ 讀取中...';
+      if (!isSilent && refreshBtn) refreshBtn.textContent = '⏳ 讀取中...';
 
       if (!gasUrl || !gasUrl.startsWith('http')) {
-        alert('請先設定有效的 Google Apps Script 部署網址！');
-        if (refreshBtn) refreshBtn.textContent = '🔄 刷新資料';
+        if (!isSilent) alert('請先設定有效的 Google Apps Script 部署網址！');
+        if (refreshBtn) refreshBtn.textContent = '🔄 立即刷新';
         return;
       }
 
       if (gasUrl.endsWith('/dev')) {
-        alert('⚠️ 偵測到目前的連線網址為 /dev 測試網址！\n\n/dev 網址無法在儀表板中使用，請在 Google Apps Script 中點選「部署 ➔ 新增部署作業 ➔ 誰可以存取：所有人」，取得 /exec 結尾之正式網址。');
-        if (refreshBtn) refreshBtn.textContent = '🔄 刷新資料';
+        if (!isSilent) alert('⚠️ 偵測到目前的連線網址為 /dev 測試網址！\n\n/dev 網址無法在儀表板中使用，請在 Google Apps Script 中點選「部署 ➔ 新增部署作業 ➔ 誰可以存取：所有人」，取得 /exec 結尾之正式網址。');
+        if (refreshBtn) refreshBtn.textContent = '🔄 立即刷新';
         return;
       }
 
@@ -858,7 +943,8 @@
         const data = await res.json();
 
         if (data.status === 'success') {
-          currentLiveRecords = data.records || [];
+          // 🛡️ 核心校正：通過智慧去重與座號錯位修正引擎清洗資料
+          currentLiveRecords = normalizeAndDeduplicateRecords(data.records || [], classVal);
           
           // 還原試算表中的請假名單與應到人數
           if (data.attendance) {
@@ -875,10 +961,95 @@
         }
       } catch (err) {
         console.warn('Failed to fetch from GAS:', err);
-        alert('⚠️ 讀取試算表資料失敗！\n\n可能原因：\n1. 網址權限未設為「所有人 (Anyone)」\n2. 網路暫態斷線\n\n目前使用網址：' + gasUrl);
+        if (!isSilent) {
+          alert('⚠️ 讀取試算表資料失敗！\n\n可能原因：\n1. 網址權限未設為「所有人 (Anyone)」\n2. 網路暫態斷線\n\n目前使用網址：' + gasUrl);
+        }
       }
 
-      if (refreshBtn) refreshBtn.textContent = '🔄 刷新資料';
+      if (refreshBtn) refreshBtn.textContent = '🔄 立即刷新';
+    }
+
+    // 🛡️ 8. 智慧去重與座號錯位修復引擎 (徹底杜絕同一學生占據雙座號、覆蓋其他同班同學成績之問題)
+    function normalizeAndDeduplicateRecords(records, targetClass) {
+      if (!Array.isArray(records)) return [];
+
+      // 步驟 1：過濾無效列與非本科/超出座號範圍之資料
+      const validRecords = records.filter(r => {
+        if (!r || typeof r !== 'object') return false;
+        const cls = String(r.studentClass || '').trim();
+        if (targetClass && cls !== String(targetClass).trim()) return false;
+        const s = parseInt(r.studentSeat, 10);
+        return !isNaN(s) && s >= 1 && s <= COURSE_CONFIG.maxSeatNumber;
+      });
+
+      // 步驟 2：解析作答詳情中的內嵌座號與時間戳記，確保最準確的時間排序
+      const enriched = validRecords.map(r => {
+        let seat = String(r.studentSeat).padStart(2, '0');
+        try {
+          const parsed = typeof r.answers === 'string' ? JSON.parse(r.answers) : r.answers;
+          if (parsed && parsed.studentSeat) {
+            const innerSeat = parseInt(parsed.studentSeat, 10);
+            if (!isNaN(innerSeat) && innerSeat >= 1 && innerSeat <= COURSE_CONFIG.maxSeatNumber) {
+              seat = String(innerSeat).padStart(2, '0');
+            }
+          }
+        } catch (e) {}
+
+        let timeMs = 0;
+        if (r.timestamp) {
+          timeMs = Date.parse(r.timestamp) || 0;
+          if (timeMs === 0) {
+            const cleaned = String(r.timestamp).replace('上午', 'AM ').replace('下午', 'PM ');
+            timeMs = Date.parse(cleaned) || 0;
+          }
+        }
+
+        return {
+          ...r,
+          studentSeat: seat,
+          studentName: String(r.studentName || '').trim(),
+          _timeMs: timeMs
+        };
+      });
+
+      // 步驟 3：依時間戳記由舊到新排序 (新在後，確保最新提交具有最高優先權)
+      enriched.sort((a, b) => a._timeMs - b._timeMs);
+
+      // 步驟 4：規則 A - 學生姓名鎖定 (每位姓名只能擁有「最新提交」的那唯一一個座號)
+      // 若該學生之前曾誤選手機/平板遺留的舊座號，其舊座號會在此被自動釋放，歸還給真正的主人！
+      const studentLatestRecord = new Map();
+      enriched.forEach(rec => {
+        if (rec.studentName) {
+          studentLatestRecord.set(rec.studentName, rec);
+        }
+      });
+
+      // 步驟 5：規則 B - 座號唯一性映射 (每個座號只保留最新且合法的學生提交)
+      const seatMap = new Map();
+      studentLatestRecord.forEach((latestRec) => {
+        const seat = latestRec.studentSeat;
+        if (seatMap.has(seat)) {
+          const existing = seatMap.get(seat);
+          if (latestRec._timeMs >= existing._timeMs) {
+            seatMap.set(seat, latestRec);
+          }
+        } else {
+          seatMap.set(seat, latestRec);
+        }
+      });
+
+      // 步驟 6：保留手動補登或未填姓名的特殊紀錄
+      enriched.forEach(rec => {
+        if (!rec.studentName) {
+          const seat = rec.studentSeat;
+          if (!seatMap.has(seat) || rec._timeMs >= seatMap.get(seat)._timeMs) {
+            seatMap.set(seat, rec);
+          }
+        }
+      });
+
+      // 步驟 7：依座號升冪排序回傳乾淨不重複的名單
+      return Array.from(seatMap.values()).sort((a, b) => parseInt(a.studentSeat, 10) - parseInt(b.studentSeat, 10));
     }
 
     // 8. 將讀取的資料繪製上 30 人卡片矩陣
