@@ -405,6 +405,29 @@
       opacity: 0.75;
     }
 
+    /* 狀態 D：同號衝突 (琥珀橘警示，當有多位不同學生誤劃同座號時顯著提醒老師憑姓名核驗) */
+    .seat-card.conflict {
+      background: #FFFBEB !important;
+      border: 2px solid #F59E0B !important;
+      color: #B45309 !important;
+      box-shadow: 0 2px 10px rgba(245, 158, 11, 0.3) !important;
+      animation: pulse-conflict 2.5s infinite ease-in-out;
+    }
+    @keyframes pulse-conflict {
+      0%, 100% { border-color: #F59E0B; }
+      50% { border-color: #EF4444; }
+    }
+    .seat-conflict-badge {
+      display: inline-block;
+      background: #EF4444;
+      color: #FFFFFF;
+      font-size: 0.72rem;
+      font-weight: 800;
+      padding: 0.12rem 0.45rem;
+      border-radius: 6px;
+      margin-top: 0.2rem;
+    }
+
     .seat-num {
       font-size: 1.15rem;
       font-weight: 800;
@@ -943,8 +966,10 @@
         const data = await res.json();
 
         if (data.status === 'success') {
-          // 🛡️ 核心校正：通過智慧去重與座號錯位修正引擎清洗資料
-          currentLiveRecords = normalizeAndDeduplicateRecords(data.records || [], classVal);
+          // 🛡️ 核心校正：通過衝突比對與資料分組引擎處理全部作答紀錄
+          const processed = processClassRecords(data.records || [], classVal);
+          currentSeatDataMap = processed.seatDataMap;
+          currentLiveRecords = processed.cleanList;
           
           // 還原試算表中的請假名單與應到人數
           if (data.attendance) {
@@ -969,12 +994,15 @@
       if (refreshBtn) refreshBtn.textContent = '🔄 立即刷新';
     }
 
-    // 🛡️ 8. 智慧去重與座號錯位修復引擎 (徹底杜絕同一學生占據雙座號、覆蓋其他同班同學成績之問題)
-    function normalizeAndDeduplicateRecords(records, targetClass) {
-      if (!Array.isArray(records)) return [];
+    // 全域存放座號衝突與作答分組
+    let currentSeatDataMap = new Map();
 
-      // 步驟 1：過濾無效列與非本科/超出座號範圍之資料
-      const validRecords = records.filter(r => {
+    // 🛡️ 8. 座號衝突比對與學生身分智能分組引擎 (支援老師憑真實姓名判別同號誤劃)
+    function processClassRecords(records, targetClass) {
+      if (!Array.isArray(records)) return { seatDataMap: new Map(), cleanList: [] };
+
+      // 步驟 1：過濾屬於該班級、座號介於 01~maxSeatNumber 的紀錄
+      const classRecords = records.filter(r => {
         if (!r || typeof r !== 'object') return false;
         const cls = String(r.studentClass || '').trim();
         if (targetClass && cls !== String(targetClass).trim()) return false;
@@ -982,8 +1010,8 @@
         return !isNaN(s) && s >= 1 && s <= COURSE_CONFIG.maxSeatNumber;
       });
 
-      // 步驟 2：解析作答詳情中的內嵌座號與時間戳記，確保最準確的時間排序
-      const enriched = validRecords.map(r => {
+      // 步驟 2：解析時間戳記與內嵌座號
+      const enriched = classRecords.map((r, idx) => {
         let seat = String(r.studentSeat).padStart(2, '0');
         try {
           const parsed = typeof r.answers === 'string' ? JSON.parse(r.answers) : r.answers;
@@ -1008,82 +1036,112 @@
           ...r,
           studentSeat: seat,
           studentName: String(r.studentName || '').trim(),
-          _timeMs: timeMs
+          _timeMs: timeMs || idx
         };
       });
 
-      // 步驟 3：依時間戳記由舊到新排序 (新在後，確保最新提交具有最高優先權)
+      // 步驟 3：依時間戳記排序 (由舊到新)
       enriched.sort((a, b) => a._timeMs - b._timeMs);
 
-      // 步驟 4：規則 A - 學生姓名鎖定 (每位姓名只能擁有「最新提交」的那唯一一個座號)
-      // 若該學生之前曾誤選手機/平板遺留的舊座號，其舊座號會在此被自動釋放，歸還給真正的主人！
-      const studentLatestRecord = new Map();
-      enriched.forEach(rec => {
-        if (rec.studentName) {
-          studentLatestRecord.set(rec.studentName, rec);
+      // 步驟 4：追蹤每位學生最新選擇的座號 (若同名學生後續改選座號，自動追蹤最新座號)
+      const studentLatestSeat = new Map();
+      enriched.forEach(r => {
+        if (r.studentName) {
+          studentLatestSeat.set(r.studentName, r.studentSeat);
         }
       });
 
-      // 步驟 5：規則 B - 座號唯一性映射 (每個座號只保留最新且合法的學生提交)
-      const seatMap = new Map();
-      studentLatestRecord.forEach((latestRec) => {
-        const seat = latestRec.studentSeat;
-        if (seatMap.has(seat)) {
-          const existing = seatMap.get(seat);
-          if (latestRec._timeMs >= existing._timeMs) {
-            seatMap.set(seat, latestRec);
-          }
+      // 步驟 5：初始化座號分組映射
+      const seatDataMap = new Map();
+      for (let i = 1; i <= COURSE_CONFIG.maxSeatNumber; i++) {
+        const s = String(i).padStart(2, '0');
+        seatDataMap.set(s, {
+          activeRecords: [],
+          historicalRecords: [],
+          isConflict: false,
+          uniqueNames: []
+        });
+      }
+
+      // 步驟 6：將紀錄歸戶至各座號
+      enriched.forEach(r => {
+        const seat = r.studentSeat;
+        if (!seatDataMap.has(seat)) return;
+        const group = seatDataMap.get(seat);
+
+        const currentLatest = studentLatestSeat.get(r.studentName);
+        if (r.studentName && currentLatest && currentLatest !== seat) {
+          // 該學生先前曾誤選此座號，後續已改選至 currentLatest
+          group.historicalRecords.push(r);
         } else {
-          seatMap.set(seat, latestRec);
+          group.activeRecords.push(r);
         }
       });
 
-      // 步驟 6：保留手動補登或未填姓名的特殊紀錄
-      enriched.forEach(rec => {
-        if (!rec.studentName) {
-          const seat = rec.studentSeat;
-          if (!seatMap.has(seat) || rec._timeMs >= seatMap.get(seat)._timeMs) {
-            seatMap.set(seat, rec);
-          }
+      // 步驟 7：分析每個座號的衝突與建置最新榜單
+      const cleanList = [];
+      seatDataMap.forEach((group, seatStr) => {
+        // 時間降冪排序 (最新提交在最前)
+        group.activeRecords.sort((a, b) => b._timeMs - a._timeMs);
+        group.historicalRecords.sort((a, b) => b._timeMs - a._timeMs);
+
+        // 收集此座號下所有不重複的活躍學生姓名
+        const namesSet = new Set(group.activeRecords.map(r => r.studentName).filter(Boolean));
+        group.uniqueNames = Array.from(namesSet);
+
+        // 若有 2 位以上「不同姓名」的學生同時占用此座號，判定為【同號衝突】！
+        if (group.uniqueNames.length > 1) {
+          group.isConflict = true;
+        }
+
+        if (group.activeRecords.length > 0) {
+          cleanList.push(group.activeRecords[0]);
         }
       });
 
-      // 步驟 7：依座號升冪排序回傳乾淨不重複的名單
-      return Array.from(seatMap.values()).sort((a, b) => parseInt(a.studentSeat, 10) - parseInt(b.studentSeat, 10));
+      return { seatDataMap, cleanList };
     }
 
-    // 8. 將讀取的資料繪製上 30 人卡片矩陣
+    // 9. 將讀取的資料繪製上 30 人卡片矩陣 (支援同號衝突警示與姓名核對)
     function renderLiveDataToMatrix() {
       renderEmptySeatCards();
-
-      const recordMap = {};
-      currentLiveRecords.forEach(rec => {
-        const seat = String(rec.studentSeat).padStart(2, '0');
-        recordMap[seat] = rec;
-      });
 
       for (let i = 1; i <= COURSE_CONFIG.maxSeatNumber; i++) {
         const seatStr = i < 10 ? '0' + i : '' + i;
         const card = document.getElementById('seat_card_' + seatStr);
         if (!card) continue;
 
+        const group = currentSeatDataMap.get(seatStr) || { activeRecords: [], historicalRecords: [], isConflict: false, uniqueNames: [] };
+
         if (absentSeatsSet.has(seatStr)) {
-          // 請假狀態
+          // 狀態 1：請假狀態
           card.className = 'seat-card absent';
           card.querySelector('.seat-name').textContent = '請假';
           card.querySelector('.seat-status-text').textContent = '🏖️ 今日請假';
-        } else if (recordMap[seatStr]) {
-          // 已繳交狀態
-          const rec = recordMap[seatStr];
+        } else if (group.isConflict) {
+          // 狀態 2：⚠️ 同號衝突！(有 2 位以上不同學生誤劃此座號)
+          card.className = 'seat-card conflict';
+          card.querySelector('.seat-name').innerHTML = `⚠️ ${group.uniqueNames.join(' / ')}`;
+          card.querySelector('.seat-status-text').innerHTML = `
+            <span class="seat-conflict-badge">⚠️ 衝突 (${group.activeRecords.length}人)</span>
+            <div style="font-size: 0.72rem; color: #B45309; margin-top: 2px; font-weight: 700;">點擊核對身分 🔍</div>
+          `;
+          card.onclick = () => showConflictDetailModal(seatStr, group);
+        } else if (group.activeRecords.length > 0) {
+          // 狀態 3：正常已繳交狀態 (包含同一人多次提交)
+          const rec = group.activeRecords[0]; // 取該生最新一次作答
+          const subCount = group.activeRecords.length;
           card.className = 'seat-card submitted';
           card.querySelector('.seat-name').textContent = rec.studentName || '已交';
           card.querySelector('.seat-status-text').innerHTML = `
             <span class="seat-score-badge">${rec.score || 100} 分</span>
-            <div style="font-size: 0.75rem; color: #059669; margin-top: 2px;">已完成 ✅</div>
+            <div style="font-size: 0.75rem; color: #059669; margin-top: 2px;">
+              ${subCount > 1 ? `已交 (${subCount}次) ✅` : '已完成 ✅'}
+            </div>
           `;
-          card.onclick = () => showStudentDetailModal(rec);
+          card.onclick = () => showStudentDetailModal(rec, group);
         } else {
-          // 未繳交
+          // 狀態 4：未繳交
           card.className = 'seat-card missing';
           card.querySelector('.seat-name').textContent = '未交';
           card.querySelector('.seat-status-text').textContent = '加油中 💪';
@@ -1272,8 +1330,8 @@
       }
     }
 
-    // 16. 檢視學生作答彈窗
-    function showStudentDetailModal(rec) {
+    // 16. 檢視學生作答彈窗 (支援多次提交歷程展示)
+    function showStudentDetailModal(rec, group) {
       document.getElementById('modalDetailTitle').textContent = `${rec.studentClass} 班 ${rec.studentSeat} 號 ${rec.studentName} 同學作答詳情`;
       
       let answersHtml = '';
@@ -1281,23 +1339,84 @@
         const ans = typeof rec.answers === 'string' ? JSON.parse(rec.answers) : rec.answers;
         answersHtml = Object.keys(ans).map(k => `
           <div style="margin-bottom: 0.6rem;">
-            <div style="font-weight: 700; color: var(--dash-primary);">題目/欄位代號 [${k}]：</div>
-            <div style="background: #FFFFFF; padding: 0.4rem 0.6rem; border-radius: 6px; border: 1px solid #CBD5E1;">${Array.isArray(ans[k]) ? ans[k].join(', ') : ans[k]}</div>
+            <div style="font-weight: 700; color: var(--dash-primary); font-size: 0.9rem;">題目代號 [${k}]：</div>
+            <div style="background: #FFFFFF; padding: 0.45rem 0.65rem; border-radius: 6px; border: 1px solid #CBD5E1; font-size: 0.95rem;">${Array.isArray(ans[k]) ? ans[k].join(', ') : ans[k]}</div>
           </div>
         `).join('');
       } catch (e) {
         answersHtml = '<div>原始作答：' + rec.answers + '</div>';
       }
 
+      // 若該生有多次繳交歷程（同姓名多次送出）
+      let historyPill = '';
+      if (group && group.activeRecords && group.activeRecords.length > 1) {
+        const historyItems = group.activeRecords.map((r, i) => `
+          <div style="font-size: 0.82rem; padding: 0.25rem 0.5rem; background: ${i === 0 ? '#DCFCE7' : '#F1F5F9'}; border-radius: 4px; margin-top: 3px; display: flex; justify-content: space-between;">
+            <span>${i === 0 ? '🌟 最新繳交' : '🕒 歷史稿件'}：${r.timestamp || '無時間'}</span>
+            <span style="font-weight: 700; color: ${i === 0 ? '#15803D' : '#64748B'};">${r.score} 分</span>
+          </div>
+        `).join('');
+
+        historyPill = `
+          <div style="background: #F0FDF4; border: 1px solid #86EFAC; padding: 0.6rem 0.8rem; border-radius: 8px; margin-bottom: 0.8rem;">
+            <div style="font-size: 0.85rem; font-weight: 700; color: #166534;">📝 該生累計提交 ${group.activeRecords.length} 次，系統目前展示最高/最新有效評分：</div>
+            ${historyItems}
+          </div>
+        `;
+      }
+
       document.getElementById('modalDetailBody').innerHTML = `
-        <div style="margin-bottom: 0.8rem; font-weight: 700; color: #10B981;">
-          🎯 系統初評得分：${rec.score} 分 | 提交時間：${rec.timestamp || '無'}
+        ${historyPill}
+        <div style="margin-bottom: 0.6rem; font-weight: 700; color: #10B981; font-size: 1.05rem;">
+          🎯 評定得分：${rec.score} 分 | 最新提交時間：${rec.timestamp || '無'}
         </div>
-        <div style="margin-bottom: 0.8rem; color: var(--text-muted);">
+        <div style="margin-bottom: 0.8rem; color: var(--text-muted); font-size: 0.9rem;">
           組別：${rec.studentGroup} | 評分明細：${rec.scoreBreakdown || '無'}
         </div>
         <hr style="margin: 0.8rem 0; border: none; border-top: 1px solid var(--border);">
         ${answersHtml}
+      `;
+
+      document.getElementById('studentDetailModal').classList.add('active');
+    }
+
+    // 17. ⚠️ 同號衝突檢視彈窗 (供教師依真實姓名逐一核驗不同學生)
+    function showConflictDetailModal(seatStr, group) {
+      const classVal = document.getElementById('selectClass').value;
+      document.getElementById('modalDetailTitle').innerHTML = `⚠️ <span style="color: #DC2626;">${classVal} 班 ${seatStr} 號 【同號衝突比對】</span> (共 ${group.activeRecords.length} 位不同學生)`;
+
+      const studentsHtml = group.activeRecords.map((r, idx) => {
+        let ansPreview = '';
+        try {
+          const ans = typeof r.answers === 'string' ? JSON.parse(r.answers) : r.answers;
+          ansPreview = Object.keys(ans).slice(0, 3).map(k => `<b>[${k}]</b> ${Array.isArray(ans[k]) ? ans[k].join(', ') : ans[k]}`).join(' ； ');
+        } catch(e) {
+          ansPreview = String(r.answers);
+        }
+
+        return `
+          <div style="border: 2px solid ${idx === 0 ? '#F59E0B' : '#E2E8F0'}; border-radius: 10px; padding: 0.8rem 1rem; margin-bottom: 0.8rem; background: #FFFFFF;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+              <span style="font-size: 1.15rem; font-weight: 800; color: #1E293B;">👤 學生姓名：<span style="color: #0284C7;">${r.studentName || '(未填姓名)'}</span></span>
+              <span style="font-weight: 800; color: #10B981; font-size: 1.1rem; background: #ECFDF5; padding: 0.15rem 0.5rem; border-radius: 6px;">${r.score} 分</span>
+            </div>
+            <div style="font-size: 0.85rem; color: #64748B; margin-bottom: 0.4rem;">
+              ⏰ 提交時間：${r.timestamp || '無'} | 🏷️ 組別：${r.studentGroup}
+            </div>
+            <div style="font-size: 0.85rem; color: #475569; background: #F8FAFC; padding: 0.4rem 0.6rem; border-radius: 6px; border: 1px dashed #CBD5E1;">
+              💡 核心作答摘要：${ansPreview || '無作答內容'}
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      document.getElementById('modalDetailBody').innerHTML = `
+        <div style="background: #FFFBEB; border: 1px solid #FCD34D; border-radius: 8px; padding: 0.75rem 0.9rem; margin-bottom: 1rem; color: #92400E; font-size: 0.9rem; line-height: 1.6;">
+          📢 <strong>教師判讀指引</strong>：系統偵測到此座號有 <strong>${group.activeRecords.length} 位不同姓名</strong> 的同學提交。請老師依上方學生姓名確認哪一位才是本班該座號同學。<br>
+          • 誤劃的同學可通知其重新選擇正確座號送出，系統將自動歸位。<br>
+          • 兩位同學之作答與成績皆已 100% 完整保留在 Google 試算表中，絕無遺失！
+        </div>
+        ${studentsHtml}
       `;
 
       document.getElementById('studentDetailModal').classList.add('active');

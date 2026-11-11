@@ -152,8 +152,14 @@ function doPost(e) {
     var targetName = String(data.studentName || "").trim();
     var existingRowIndex = -1;
 
-    // 🔍 防重複洗板與錯位覆蓋檢查：
-    // 比對條件：同班級下，若「座號相同」或「姓名相同（防止改座號重複洗板殘留幽靈列）」，皆視為同一位學生的更新！
+    // 🔍 試算表嚴格保全機制 (絕對保護每位學生，絕不被他人覆蓋)：
+    // 1. 若為「教師手動補登」：以座號為準進行補登或更新
+    // 2. 若為「學生自主繳交」：
+    //    - 僅當「同班級 且 同姓名」時才視為該學生本人重交/修改座號，原地更新該列；
+    //    - 若該座號已存在其他人（姓名不同）：【絕對不可覆蓋他人】，直接新增一列 (appendRow)！
+    //    確保兩位同學的姓名、作答與分數 100% 完整留存於試算表，供教師親自憑姓名核對！
+    var isManualGrade = (data.studentGroup === "教師手動補登" || (data.answers && data.answers.manual));
+
     if (sheet.getLastRow() > 1) {
       var existingData = sheet.getRange(2, 2, sheet.getLastRow() - 1, 3).getValues(); // 班級(欄2), 座號(欄3), 姓名(欄4)
       for (var r = 0; r < existingData.length; r++) {
@@ -163,15 +169,19 @@ function doPost(e) {
         var rowName = String(existingData[r][2] || "").trim();
 
         if (rowClass === targetClass) {
-          // 1. 若同班且姓名相符：學生修正座號重交，優先覆蓋此列，避免在舊座號殘留幽靈紀錄！
-          if (targetName && rowName === targetName) {
-            existingRowIndex = r + 2;
-            break;
-          }
-          // 2. 若同班且座號相符：同座號更新或教師手動補登
-          if (rowSeatStr === targetSeat) {
-            existingRowIndex = r + 2;
-            break;
+          if (isManualGrade) {
+            // 教師手動補登：座號相同即更新
+            if (rowSeatStr === targetSeat) {
+              existingRowIndex = r + 2;
+              break;
+            }
+          } else {
+            // 學生自主繳交：必須「姓名完全相同」才視為本人更新覆蓋！
+            // 若姓名不同，絕不覆蓋，保留至全新一列！
+            if (targetName && rowName === targetName) {
+              existingRowIndex = r + 2;
+              break;
+            }
           }
         }
       }
@@ -425,37 +435,20 @@ function deduplicateRecordsList(records) {
 
   enriched.sort(function(a, b) { return a.timeMs - b.timeMs; });
 
+  // 🛡️ 伺服器端資料保全原則：
+  // 1. 同一位學生 (同班同姓名) 重複提交時，保留最新一次的作答紀錄
+  // 2. 若不同學生填寫了相同座號 (誤劃衝突)：絕對不剔除任何一人，兩人均完整保留並傳回！
   var studentLatest = {};
   enriched.forEach(function(rec) {
     if (rec.name) {
       studentLatest[rec.cls + '_' + rec.name] = rec;
-    }
-  });
-
-  var seatMap = {};
-  Object.keys(studentLatest).forEach(function(k) {
-    var rec = studentLatest[k];
-    var seatKey = rec.cls + '_' + rec.seat;
-    if (seatMap[seatKey]) {
-      if (rec.timeMs >= seatMap[seatKey].timeMs) {
-        seatMap[seatKey] = rec;
-      }
     } else {
-      seatMap[seatKey] = rec;
+      studentLatest['anon_' + rec.cls + '_' + rec.seat + '_' + rec.timeMs] = rec;
     }
   });
 
-  enriched.forEach(function(rec) {
-    if (!rec.name) {
-      var seatKey = rec.cls + '_' + rec.seat;
-      if (!seatMap[seatKey] || rec.timeMs >= seatMap[seatKey].timeMs) {
-        seatMap[seatKey] = rec;
-      }
-    }
-  });
-
-  var res = Object.keys(seatMap).map(function(k) {
-    var item = seatMap[k];
+  var res = Object.keys(studentLatest).map(function(k) {
+    var item = studentLatest[k];
     var r = item.raw;
     r.studentSeat = item.seat;
     return r;
@@ -464,7 +457,8 @@ function deduplicateRecordsList(records) {
   res.sort(function(a, b) {
     var sa = parseInt(a.studentSeat, 10);
     var sb = parseInt(b.studentSeat, 10);
-    return sa - sb;
+    if (sa !== sb) return sa - sb;
+    return (a.timeMs || 0) - (b.timeMs || 0);
   });
 
   return res;
@@ -473,8 +467,10 @@ function deduplicateRecordsList(records) {
 /**
  * ==========================================================================
  * 🧹 一鍵清除與修復全試算表重複錯位紀錄 (Google Sheets 專用管理維護工具)
- * 自動掃描所有「第X週作答紀錄」工作表，清除跨座號幽靈列、保留最新有效作答，
- * 並依班級、座號 ('01~'35) 重新排序且套用高雅綠美化格式！
+ * 自動掃描所有「第X週作答紀錄」工作表：
+ * 1. 僅清理「同班級同姓名」的重複洗板歷史舊稿，保留最新有效成績
+ * 2. 嚴格保全：若有多位不同學生誤劃同座號，絕對 100% 完整保留各自列，供教師核對姓名
+ * 3. 依班級、座號 ('01~'35) 自動美化與排序！
  * ==========================================================================
  */
 function cleanAllSheetsDuplicates() {
@@ -533,45 +529,24 @@ function cleanAllSheetsDuplicates() {
       // 依時間舊到新排序
       parsedRecords.sort(function(a, b) { return a.timeMs - b.timeMs; });
 
-      // 規則 1：同班級每位姓名只保留最新一次的提交座號
+      // 🛡️ 安全去重核心：只清理同班級「同一姓名」的多次提交舊列，絕不刪除任何不同姓名的學生！
       var studentLatest = {};
       parsedRecords.forEach(function(rec) {
         if (rec.name) {
           studentLatest[rec.cls + '_' + rec.name] = rec;
-        }
-      });
-
-      // 規則 2：映射至座號，確保每班每個座號只有一位最新合法學生
-      var seatMap = {};
-      Object.keys(studentLatest).forEach(function(k) {
-        var rec = studentLatest[k];
-        var seatKey = rec.cls + '_' + rec.seat;
-        if (seatMap[seatKey]) {
-          if (rec.timeMs >= seatMap[seatKey].timeMs) {
-            seatMap[seatKey] = rec;
-          }
         } else {
-          seatMap[seatKey] = rec;
+          studentLatest['anon_' + rec.cls + '_' + rec.seat + '_' + rec.timeMs] = rec;
         }
       });
 
-      // 補入手動補登或無名紀錄
-      parsedRecords.forEach(function(rec) {
-        if (!rec.name) {
-          var seatKey = rec.cls + '_' + rec.seat;
-          if (!seatMap[seatKey] || rec.timeMs >= seatMap[seatKey].timeMs) {
-            seatMap[seatKey] = rec;
-          }
-        }
-      });
-
-      // 輸出排序後乾淨資料
-      var cleanList = Object.keys(seatMap).map(function(k) { return seatMap[k]; });
+      // 輸出排序後乾淨資料 (同座號有不同學生時，並列呈現供教師判別)
+      var cleanList = Object.keys(studentLatest).map(function(k) { return studentLatest[k]; });
       cleanList.sort(function(a, b) {
         if (a.cls !== b.cls) return a.cls.localeCompare(b.cls);
         var sa = parseInt(a.seat, 10);
         var sb = parseInt(b.seat, 10);
-        return sa - sb;
+        if (sa !== sb) return sa - sb;
+        return a.timeMs - b.timeMs;
       });
 
       var rowsDiff = rawRows.length - cleanList.length;
