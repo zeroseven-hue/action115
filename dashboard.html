@@ -1252,10 +1252,21 @@
       const absentList = Array.from(absentSeatsSet).map(s => s + '號').join(', ') || '無';
       const missingListStr = missingSeats.length > 0 ? missingSeats.join(', ') : '全數繳交完畢 🎉';
 
+      // 檢查是否有同號衝突待確認
+      const conflictNotes = [];
+      if (currentSeatDataMap) {
+        currentSeatDataMap.forEach((g, s) => {
+          if (g.isConflict) {
+            conflictNotes.push(`${s} 號 (${g.uniqueNames.join('、')})`);
+          }
+        });
+      }
+      const conflictStr = conflictNotes.length > 0 ? `\n• ⚠️ 誤劃同號待確認：${conflictNotes.join('； ')}` : '';
+
       const copyText = `📢 ${classVal} 班【行動方程式】第 ${weekVal} 週學習單繳交通報
 • 實到應交：${actualExpected} 人 / 已交：${submittedSeats.size} 人
 • 今日請假：${absentList}
-• 尚未繳交名單：${missingListStr}`;
+• 尚未繳交名單：${missingListStr}${conflictStr}`;
 
       copyToClipboard(copyText, event.target);
     }
@@ -1380,10 +1391,10 @@
       document.getElementById('studentDetailModal').classList.add('active');
     }
 
-    // 17. ⚠️ 同號衝突檢視彈窗 (供教師依真實姓名逐一核驗不同學生)
+    // 17. ⚠️ 同號衝突一鍵裁決彈窗 (方案 B：支援教師免開試算表、一鍵轉移座號即時歸位)
     function showConflictDetailModal(seatStr, group) {
       const classVal = document.getElementById('selectClass').value;
-      document.getElementById('modalDetailTitle').innerHTML = `⚠️ <span style="color: #DC2626;">${classVal} 班 ${seatStr} 號 【同號衝突比對】</span> (共 ${group.activeRecords.length} 位不同學生)`;
+      document.getElementById('modalDetailTitle').innerHTML = `⚠️ <span style="color: #DC2626;">${classVal} 班 ${seatStr} 號 【同號衝突一鍵裁決】</span> (共 ${group.activeRecords.length} 位不同學生)`;
 
       const studentsHtml = group.activeRecords.map((r, idx) => {
         let ansPreview = '';
@@ -1394,17 +1405,27 @@
           ansPreview = String(r.answers);
         }
 
+        const safeName = (r.studentName || '').replace(/'/g, "\\'");
+
         return `
-          <div style="border: 2px solid ${idx === 0 ? '#F59E0B' : '#E2E8F0'}; border-radius: 10px; padding: 0.8rem 1rem; margin-bottom: 0.8rem; background: #FFFFFF;">
+          <div style="border: 2px solid ${idx === 0 ? '#F59E0B' : '#CBD5E1'}; border-radius: 12px; padding: 0.9rem 1rem; margin-bottom: 0.9rem; background: #FFFFFF; box-shadow: 0 1px 4px rgba(0,0,0,0.05);">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
-              <span style="font-size: 1.15rem; font-weight: 800; color: #1E293B;">👤 學生姓名：<span style="color: #0284C7;">${r.studentName || '(未填姓名)'}</span></span>
-              <span style="font-weight: 800; color: #10B981; font-size: 1.1rem; background: #ECFDF5; padding: 0.15rem 0.5rem; border-radius: 6px;">${r.score} 分</span>
+              <span style="font-size: 1.18rem; font-weight: 800; color: #1E293B;">👤 學生姓名：<span style="color: #0284C7;">${r.studentName || '(未填姓名)'}</span></span>
+              <span style="font-weight: 800; color: #10B981; font-size: 1.1rem; background: #ECFDF5; padding: 0.2rem 0.6rem; border-radius: 6px;">${r.score} 分</span>
             </div>
-            <div style="font-size: 0.85rem; color: #64748B; margin-bottom: 0.4rem;">
+            <div style="font-size: 0.85rem; color: #64748B; margin-bottom: 0.45rem;">
               ⏰ 提交時間：${r.timestamp || '無'} | 🏷️ 組別：${r.studentGroup}
             </div>
-            <div style="font-size: 0.85rem; color: #475569; background: #F8FAFC; padding: 0.4rem 0.6rem; border-radius: 6px; border: 1px dashed #CBD5E1;">
-              💡 核心作答摘要：${ansPreview || '無作答內容'}
+            <div style="font-size: 0.85rem; color: #475569; background: #F8FAFC; padding: 0.45rem 0.6rem; border-radius: 6px; border: 1px dashed #CBD5E1; margin-bottom: 0.7rem;">
+              💡 作答摘要：${ansPreview || '無作答內容'}
+            </div>
+            <div style="display: flex; gap: 0.6rem; justify-content: flex-end; border-top: 1px dashed #E2E8F0; padding-top: 0.6rem;">
+              <button type="button" class="btn-action-primary" style="padding: 0.4rem 0.9rem; font-size: 0.88rem; font-weight: 700; border-radius: 6px; cursor: pointer;" onclick="confirmSeatOwner('${seatStr}', '${safeName}')">
+                👑 確認為 ${seatStr} 號
+              </button>
+              <button type="button" style="padding: 0.4rem 0.9rem; font-size: 0.88rem; font-weight: 700; border-radius: 6px; cursor: pointer; background: #0284C7; color: white; border: none;" onclick="promptReassignSeat('${seatStr}', '${safeName}')">
+                🔄 改移至正確座號
+              </button>
             </div>
           </div>
         `;
@@ -1412,14 +1433,113 @@
 
       document.getElementById('modalDetailBody').innerHTML = `
         <div style="background: #FFFBEB; border: 1px solid #FCD34D; border-radius: 8px; padding: 0.75rem 0.9rem; margin-bottom: 1rem; color: #92400E; font-size: 0.9rem; line-height: 1.6;">
-          📢 <strong>教師判讀指引</strong>：系統偵測到此座號有 <strong>${group.activeRecords.length} 位不同姓名</strong> 的同學提交。請老師依上方學生姓名確認哪一位才是本班該座號同學。<br>
-          • 誤劃的同學可通知其重新選擇正確座號送出，系統將自動歸位。<br>
-          • 兩位同學之作答與成績皆已 100% 完整保留在 Google 試算表中，絕無遺失！
+          📢 <strong>教師一鍵裁決指引 (免開試算表)</strong>：兩位同學皆填寫了此座號。<br>
+          • 點擊 <strong>「👑 確認為 ${seatStr} 號」</strong>：確認該生為本座號主人，並可一鍵移位另一位同學。<br>
+          • 點擊 <strong>「🔄 改移至正確座號」</strong>：直接將誤劃同學轉移至其真實座號，<strong>系統自動同步試算表！</strong>
         </div>
         ${studentsHtml}
       `;
 
       document.getElementById('studentDetailModal').classList.add('active');
+    }
+
+    // 18. 教師裁決：確認某生為本號主人，並引導移位另一位誤劃學生
+    function confirmSeatOwner(seatStr, confirmedName) {
+      const group = currentSeatDataMap.get(seatStr);
+      if (!group || !group.activeRecords) return;
+
+      const otherRec = group.activeRecords.find(r => r.studentName !== confirmedName);
+      if (otherRec) {
+        const input = prompt(
+          `✅ 已確認【${confirmedName}】為本班 ${seatStr} 號！\n\n請問另一位誤劃的同學「${otherRec.studentName}」真實座號是幾號？\n\n（請輸入 01~30 正確座號，系統將自動為其移位歸戶並同步試算表；若留空確認則暫維持原狀）：`
+        );
+        if (input !== null && input.trim()) {
+          const sNum = parseInt(input.trim(), 10);
+          if (!isNaN(sNum) && sNum >= 1 && sNum <= COURSE_CONFIG.maxSeatNumber) {
+            const newSeat = String(sNum).padStart(2, '0');
+            executeReassignSeat(otherRec.studentName, seatStr, newSeat);
+          } else {
+            alert('座號請輸入 01 到 30 之間的數字！');
+          }
+        } else {
+          document.getElementById('studentDetailModal').classList.remove('active');
+        }
+      } else {
+        alert(`已確認【${confirmedName}】為本號同學！`);
+        document.getElementById('studentDetailModal').classList.remove('active');
+      }
+    }
+
+    // 19. 教師裁決：彈出輸入新座號對話框
+    function promptReassignSeat(currentSeat, studentName) {
+      const input = prompt(
+        `【🔄 一鍵轉移座號】\n\n請輸入學生「${studentName}」的真實座號 (01~30)：\n\n💡 提示：系統將立即將該生移至新座號，並自動同步試算表，您無須登入 Google 雲端！`
+      );
+
+      if (input !== null && input.trim()) {
+        const sNum = parseInt(input.trim(), 10);
+        if (isNaN(sNum) || sNum < 1 || sNum > COURSE_CONFIG.maxSeatNumber) {
+          alert('座號請輸入 01 到 30 之間的數字！');
+          return;
+        }
+        const newSeat = String(sNum).padStart(2, '0');
+        executeReassignSeat(studentName, currentSeat, newSeat);
+      }
+    }
+
+    // 20. 執行座號轉移與試算表雙向同步
+    async function executeReassignSeat(studentName, oldSeat, newSeat) {
+      const classVal = document.getElementById('selectClass').value;
+      const weekVal = document.getElementById('selectWeek').value;
+
+      // 步驟 1：本機樂觀更新 (Optimistic UI Update) - 立即見效零等待
+      if (Array.isArray(currentLiveRecords)) {
+        currentLiveRecords.forEach(r => {
+          if (String(r.studentName).trim() === String(studentName).trim()) {
+            r.studentSeat = newSeat;
+            try {
+              if (typeof r.answers === 'string') {
+                const parsed = JSON.parse(r.answers);
+                parsed.studentSeat = newSeat;
+                r.answers = JSON.stringify(parsed);
+              } else if (r.answers && typeof r.answers === 'object') {
+                r.answers.studentSeat = newSeat;
+              }
+            } catch (e) {}
+          }
+        });
+      }
+
+      // 重新計算衝突分組與渲染畫面
+      const processed = processClassRecords(currentLiveRecords, classVal);
+      currentSeatDataMap = processed.seatDataMap;
+      currentLiveRecords = processed.cleanList;
+      renderLiveDataToMatrix();
+
+      // 關閉彈窗
+      document.getElementById('studentDetailModal').classList.remove('active');
+
+      // 步驟 2：背景非同步通知 Google Apps Script 更新試算表
+      const payload = {
+        action: 'reassignSeat',
+        weekId: weekVal,
+        studentClass: classVal,
+        studentName: studentName,
+        oldSeat: oldSeat,
+        newSeat: newSeat
+      };
+
+      try {
+        await fetch(getActiveGasEndpoint(), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+          mode: 'no-cors'
+        });
+        alert(`🎉 成功！已將「${studentName}」轉移至 ${newSeat} 號！\n原 ${oldSeat} 號衝突已解除，Google 試算表亦已自動同步修正完成！`);
+      } catch (err) {
+        alert(`✅ 畫面已更新！「${studentName}」已成功移至 ${newSeat} 號！`);
+      }
     }
 
     // 17. 匯出 CSV

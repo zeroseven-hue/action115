@@ -118,6 +118,75 @@ function doPost(e) {
       })).setMimeType(ContentService.MimeType.JSON);
     }
 
+    // 模式 C：教師一鍵轉移座號 (同號衝突即時裁決，無須登入試算表)
+    if (data.action === "reassignSeat") {
+      var targetWeek = data.weekId || "1";
+      var targetClass = String(data.studentClass || "").trim();
+      var studentName = String(data.studentName || "").trim();
+      var newSeatNum = parseInt(data.newSeat, 10);
+      var newSeatStr = (!isNaN(newSeatNum) && newSeatNum > 0) ? String(newSeatNum).padStart(2, '0') : String(data.newSeat || "").trim();
+
+      var sheetName = "第" + targetWeek + "週作答紀錄";
+      var sheet = ss.getSheetByName(sheetName);
+
+      if (!sheet || sheet.getLastRow() < 2) {
+        return ContentService.createTextOutput(JSON.stringify({
+          status: "error",
+          message: "找不到第 " + targetWeek + " 週作答紀錄表！"
+        })).setMimeType(ContentService.MimeType.JSON);
+      }
+
+      var rowCount = sheet.getLastRow() - 1;
+      var classRange = sheet.getRange(2, 2, rowCount, 3).getValues(); // 班級(欄2), 座號(欄3), 姓名(欄4)
+      var targetRow = -1;
+
+      for (var r = 0; r < classRange.length; r++) {
+        var rClass = String(classRange[r][0]).trim();
+        var rName = String(classRange[r][2]).trim();
+        if (rClass === targetClass && rName === studentName) {
+          targetRow = r + 2;
+          break;
+        }
+      }
+
+      if (targetRow > 0) {
+        // 更新座號為新座號 (加上單引號保留前導 0)
+        sheet.getRange(targetRow, 3).setValue("'" + newSeatStr);
+
+        // 同步更新 answers JSON 中的 studentSeat
+        try {
+          var ansCell = sheet.getRange(targetRow, 8).getValue();
+          if (ansCell) {
+            var ansObj = typeof ansCell === "string" ? JSON.parse(ansCell) : ansCell;
+            if (ansObj && typeof ansObj === "object") {
+              ansObj.studentSeat = newSeatStr;
+              sheet.getRange(targetRow, 8).setValue(JSON.stringify(ansObj));
+            }
+          }
+        } catch (e) {}
+
+        // 重新依班級、座號排序並美化格式
+        try {
+          var dataRange = sheet.getRange(2, 1, rowCount, 8);
+          dataRange.sort([
+            { column: 2, ascending: true },
+            { column: 3, ascending: true }
+          ]);
+          formatWeekSheet(sheet);
+        } catch (e) {}
+
+        return ContentService.createTextOutput(JSON.stringify({
+          status: "success",
+          message: "已成功將 " + studentName + " 座號轉移至 " + newSeatStr + " 號！"
+        })).setMimeType(ContentService.MimeType.JSON);
+      } else {
+        return ContentService.createTextOutput(JSON.stringify({
+          status: "warning",
+          message: "試算表中未找到學生 " + studentName + " 之紀錄！"
+        })).setMimeType(ContentService.MimeType.JSON);
+      }
+    }
+
     // 模式 B：學生送出作答 或 教師手動補登成績 (具備防重複繳交覆蓋與自動美化排序機制)
     var sheetName = "第" + (data.weekId || "1") + "週作答紀錄";
     var sheet = ss.getSheetByName(sheetName);
