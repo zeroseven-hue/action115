@@ -721,31 +721,38 @@ const UNIT_EVALUATION_CONFIG = {
     baseScore: 78,
     questions: [
       {
+        id: 'w5_q0_symptom',
+        name: '任務一 [地球會診危機與責任思辨]',
+        minLen: 12,
+        keywords: ['昏迷', '病徵', '暖化', '高溫', '垃圾', '海廢', '塑膠', '氣候', '真兇', '人類', '責任', '公民'],
+        weight: 2.5
+      },
+      {
         id: 'w5_q1_spirit',
         name: '任務一 [世界地球日由來與精神]',
-        minLen: 12,
-        keywords: ['地球日', '4月22', '環保', '意識', '行動', '守護', '綠色', '節日', '草根'],
-        weight: 3
+        minLen: 10,
+        keywords: ['地球日', '4月22', '4/22', '覺醒', '倡議', '法案', '草根', '學生', '守護', '綠色'],
+        weight: 2.5
       },
       {
         id: 'w5_q2_aim',
-        name: '任務一 [世界環境日時間與主旨]',
-        minLen: 12,
-        keywords: ['環境日', '6月5', '聯合國', '塑膠', '污染', '氣候', '永續', '倡議'],
-        weight: 3
+        name: '任務一 [世界清潔日時間與主旨]',
+        minLen: 10,
+        keywords: ['清潔日', '9月', '清理', '動手', '實踐', '愛沙尼亞', '志工', '垃圾', '廢棄物'],
+        weight: 2.5
       },
       {
         id: 'w5_q3_content',
         name: '任務二 [全球綠色案例資訊統整]',
         minLen: 15,
-        keywords: ['案例', '政策', '禁塑', '減塑', '能源', '太陽能', '風電', '回收', '減碳', '法律', '國家', '永續'],
-        weight: 4
+        keywords: ['案例', '政策', '禁塑', '減塑', '押金', '清理', '回收', '減碳', '法律', '國家', '永續', '科技'],
+        weight: 3.5
       },
       {
         id: 'w5_roles',
-        name: '任務三 [小組團隊角色分工]',
+        name: '任務三 [下週成果發表團隊分工]',
         isRoleCheck: true,
-        roleKeys: ['w5_leader', 'w5_searcher', 'w5_presenter'],
+        roleKeys: ['w5_leader', 'w5_searcher', 'w5_designer', 'w5_presenter'],
         weight: 3
       }
     ],
