@@ -1042,6 +1042,28 @@ async function submitWorksheet(weekId, scoreCalculator) {
     return;
   }
 
+  // 1.2 檢查自我檢核表是否完成自評（防滑水未看題目就交卷）
+  const check1Selected = document.querySelector('input[name="check1"]:checked');
+  const check2Selected = document.querySelector('input[name="check2"]:checked');
+  const check3Selected = document.querySelector('input[name="check3"]:checked');
+  if (document.querySelector('input[name="check1"]') && (!check1Selected || !check2Selected || !check3Selected)) {
+    alert('⚠️ 請完成下方的「學習表現自我檢核表」，誠實自評各項學習表現後再送出！');
+    const chkTable = document.querySelector('.check-table');
+    if (chkTable) chkTable.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
+
+  // 1.3 特殊單選題檢查（例如第 8 週選擇題）
+  if (weekId === '8') {
+    const senseSelected = document.querySelector('input[name="w8_sense"]:checked');
+    if (!senseSelected) {
+      alert('⚠️ 任務一第 3 題「海豚的生存感知之眼」尚未選擇答案，請點選後再送出！');
+      const senseEl = document.querySelector('input[name="w8_sense"]');
+      if (senseEl) senseEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+  }
+
   // 1.5 🔍 雙重送出確認對話框 (顯示班級、座號、姓名確認，防手滑與防冒名)
   const confirmSubmit = await new Promise(resolve => {
     let confirmModal = document.getElementById('submitConfirmModal');

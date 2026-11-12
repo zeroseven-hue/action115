@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>【行動方程式】第 5 週：地球公民——環境保育一起來</title>
-  <link rel="stylesheet" href="assets/css/style.css?v=1.4">
+  <link rel="stylesheet" href="assets/css/style.css?v=1.5">
   <script src="assets/js/qrcode.min.js"></script>
 </head>
 <body>
@@ -63,8 +63,9 @@
     <!-- 影音引導專區 -->
     <div class="card">
       <h3 class="card-title">🎬 課堂引導精選影音專區</h3>
-      <p class="question-desc">請點擊觀看以下兩段引導影片，感受地球面臨的危機震撼，並理解地球日與清潔日的誕生義涵：</p>
+      <p class="question-desc">請點擊觀看以下精選短片，感受地球面臨的危機震撼，並理解地球日與清潔日的誕生義涵：</p>
       
+      <!-- 第一部：危機 -->
       <div style="margin-bottom: 1.5rem;">
         <h4 style="margin: 0.5rem 0; font-size: 1.05rem; color: #1E293B;">
           1. 危機思辨短片：《地球昏迷中，誰是真兇？｜地球日和 EP01》
@@ -75,13 +76,25 @@
         </div>
       </div>
 
-      <div>
+      <!-- 第二部：地球日由來 -->
+      <div style="margin-bottom: 1.5rem;">
         <h4 style="margin: 0.5rem 0; font-size: 1.05rem; color: #1E293B;">
-          2. 由來義涵短片：Discovery 介紹世界地球日起源短片
+          2. 地球日由來短片：Discovery 介紹世界地球日起源短片（意識覺醒）
           <a href="https://youtu.be/ygCfh1ZBpHM" target="_blank" rel="noopener noreferrer" style="font-size: 0.9rem; color: #2563EB; margin-left: 0.5rem; text-decoration: underline;">🔗 點此另開 YouTube 觀看</a>
         </h4>
         <div class="video-container">
           <iframe src="https://www.youtube.com/embed/ygCfh1ZBpHM" title="Discovery 世界地球日起源短片" allowfullscreen></iframe>
+        </div>
+      </div>
+
+      <!-- 第三部：清潔日實踐 -->
+      <div>
+        <h4 style="margin: 0.5rem 0; font-size: 1.05rem; color: #1E293B;">
+          3. 清潔日實踐短片：《2022世界環境清潔日宣傳片_正式篇》（Let's Do It Taiwan 熱血行動）
+          <a href="https://youtu.be/jJmNYkdA6DY" target="_blank" rel="noopener noreferrer" style="font-size: 0.9rem; color: #D97706; margin-left: 0.5rem; text-decoration: underline;">🔗 點此另開 YouTube 觀看</a>
+        </h4>
+        <div class="video-container">
+          <iframe src="https://www.youtube.com/embed/jJmNYkdA6DY" title="2022世界環境清潔日宣傳片" allowfullscreen></iframe>
         </div>
       </div>
     </div>
@@ -93,22 +106,22 @@
 
       <div class="question-item">
         <div class="question-title">1. 地球會診思辨：影片中地球出現了哪些病徵？誰是讓地球昏迷的「真兇」？我們身為地球公民能做什麼？</div>
-        <textarea id="w5_q0_symptom" class="form-control" placeholder="寫下影片中地球的危機病徵（例如體溫飆高、海廢污染、極端氣候）、誰該負起責任，以及我們能扮演的角色..."></textarea>
+        <textarea id="w5_q0_symptom" class="form-control" placeholder="請依據影片內容，說明地球面臨的危機病徵、真兇是誰，以及個人可以發揮的行動（建議 15 字以上）..."></textarea>
       </div>
 
       <div class="question-item">
         <div class="question-title">2. 「世界地球日 (Earth Day)」為每年的哪一天？其核心精神是什麼？（覺醒倡議）</div>
         <div style="display: grid; grid-template-columns: 180px 1fr; gap: 0.6rem; margin-bottom: 0.5rem;">
-          <input type="text" id="w5_q1_date" class="form-control" placeholder="日期 (如：4月22日)">
-          <input type="text" id="w5_q1_spirit" class="form-control" placeholder="核心精神 (如：觀念覺醒、法案催生、跨國環保倡議)">
+          <input type="text" id="w5_q1_date" class="form-control" placeholder="請填寫月份與日期（例：○月○日）">
+          <input type="text" id="w5_q1_spirit" class="form-control" placeholder="請簡述地球日發起的核心理念與推動方向...">
         </div>
       </div>
 
       <div class="question-item">
         <div class="question-title">3. 「世界清潔日 (World Cleanup Day)」舉辦時間與全球萬人參與的目的為何？（動手實踐）</div>
         <div style="display: grid; grid-template-columns: 240px 1fr; gap: 0.6rem;">
-          <input type="text" id="w5_q2_time" class="form-control" placeholder="舉辦時間 (如：9月第三個週六)">
-          <input type="text" id="w5_q2_aim" class="form-control" placeholder="目的 (如：挽起袖子動手實踐、全民一天清光廢棄物)">
+          <input type="text" id="w5_q2_time" class="form-control" placeholder="請填寫舉辦時間（例：○月第○個週○）">
+          <input type="text" id="w5_q2_aim" class="form-control" placeholder="請簡述清潔日號召全球志工動手的核心目的...">
         </div>
       </div>
     </div>
@@ -120,10 +133,10 @@
 
       <div class="question-item">
         <div style="display: grid; grid-template-columns: 180px 1fr; gap: 0.6rem; margin-bottom: 0.8rem;">
-          <input type="text" id="w5_q3_country" class="form-control" placeholder="國家/地區 (如：德國/愛沙尼亞/荷蘭)">
-          <input type="text" id="w5_q3_title" class="form-control" placeholder="行動主題 (如：空瓶押金循環/海洋清理船/綠色長城)">
+          <input type="text" id="w5_q3_country" class="form-control" placeholder="請輸入查找到的國家或地區">
+          <input type="text" id="w5_q3_title" class="form-control" placeholder="請輸入該項行動或政策的主題名稱">
         </div>
-        <textarea id="w5_q3_content" class="form-control" placeholder="具體作為與給予我們的啟示（例如：該國如何透過政策、科技或全民動員成功推動環境永續）..."></textarea>
+        <textarea id="w5_q3_content" class="form-control" placeholder="請具體描述該國採取的保育做法、實施成效，以及對我們生活帶來的啟發（建議 20 字以上）..."></textarea>
       </div>
     </div>
 
@@ -165,10 +178,10 @@
       </table>
     </div>
 
-    <!-- 檢核表 -->
+    <!-- 檢核表（未預選，必勾防呆） -->
     <div class="card">
       <h3 class="card-title">📝 學習表現自我檢核表</h3>
-      <p class="question-desc">請誠實回顧本節課的學習狀態，為自己進行自評：</p>
+      <p class="question-desc">請誠實回顧本節課的學習狀態，為自己進行自評（每題皆須完成點選）：</p>
       <table class="check-table">
         <thead>
           <tr>
@@ -180,21 +193,21 @@
           <tr>
             <td>1. 我能專注觀賞影音引導，並理解地球日（覺醒）與清潔日（實踐）的深刻義涵。</td>
             <td>
-              <label><input type="radio" name="check1" value="yes" checked> 是</label>&nbsp;&nbsp;
+              <label><input type="radio" name="check1" value="yes"> 是</label>&nbsp;&nbsp;
               <label><input type="radio" name="check1" value="need_work"> 需加油</label>
             </td>
           </tr>
           <tr>
             <td>2. 我能善用數位載具檢索並統整國際環境保育案例，完成具體筆記。</td>
             <td>
-              <label><input type="radio" name="check2" value="yes" checked> 是</label>&nbsp;&nbsp;
+              <label><input type="radio" name="check2" value="yes"> 是</label>&nbsp;&nbsp;
               <label><input type="radio" name="check2" value="need_work"> 需加油</label>
             </td>
           </tr>
           <tr>
             <td>3. 我能積極參與小組溝通協調，清楚確認下週成果發表會的分工職責。</td>
             <td>
-              <label><input type="radio" name="check3" value="yes" checked> 是</label>&nbsp;&nbsp;
+              <label><input type="radio" name="check3" value="yes"> 是</label>&nbsp;&nbsp;
               <label><input type="radio" name="check3" value="need_work"> 需加油</label>
             </td>
           </tr>
@@ -208,7 +221,7 @@
 
   </div>
 
-  <script src="assets/js/common.js?v=1.4"></script>
+  <script src="assets/js/common.js?v=1.5"></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       initStudentInfoForm('5');
