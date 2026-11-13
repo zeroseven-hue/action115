@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>【行動方程式】第 11 週：與自然有約——專書共讀與角色分工</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+  <script src="assets/js/qrcode.min.js"></script>
+</head>
+<body>
+
+  <!-- 頂部導覽列 -->
+  <header class="navbar">
+    <a href="index.html" class="navbar-brand">
+      <span>🌱 行動方程式</span>
+      <span class="navbar-badge">第 11 週</span>
+    </a>
+    <div class="nav-actions">
+      <button type="button" class="btn-nav btn-nav-qr" onclick="showCurrentPageQrModal()">📱 投影派卷 QR Code</button>
+      <span id="saveStatus" class="save-status">💾 本地暫存安全</span>
+      <a href="index.html" class="btn-nav">🏠 回課程首頁</a>
+    </div>
+  </header>
+
+  <div class="container">
+
+    <!-- 頁面標題 -->
+    <div class="page-header">
+      <div class="school-title">桃園市楊光國民中學 115 學年度第一學期 彈性學習課程學習單</div>
+      <h1 class="unit-title">【行動方程式】第 11 週：與自然有約——專書共讀與角色分工</h1>
+      <p class="unit-desc">授課日期：11/8 - 11/14 | 主題：專書架構掃描 · 團隊角色認領 · 章節金句萃取 · 進度盤點</p>
+    </div>
+
+    <!-- 學生基本資料卡片 -->
+    <div class="card">
+      <h3 class="card-title">👤 學生基本資料</h3>
+      <div class="student-bar">
+        <div class="form-group">
+          <label class="form-label required" for="studentClass">班級</label>
+          <select id="studentClass" class="form-control" required>
+            <option value="" disabled selected>載入中...</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label required" for="studentSeat">座號</label>
+          <select id="studentSeat" class="form-control" required>
+            <option value="" disabled selected>載入中...</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label required" for="studentName">姓名</label>
+          <input type="text" id="studentName" class="form-control" placeholder="請輸入全名" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label required" for="studentGroup">組別</label>
+          <select id="studentGroup" class="form-control" required>
+            <option value="" disabled selected>載入中...</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- 任務一：本組選定專書與閱讀進度盤點 -->
+    <div class="card">
+      <h3 class="card-title">📚 任務一：本組選定專書與閱讀進度盤點</h3>
+      <p class="question-desc">請組內共同盤點確認選定的專書架構與核心議題：</p>
+
+      <div class="question-item">
+        <div class="question-title">1. 本組選定書目基本資訊：</div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.8rem; margin-bottom: 0.8rem;">
+          <div>
+            <label style="font-size: 0.85rem; font-weight: 700; color: var(--primary);">專書名稱</label>
+            <input type="text" id="w11_book_title" class="form-control" placeholder="例如：《搶救寂靜》或《種樹的男人》">
+          </div>
+          <div>
+            <label style="font-size: 0.85rem; font-weight: 700; color: var(--primary);">作者 / 譯者</label>
+            <input type="text" id="w11_book_author" class="form-control" placeholder="例如：范欽慧 / 遠流出版">
+          </div>
+        </div>
+      </div>
+
+      <div class="question-item">
+        <div class="question-title">2. 全書架構與章節主題探索：</div>
+        <p style="font-size: 0.95rem; color: var(--text-muted); margin-bottom: 0.5rem;">全書大致分為幾大章節或面向？主要探討哪一類自然生態或環境危機議題？（建議 15 字以上）</p>
+        <textarea id="w11_book_structure" class="form-control" placeholder="請簡述全書章節結構與核心主題（例如：全書分三部，探討台灣各地的聲景危機、世界寂靜步道與人為噪音...）"></textarea>
+      </div>
+
+      <div class="question-item">
+        <div class="question-title">3. 觸動團隊的靈魂金句（或關鍵生態數據）：</div>
+        <p style="font-size: 0.95rem; color: var(--text-muted); margin-bottom: 0.5rem;">請從小組已讀篇章中，精選一句最打動全組的句子或震撼數據，並註明大致頁碼：</p>
+        <div style="display: grid; grid-template-columns: 1fr 140px; gap: 0.8rem;">
+          <input type="text" id="w11_core_quote" class="form-control" placeholder="例如：「寧靜不是死寂，而是生命的交響。」">
+          <input type="text" id="w11_quote_page" class="form-control" placeholder="頁碼（例如：P. 48）">
+        </div>
+      </div>
+    </div>
+
+    <!-- 任務二：小組角色認領與分工簽核 -->
+    <div class="card">
+      <h3 class="card-title">🤝 任務二：小組角色認領與發表任務分工表</h3>
+      <p class="question-desc">團隊作戰人人有責，請協商認領各項職責並填入姓名（拒絕搭便車）：</p>
+
+      <table class="check-table" style="margin-bottom: 1.2rem;">
+        <thead>
+          <tr>
+            <th style="width: 32%;">團隊職責角色</th>
+            <th style="width: 28%;">負責組員姓名</th>
+            <th style="width: 40%;">主要任務職責</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>👑 小組長 (進度控管)</strong></td>
+            <td><input type="text" id="w11_role_leader" class="form-control" placeholder="輸入姓名"></td>
+            <td style="font-size: 0.9rem; color: var(--text-muted);">掌控閱讀節奏、安排發言、統籌發表時程</td>
+          </tr>
+          <tr>
+            <td><strong>📝 重點紀錄員 (論點萃取)</strong></td>
+            <td><input type="text" id="w11_role_recorder" class="form-control" placeholder="輸入姓名"></td>
+            <td style="font-size: 0.9rem; color: var(--text-muted);">整理書中核心生態爭點、摘錄數據與金句</td>
+          </tr>
+          <tr>
+            <td><strong>🎨 視覺構思員 (簡報道具)</strong></td>
+            <td><input type="text" id="w11_role_visual" class="form-control" placeholder="輸入姓名"></td>
+            <td style="font-size: 0.9rem; color: var(--text-muted);">規劃發表形式 (TED/Podcast/短劇/PPT) 版面構思</td>
+          </tr>
+          <tr>
+            <td><strong>🎤 發表演練員 (口語表達)</strong></td>
+            <td><input type="text" id="w11_role_presenter" class="form-control" placeholder="輸入姓名"></td>
+            <td style="font-size: 0.9rem; color: var(--text-muted);">統整發表講稿、設計開場故事與提問互動</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="question-item">
+        <div class="question-title">4. 我今天在小組內具體完成的工作是：</div>
+        <textarea id="w11_my_contribution" class="form-control" placeholder="請具體寫下你今天在課堂上精讀了哪一篇章、記錄了什麼或是提出什麼好點子（建議 15 字以上）..."></textarea>
+      </div>
+    </div>
+
+    <!-- 任務三：今日進度達成率與下週目標 -->
+    <div class="card">
+      <h3 class="card-title">📊 任務三：今日進度達成率與下週目標</h3>
+      
+      <div class="question-item">
+        <div class="question-title">1. 本組今日專書共讀整體進度估計：</div>
+        <div class="checkbox-group" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.6rem;">
+          <label class="checkbox-label"><input type="radio" name="w11_progress" value="25%"> 🌱 25% (剛選定章節脈絡)</label>
+          <label class="checkbox-label"><input type="radio" name="w11_progress" value="50%"> 🌿 50% (完成初讀與摘要)</label>
+          <label class="checkbox-label"><input type="radio" name="w11_progress" value="75%"> 🌲 75% (啟動發表構思)</label>
+          <label class="checkbox-label"><input type="radio" name="w11_progress" value="100%"> 🏆 100% (完讀並融會貫通)</label>
+        </div>
+      </div>
+
+      <div class="question-item">
+        <div class="question-title">2. 本組目前遇到的困難或需要老師協助的事項（選填）：</div>
+        <textarea id="w11_help_needed" class="form-control" placeholder="例如：某個章節專有名詞不懂、書籍借閱數量不足、對發表形式有疑問...（若無請填：進度順利良好）"></textarea>
+      </div>
+    </div>
+
+    <!-- 自我檢核表 -->
+    <div class="card">
+      <h3 class="card-title">📝 學習表現自我檢核表</h3>
+      <p class="question-desc">請誠實回顧本節課的學習狀態，為自己進行自評：</p>
+      <table class="check-table">
+        <thead>
+          <tr>
+            <th>檢核項目</th>
+            <th>自評結果</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1. 我能專注閱讀小組選定之專書篇章，並積極參與觀點對話。</td>
+            <td>
+              <label><input type="radio" name="check1" value="yes"> 是</label>&nbsp;&nbsp;
+              <label><input type="radio" name="check1" value="need_work"> 需加油</label>
+            </td>
+          </tr>
+          <tr>
+            <td>2. 我清楚自己在小組中的角色任務，並願意負責落實。</td>
+            <td>
+              <label><input type="radio" name="check2" value="yes"> 是</label>&nbsp;&nbsp;
+              <label><input type="radio" name="check2" value="need_work"> 需加油</label>
+            </td>
+          </tr>
+          <tr>
+            <td>3. 我能與組員良好協商，共同完成今日進度盤點與學習單。</td>
+            <td>
+              <label><input type="radio" name="check3" value="yes"> 是</label>&nbsp;&nbsp;
+              <label><input type="radio" name="check3" value="need_work"> 需加油</label>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 送出按鈕 -->
+    <div class="submit-section">
+      <button id="submitBtn" class="btn-submit" onclick="handleSubmit()">🚀 送出第 11 週學習單</button>
+    </div>
+
+  </div>
+
+  <script src="assets/js/common.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      initStudentInfoForm('11');
+    });
+
+    function handleSubmit() {
+      submitWorksheet('11', (answers) => {
+        return evaluateUnitWorksheet('11', answers);
+      });
+    }
+  </script>
+
+</body>
+</html>

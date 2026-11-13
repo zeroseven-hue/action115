@@ -908,6 +908,45 @@ const UNIT_EVALUATION_CONFIG = {
     ],
     actionsId: 'w10_actions'
   }
+,
+
+  '11': {
+    name: '第 11 週：與自然有約——專書共讀與角色分工',
+    baseScore: 78,
+    questions: [
+      {
+        id: 'w11_book_info',
+        name: '任務一 [共讀專書與架構]',
+        isCombo: true,
+        subIds: ['w11_book_title', 'w11_book_author', 'w11_book_structure'],
+        keywords: ['章', '生態', '環境', '自然', '探討', '危機', '保護', '閱讀', '故事'],
+        weight: 3
+      },
+      {
+        id: 'w11_quote_info',
+        name: '任務一 [靈魂金句與頁碼]',
+        isCombo: true,
+        subIds: ['w11_core_quote', 'w11_quote_page'],
+        keywords: ['P', 'p', '頁', '自然', '心', '生命', '安靜', '樹', '林', '愛', '人'],
+        weight: 2
+      },
+      {
+        id: 'w11_roles',
+        name: '任務二 [團隊四角角色分工]',
+        isRoleCheck: true,
+        roleKeys: ['w11_role_leader', 'w11_role_recorder', 'w11_role_visual', 'w11_role_presenter'],
+        weight: 3.5
+      },
+      {
+        id: 'w11_contribution',
+        name: '任務二 [個人今日具體貢獻]',
+        minLen: 15,
+        keywords: ['閱讀', '負責', '整理', '討論', '金句', '章節', '想法', '提議', '角色', '摘要'],
+        weight: 3.5
+      }
+    ],
+    actionsId: 'w11_actions'
+  }
 };
 
 /**
