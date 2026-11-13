@@ -1025,6 +1025,46 @@ const UNIT_EVALUATION_CONFIG = {
     ],
     actionsId: 'w13_actions'
   }
+,
+
+  '14': {
+    name: '第 14 週：與自然有約之『小組發表會（場次一）』',
+    baseScore: 78,
+    questions: [
+      {
+        id: 'w14_self',
+        name: '任務一 [本組展演表現自評]',
+        minLen: 15,
+        keywords: ['默契', '台風', '時間', '發表', '準備', '簡報', '開場', '順利', '優點', '亮點'],
+        weight: 3
+      },
+      {
+        id: 'w14_peer1',
+        name: '任務二 [同儕回饋與給星 ①]',
+        isCombo: true,
+        subIds: ['w14_peer1_group', 'w14_peer1_book', 'w14_peer1_praise'],
+        keywords: ['精彩', '棒', '清楚', '好', '生動', '深入', '讚', '數據', '金句', '流暢', '啟發'],
+        weight: 3
+      },
+      {
+        id: 'w14_peer2',
+        name: '任務二 [同儕回饋與給星 ②]',
+        isCombo: true,
+        subIds: ['w14_peer2_group', 'w14_peer2_book', 'w14_peer2_praise'],
+        keywords: ['精彩', '棒', '清楚', '好', '生動', '深入', '讚', '數據', '金句', '流暢', '啟發'],
+        weight: 3
+      },
+      {
+        id: 'w14_question_insight',
+        name: '任務二&三 [深度思辨提問與觀點共鳴]',
+        isCombo: true,
+        subIds: ['w14_peer_question', 'w14_deep_insight'],
+        keywords: ['請問', '為什麼', '如何', '生態', '自然', '生命', '改變', '感動', '想法', '行動', '保護'],
+        weight: 3
+      }
+    ],
+    actionsId: 'w14_actions'
+  }
 };
 
 /**
