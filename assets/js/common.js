@@ -947,6 +947,45 @@ const UNIT_EVALUATION_CONFIG = {
     ],
     actionsId: 'w11_actions'
   }
+,
+
+  '12': {
+    name: '第 12 週：與自然有約之『小組會議（一）』——專書拆解與觀點萃取',
+    baseScore: 78,
+    questions: [
+      {
+        id: 'w12_orid_facts',
+        name: '任務一 [ORID 事實與感受]',
+        isCombo: true,
+        subIds: ['w12_orid_o', 'w12_orid_r'],
+        keywords: ['生態', '數據', '森林', '聲音', '破壞', '樹', '保護', '感動', '敬佩', '心疼', '震撼'],
+        weight: 3
+      },
+      {
+        id: 'w12_orid_insights',
+        name: '任務一 [ORID 詮釋與行動]',
+        isCombo: true,
+        subIds: ['w12_orid_i', 'w12_orid_d'],
+        keywords: ['永續', '觀念', '反省', '改變', '行動', '生活', '校園', '自然', '生命', '自備', '分享'],
+        weight: 3
+      },
+      {
+        id: 'w12_roles',
+        name: '任務二 [角色成果推進簽核]',
+        isRoleCheck: true,
+        roleKeys: ['w12_role_leader', 'w12_role_recorder', 'w12_role_visual', 'w12_role_presenter'],
+        weight: 3.5
+      },
+      {
+        id: 'w12_contribution',
+        name: '任務二 [個人今日最大實質貢獻]',
+        minLen: 15,
+        keywords: ['討論', '提出', '觀點', '整理', '紀錄', '簡報', '開場', '想法', '負責', '重點'],
+        weight: 3.5
+      }
+    ],
+    actionsId: 'w12_actions'
+  }
 };
 
 /**

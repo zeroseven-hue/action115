@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>【行動方程式】第 12 週：與自然有約之『小組會議（一）』——專書拆解與觀點萃取</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+  <script src="assets/js/qrcode.min.js"></script>
+</head>
+<body>
+
+  <!-- 頂部導覽列 -->
+  <header class="navbar">
+    <a href="index.html" class="navbar-brand">
+      <span>🌱 行動方程式</span>
+      <span class="navbar-badge">第 12 週</span>
+    </a>
+    <div class="nav-actions">
+      <button type="button" class="btn-nav btn-nav-qr" onclick="showCurrentPageQrModal()">📱 投影派卷 QR Code</button>
+      <span id="saveStatus" class="save-status">💾 本地暫存安全</span>
+      <a href="index.html" class="btn-nav">🏠 回課程首頁</a>
+    </div>
+  </header>
+
+  <div class="container">
+
+    <!-- 頁面標題 -->
+    <div class="page-header">
+      <div class="school-title">桃園市楊光國民中學 115 學年度第一學期 彈性學習課程學習單</div>
+      <h1 class="unit-title">【行動方程式】第 12 週：與自然有約之『小組會議（一）』——專書拆解與觀點萃取</h1>
+      <p class="unit-desc">授課日期：11/15 - 11/21 | 主題：ORID 焦點拆解 · 3 大發表核心論點 · 角色推進實質簽核</p>
+    </div>
+
+    <!-- 學生基本資料卡片 -->
+    <div class="card">
+      <h3 class="card-title">👤 學生基本資料</h3>
+      <div class="student-bar">
+        <div class="form-group">
+          <label class="form-label required" for="studentClass">班級</label>
+          <select id="studentClass" class="form-control" required>
+            <option value="" disabled selected>載入中...</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label required" for="studentSeat">座號</label>
+          <select id="studentSeat" class="form-control" required>
+            <option value="" disabled selected>載入中...</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label required" for="studentName">姓名</label>
+          <input type="text" id="studentName" class="form-control" placeholder="請輸入全名" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label required" for="studentGroup">組別</label>
+          <select id="studentGroup" class="form-control" required>
+            <option value="" disabled selected>載入中...</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- 任務一：ORID 專書觀點拆解卡 -->
+    <div class="card">
+      <h3 class="card-title">🔍 任務一：ORID 專書觀點拆解卡（發表核心論點骨架）</h3>
+      <p class="question-desc">請組長主持組內焦點討論，共同將整本書濃縮為 4 大向度精華：</p>
+
+      <div class="question-item">
+        <div class="question-title">1. 本組共讀專書名稱與閱讀完成度：</div>
+        <div style="display: grid; grid-template-columns: 1fr 200px; gap: 0.8rem; margin-bottom: 0.8rem;">
+          <input type="text" id="w12_book_title" class="form-control" placeholder="書名，例如：《搶救寂靜》或《賴桑的千年之約》">
+          <select id="w12_reading_rate" class="form-control">
+            <option value="50%">📖 累計完讀 50%</option>
+            <option value="75%" selected>📖 累計完讀 75%</option>
+            <option value="100%">🏆 全組已完讀 100%</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="question-item">
+        <div class="question-title">2. 【O 客觀事實】書中最震撼的生態危機或具體數據：</div>
+        <textarea id="w12_orid_o" class="form-control" placeholder="例如：三十億買山種下三十萬棵樹、翠峰湖泥炭蘚低於25分貝的寂靜、全球雨林每分鐘消失面積...（建議 15 字以上）"></textarea>
+      </div>
+
+      <div class="question-item">
+        <div class="question-title">3. 【R 主觀感受】最觸動本組的一個故事情節或人物言行：</div>
+        <textarea id="w12_orid_r" class="form-control" placeholder="例如：賴桑被家人笑傻子卻堅持不賣一棵樹、范欽慧老師背著錄音設備走遍荒野搶救自然寧靜權...（建議 15 字以上）"></textarea>
+      </div>
+
+      <div class="question-item">
+        <div class="question-title">4. 【I 深度詮釋】作者希望喚醒社會大眾什麼深刻觀念：</div>
+        <textarea id="w12_orid_i" class="form-control" placeholder="例如：自然不是人類任意索取的資源、寧靜權是生命繁衍的基本權利、永續不是口號而是世代承諾...（建議 15 字以上）"></textarea>
+      </div>
+
+      <div class="question-item">
+        <div class="question-title">5. 【D 生活行動】國中生在生活中能做出的具體小改變：</div>
+        <textarea id="w12_orid_d" class="form-control" placeholder="例如：走入山林時放輕音量尊重聲景、自備環保袋減少森林資源消耗、向同學分享一則生態故事...（建議 15 字以上）"></textarea>
+      </div>
+    </div>
+
+    <!-- 任務二：各角色推進成果與分工簽核 -->
+    <div class="card">
+      <h3 class="card-title">🤝 任務二：各角色本週推進成果與分工簽核</h3>
+      <p class="question-desc">請誠實盤點各角色今日推進之實質進度，並記錄個人貢獻（拒絕搭便車）：</p>
+
+      <table class="check-table" style="margin-bottom: 1.2rem;">
+        <thead>
+          <tr>
+            <th style="width: 28%;">團隊角色</th>
+            <th style="width: 24%;">組員姓名</th>
+            <th style="width: 48%;">今日推進實質成果</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>👑 小組長</strong></td>
+            <td><input type="text" id="w12_role_leader" class="form-control" placeholder="組長姓名"></td>
+            <td style="font-size: 0.9rem; color: var(--text-muted);">掌控 ORID 討論流程、統整全組四大向度共識</td>
+          </tr>
+          <tr>
+            <td><strong>📝 重點紀錄員</strong></td>
+            <td><input type="text" id="w12_role_recorder" class="form-control" placeholder="紀錄員姓名"></td>
+            <td style="font-size: 0.9rem; color: var(--text-muted);">梳理發表 3 大論點骨架、整理關鍵生態數據</td>
+          </tr>
+          <tr>
+            <td><strong>🎨 視覺構思員</strong></td>
+            <td><input type="text" id="w12_role_visual" class="form-control" placeholder="視覺員姓名"></td>
+            <td style="font-size: 0.9rem; color: var(--text-muted);">確認發表形式 (TED/短劇/簡報) 並草擬 4~6 頁大綱</td>
+          </tr>
+          <tr>
+            <td><strong>🎤 發表演練員</strong></td>
+            <td><input type="text" id="w12_role_presenter" class="form-control" placeholder="發演員姓名"></td>
+            <td style="font-size: 0.9rem; color: var(--text-muted);">草擬開場 30 秒故事、預估 4 分鐘各段落時間</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="question-item">
+        <div class="question-title">6. 我今天在組內最大的實質貢獻是：</div>
+        <textarea id="w12_my_contribution" class="form-control" placeholder="請具體寫下你今天在討論中提出了什麼觀點、記錄了哪一部分內容或構思了什麼呈現方式（建議 15 字以上）..."></textarea>
+      </div>
+    </div>
+
+    <!-- 任務三：小組籌備進度自評與卡點求助 -->
+    <div class="card">
+      <h3 class="card-title">📊 任務三：小組籌備進度自評與卡點求助</h3>
+      
+      <div class="question-item">
+        <div class="question-title">1. 發表簡報/展示道具整體籌備進度：</div>
+        <div class="checkbox-group" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.6rem;">
+          <label class="checkbox-label"><input type="radio" name="w12_progress" value="25%"> 🌱 25% (構思形式中)</label>
+          <label class="checkbox-label"><input type="radio" name="w12_progress" value="50%"> 🌿 50% (完成大綱草稿)</label>
+          <label class="checkbox-label"><input type="radio" name="w12_progress" value="75%"> 🌲 75% (製作簡報/道具中)</label>
+          <label class="checkbox-label"><input type="radio" name="w12_progress" value="100%"> 🏆 100% (已可直接彩排)</label>
+        </div>
+      </div>
+
+      <div class="question-item">
+        <div class="question-title">2. 本組目前遇到的卡點或需老師協助之處（選填）：</div>
+        <textarea id="w12_help_needed" class="form-control" placeholder="例如：討論時間不夠、簡報不知道怎麼排版、某段內容太長不知如何刪減...（若無請填：進度順利良好）"></textarea>
+      </div>
+    </div>
+
+    <!-- 自我檢核表 -->
+    <div class="card">
+      <h3 class="card-title">📝 學習表現自我檢核表</h3>
+      <p class="question-desc">請誠實回顧本節課的學習狀態，為自己進行自評：</p>
+      <table class="check-table">
+        <thead>
+          <tr>
+            <th>檢核項目</th>
+            <th>自評結果</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1. 我能運用 ORID 架構深入分析專書內容，提出有價值的觀點。</td>
+            <td>
+              <label><input type="radio" name="check1" value="yes"> 是</label>&nbsp;&nbsp;
+              <label><input type="radio" name="check1" value="need_work"> 需加油</label>
+            </td>
+          </tr>
+          <tr>
+            <td>2. 我清楚且確實完成自己角色今日應推進的具體任務。</td>
+            <td>
+              <label><input type="radio" name="check2" value="yes"> 是</label>&nbsp;&nbsp;
+              <label><input type="radio" name="check2" value="need_work"> 需加油</label>
+            </td>
+          </tr>
+          <tr>
+            <td>3. 我能與組員積極協調，共同確立發表的 3 大核心骨架。</td>
+            <td>
+              <label><input type="radio" name="check3" value="yes"> 是</label>&nbsp;&nbsp;
+              <label><input type="radio" name="check3" value="need_work"> 需加油</label>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 送出按鈕 -->
+    <div class="submit-section">
+      <button id="submitBtn" class="btn-submit" onclick="handleSubmit()">🚀 送出第 12 週學習單</button>
+    </div>
+
+  </div>
+
+  <script src="assets/js/common.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      initStudentInfoForm('12');
+    });
+
+    function handleSubmit() {
+      submitWorksheet('12', (answers) => {
+        return evaluateUnitWorksheet('12', answers);
+      });
+    }
+  </script>
+
+</body>
+</html>
