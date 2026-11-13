@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>【行動方程式】第 15 週：與自然有約之『小組發表會（場次二）』</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+  <script src="assets/js/qrcode.min.js"></script>
+</head>
+<body>
+
+  <!-- 頂部導覽列 -->
+  <header class="navbar">
+    <a href="index.html" class="navbar-brand">
+      <span>🌱 行動方程式</span>
+      <span class="navbar-badge">第 15 週</span>
+    </a>
+    <div class="nav-actions">
+      <button type="button" class="btn-nav btn-nav-qr" onclick="showCurrentPageQrModal()">📱 投影派卷 QR Code</button>
+      <span id="saveStatus" class="save-status">💾 本地暫存安全</span>
+      <a href="index.html" class="btn-nav">🏠 回課程首頁</a>
+    </div>
+  </header>
+
+  <div class="container">
+
+    <!-- 頁面標題 -->
+    <div class="page-header">
+      <div class="school-title">桃園市楊光國民中學 115 學年度第一學期 彈性學習課程學習單</div>
+      <h1 class="unit-title">【行動方程式】第 15 週：與自然有約之『小組發表會（場次二）』</h1>
+      <p class="unit-desc">授課日期：12/6 - 12/12 | 主題：好書展演與共讀總策展 · 第 5～8 組登場 · 全班票選與行動宣言</p>
+    </div>
+
+    <!-- 學生基本資料卡片 -->
+    <div class="card">
+      <h3 class="card-title">👤 學生基本資料與今日身分</h3>
+      <div class="student-bar">
+        <div class="form-group">
+          <label class="form-label required" for="studentClass">班級</label>
+          <select id="studentClass" class="form-control" required>
+            <option value="" disabled selected>載入中...</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label required" for="studentSeat">座號</label>
+          <select id="studentSeat" class="form-control" required>
+            <option value="" disabled selected>載入中...</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label required" for="studentName">姓名</label>
+          <input type="text" id="studentName" class="form-control" placeholder="請輸入全名" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label required" for="studentGroup">組別</label>
+          <select id="studentGroup" class="form-control" required>
+            <option value="" disabled selected>載入中...</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="margin-top: 1rem; padding: 0.8rem; background: #F8FAFC; border-radius: 8px;">
+        <label class="form-label required">今日課堂主要身分：</label>
+        <div style="display: flex; gap: 1.5rem; flex-wrap: wrap;">
+          <label class="checkbox-label"><input type="radio" name="w15_identity" value="presenter"> 🎤 今日登台展演組 (第 5～8 組)</label>
+          <label class="checkbox-label"><input type="radio" name="w15_identity" value="evaluator"> 👀 今日評審觀察組 (第 1～4 組)</label>
+        </div>
+      </div>
+    </div>
+
+    <!-- 任務一：本組展演表現與默契自評 -->
+    <div class="card">
+      <h3 class="card-title">🎤 任務一：本組展演表現與默契自評</h3>
+      <p class="question-desc">第 5～8 組請針對今日台上發揮進行自評，第 1～4 組請回顧兩週觀摩心得：</p>
+
+      <div class="question-item">
+        <div class="question-title">1. 本組今天（或觀摩兩週中）最值得肯定與亮眼的一點：</div>
+        <textarea id="w15_self_highlight" class="form-control" placeholder="請寫下本組在時間控制、台風、簡報呈現或團隊默契上的具體優點（建議 15 字以上）..."></textarea>
+      </div>
+
+      <div class="question-item">
+        <div class="question-title">2. 全組成員是否均能依分工順暢發揮：</div>
+        <div class="checkbox-group" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.6rem;">
+          <label class="checkbox-label"><input type="radio" name="w15_teamwork" value="excellent"> 🌟 默契絕佳，全員到位</label>
+          <label class="checkbox-label"><input type="radio" name="w15_teamwork" value="good"> 👍 大致良好，分工明確</label>
+          <label class="checkbox-label"><input type="radio" name="w15_teamwork" value="improve"> ⚠️ 仍有微調與進步空間</label>
+        </div>
+      </div>
+    </div>
+
+    <!-- 任務二：同儕發表深度觀察與互評矩陣 -->
+    <div class="card">
+      <h3 class="card-title">🌟 任務二：同儕發表深度觀察與互評矩陣（全班必填）</h3>
+      <p class="question-desc">請從今天發表的第 5～8 組中，挑選 2 組進行客觀給星與質性讚賞：</p>
+
+      <!-- 受評組 1 -->
+      <div style="background: #F8FAFC; border: 1.5px solid var(--border); border-radius: 10px; padding: 1rem; margin-bottom: 1.2rem;">
+        <h4 style="color: var(--primary); font-size: 1rem; margin-bottom: 0.6rem;">📋 深度回饋 ①：</h4>
+        <div style="display: grid; grid-template-columns: 140px 1fr; gap: 0.8rem; margin-bottom: 0.8rem;">
+          <select id="w15_peer1_group" class="form-control">
+            <option value="" disabled selected>受評組別</option>
+            <option value="第 5 組">第 5 組</option>
+            <option value="第 6 組">第 6 組</option>
+            <option value="第 7 組">第 7 組</option>
+            <option value="第 8 組">第 8 組</option>
+          </select>
+          <input type="text" id="w15_peer1_book" class="form-control" placeholder="該組發表之書名與主題">
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; margin-bottom: 0.8rem;">
+          <div>
+            <label style="font-size: 0.85rem; font-weight: 700; color: var(--primary);">內容深度星等</label>
+            <select id="w15_peer1_stars_content" class="form-control">
+              <option value="5星">★★★★★ (5星-卓越深刻)</option>
+              <option value="4星">★★★★☆ (4星-充實完整)</option>
+              <option value="3星">★★★☆☆ (3星-基本具備)</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size: 0.85rem; font-weight: 700; color: var(--primary);">台風與默契星等</label>
+            <select id="w15_peer1_stars_stage" class="form-control">
+              <option value="5星">★★★★★ (5星-生動自信)</option>
+              <option value="4星">★★★★☆ (4星-流暢清楚)</option>
+              <option value="3星">★★★☆☆ (3星-平穩完成)</option>
+            </select>
+          </div>
+        </div>
+        <textarea id="w15_peer1_praise" class="form-control" placeholder="請寫下一句最真誠的讚美或具體啟發（建議 15 字以上）..."></textarea>
+      </div>
+
+      <!-- 受評組 2 -->
+      <div style="background: #F8FAFC; border: 1.5px solid var(--border); border-radius: 10px; padding: 1rem; margin-bottom: 1.2rem;">
+        <h4 style="color: var(--primary); font-size: 1rem; margin-bottom: 0.6rem;">📋 深度回饋 ②：</h4>
+        <div style="display: grid; grid-template-columns: 140px 1fr; gap: 0.8rem; margin-bottom: 0.8rem;">
+          <select id="w15_peer2_group" class="form-control">
+            <option value="" disabled selected>受評組別</option>
+            <option value="第 5 組">第 5 組</option>
+            <option value="第 6 組">第 6 組</option>
+            <option value="第 7 組">第 7 組</option>
+            <option value="第 8 組">第 8 組</option>
+          </select>
+          <input type="text" id="w15_peer2_book" class="form-control" placeholder="該組發表之書名與主題">
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; margin-bottom: 0.8rem;">
+          <div>
+            <label style="font-size: 0.85rem; font-weight: 700; color: var(--primary);">內容深度星等</label>
+            <select id="w15_peer2_stars_content" class="form-control">
+              <option value="5星">★★★★★ (5星-卓越深刻)</option>
+              <option value="4星">★★★★☆ (4星-充實完整)</option>
+              <option value="3星">★★★☆☆ (3星-基本具備)</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size: 0.85rem; font-weight: 700; color: var(--primary);">台風與默契星等</label>
+            <select id="w15_peer2_stars_stage" class="form-control">
+              <option value="5星">★★★★★ (5星-生動自信)</option>
+              <option value="4星">★★★★☆ (4星-流暢清楚)</option>
+              <option value="3星">★★★☆☆ (3星-平穩完成)</option>
+            </select>
+          </div>
+        </div>
+        <textarea id="w15_peer2_praise" class="form-control" placeholder="請寫下一句最真誠的讚美或具體啟發（建議 15 字以上）..."></textarea>
+      </div>
+
+      <div class="question-item">
+        <div class="question-title">3. 我想向今天台上發表者提出的一個深度好問題：</div>
+        <textarea id="w15_peer_question" class="form-control" placeholder="請提出一個能引導台上組別更深入思辨的好問題（建議 15 字以上）..."></textarea>
+      </div>
+    </div>
+
+    <!-- 任務三：書海策展總回饋與我的綠色行動宣言 -->
+    <div class="card">
+      <h3 class="card-title">🏆 任務三：書海策展總回饋與我的綠色行動宣言</h3>
+      
+      <div class="question-item">
+        <div class="question-title">1. 聽完全班 8 組發表，我最想借回家閱讀的一本書是：</div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; margin-bottom: 0.8rem;">
+          <input type="text" id="w15_vote_book" class="form-control" placeholder="書名，例如：《搶救寂靜》">
+          <input type="text" id="w15_vote_reason" class="form-control" placeholder="推薦想借閱的具體理由">
+        </div>
+      </div>
+
+      <div class="question-item">
+        <div class="question-title">2. 走過 6 週專書共學，我的生活綠色行動宣言（為第 16 週 Let's do it 暖身）：</div>
+        <textarea id="w15_action_pledge" class="form-control" placeholder="身為地球公民與楊光國中學生，我承諾在生活中做出的實質行動改變是（建議 15 字以上）..."></textarea>
+      </div>
+    </div>
+
+    <!-- 自我檢核表 -->
+    <div class="card">
+      <h3 class="card-title">📝 學習表現自我檢核表</h3>
+      <p class="question-desc">請誠實回顧本節課的學習狀態，為自己進行自評：</p>
+      <table class="check-table">
+        <thead>
+          <tr>
+            <th>檢核項目</th>
+            <th>自評結果</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1. 我能專注聆聽全班展演，肯定同儕付出與學習成果。</td>
+            <td>
+              <label><input type="radio" name="check1" value="yes"> 是</label>&nbsp;&nbsp;
+              <label><input type="radio" name="check1" value="need_work"> 需加油</label>
+            </td>
+          </tr>
+          <tr>
+            <td>2. 我能認真參與書海票選，並提出真誠的回饋與反思。</td>
+            <td>
+              <label><input type="radio" name="check2" value="yes"> 是</label>&nbsp;&nbsp;
+              <label><input type="radio" name="check2" value="need_work"> 需加油</label>
+            </td>
+          </tr>
+          <tr>
+            <td>3. 我已準備好將專書所得轉化為下週實體環保行動方案。</td>
+            <td>
+              <label><input type="radio" name="check3" value="yes"> 是</label>&nbsp;&nbsp;
+              <label><input type="radio" name="check3" value="need_work"> 需加油</label>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 送出按鈕 -->
+    <div class="submit-section">
+      <button id="submitBtn" class="btn-submit" onclick="handleSubmit()">🚀 送出第 15 週總策展學習單</button>
+    </div>
+
+  </div>
+
+  <script src="assets/js/common.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      initStudentInfoForm('15');
+    });
+
+    function handleSubmit() {
+      submitWorksheet('15', (answers) => {
+        return evaluateUnitWorksheet('15', answers);
+      });
+    }
+  </script>
+
+</body>
+</html>

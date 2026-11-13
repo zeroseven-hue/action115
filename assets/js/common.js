@@ -1065,6 +1065,46 @@ const UNIT_EVALUATION_CONFIG = {
     ],
     actionsId: 'w14_actions'
   }
+,
+
+  '15': {
+    name: '第 15 週：與自然有約之『小組發表會（場次二）』＆ 共讀總策展',
+    baseScore: 78,
+    questions: [
+      {
+        id: 'w15_self',
+        name: '任務一 [本組展演表現自評]',
+        minLen: 15,
+        keywords: ['默契', '台風', '時間', '發表', '準備', '簡報', '開場', '順利', '優點', '亮點'],
+        weight: 3
+      },
+      {
+        id: 'w15_peer1',
+        name: '任務二 [同儕回饋與給星 ①]',
+        isCombo: true,
+        subIds: ['w15_peer1_group', 'w15_peer1_book', 'w15_peer1_praise'],
+        keywords: ['精彩', '棒', '清楚', '好', '生動', '深入', '讚', '數據', '金句', '流暢', '啟發'],
+        weight: 3
+      },
+      {
+        id: 'w15_peer2',
+        name: '任務二 [同儕回饋與給星 ②]',
+        isCombo: true,
+        subIds: ['w15_peer2_group', 'w15_peer2_book', 'w15_peer2_praise'],
+        keywords: ['精彩', '棒', '清楚', '好', '生動', '深入', '讚', '數據', '金句', '流暢', '啟發'],
+        weight: 3
+      },
+      {
+        id: 'w15_vote_pledge',
+        name: '任務三 [書海票選與綠色行動宣言]',
+        isCombo: true,
+        subIds: ['w15_vote_book', 'w15_vote_reason', 'w15_action_pledge'],
+        keywords: ['借', '書', '推薦', '因為', '行動', '生活', '承諾', '改變', '環保', '自然', '減塑', '珍惜'],
+        weight: 3
+      }
+    ],
+    actionsId: 'w15_actions'
+  }
 };
 
 /**
