@@ -868,6 +868,46 @@ const UNIT_EVALUATION_CONFIG = {
     ],
     actionsId: 'w9_actions'
   }
+,
+
+  '10': {
+    name: '第 10 週：與自然有約——專書閱讀',
+    baseScore: 78,
+    questions: [
+      {
+        id: 'w10_soundscape',
+        name: '任務一 [聲景三元素與寂靜山徑]',
+        isCombo: true,
+        subIds: ['w10_q1_mountain', 'w10_q1_bio', 'w10_q1_geo', 'w10_q1_anthro'],
+        keywords: ['太平', '生物', '環境', '人為'],
+        weight: 3
+      },
+      {
+        id: 'w10_laisang',
+        name: '任務一 [賴桑三不政策]',
+        isCombo: true,
+        subIds: ['w10_q2_policy1', 'w10_q2_policy2', 'w10_q2_policy3'],
+        keywords: ['砍', '買', '賣', '子孫', '後代', '私有'],
+        weight: 2.5
+      },
+      {
+        id: 'w10_reflection',
+        name: '任務二 [心靈啟發與深度思辨]',
+        minLen: 15,
+        keywords: ['堅持', '無私', '守護', '自然', '生命', '永續', '感動', '尊重', '承諾', '傻子', '綠色', '責任'],
+        weight: 3.5
+      },
+      {
+        id: 'w10_book_reasons',
+        name: '任務二 [小組選書與選擇理由]',
+        isCombo: true,
+        subIds: ['w10_book_title', 'w10_book_author', 'w10_book_reason1', 'w10_book_reason2'],
+        keywords: ['生態', '環境', '閱讀', '動物', '森林', '海洋', '故事', '啟發', '共讀', '發表'],
+        weight: 3
+      }
+    ],
+    actionsId: 'w10_actions'
+  }
 };
 
 /**

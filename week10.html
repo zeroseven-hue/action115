@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>【行動方程式】第 10 週：與自然有約——專書閱讀</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+  <script src="assets/js/qrcode.min.js"></script>
+</head>
+<body>
+
+  <!-- 頂部導覽列 -->
+  <header class="navbar">
+    <a href="index.html" class="navbar-brand">
+      <span>🌱 行動方程式</span>
+      <span class="navbar-badge">第 10 週</span>
+    </a>
+    <div class="nav-actions">
+      <button type="button" class="btn-nav btn-nav-qr" onclick="showCurrentPageQrModal()">📱 投影派卷 QR Code</button>
+      <span id="saveStatus" class="save-status">💾 本地暫存安全</span>
+      <a href="index.html" class="btn-nav">🏠 回課程首頁</a>
+    </div>
+  </header>
+
+  <div class="container">
+
+    <!-- 頁面標題 -->
+    <div class="page-header">
+      <div class="school-title">桃園市楊光國民中學 115 學年度第一學期 彈性學習課程學習單</div>
+      <h1 class="unit-title">【行動方程式】第 10 週：與自然有約——專書閱讀</h1>
+      <p class="unit-desc">授課日期：11/1 - 11/7 | 主題：雙典範專書導讀 · 聲景與寂靜山徑 · 賴桑千年造林 · 小組選書</p>
+    </div>
+
+    <!-- 學生基本資料卡片 -->
+    <div class="card">
+      <h3 class="card-title">👤 學生基本資料</h3>
+      <div class="student-bar">
+        <div class="form-group">
+          <label class="form-label required" for="studentClass">班級</label>
+          <select id="studentClass" class="form-control" required>
+            <option value="" disabled selected>載入中...</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label required" for="studentSeat">座號</label>
+          <select id="studentSeat" class="form-control" required>
+            <option value="" disabled selected>載入中...</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label required" for="studentName">姓名</label>
+          <input type="text" id="studentName" class="form-control" placeholder="請輸入全名" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label required" for="studentGroup">組別</label>
+          <select id="studentGroup" class="form-control" required>
+            <option value="" disabled selected>載入中...</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- 任務一：雙典範專書精選導讀大解密 -->
+    <div class="card">
+      <h3 class="card-title">📖 任務一：雙典範專書精選導讀大解密（影音直擊）</h3>
+      <p class="question-desc">請專注觀看兩部紀錄短片，探索聲景學家范欽慧老師與種樹奇人賴桑的綠色生命堅持：</p>
+
+      <!-- 影音 1：《搶救寂靜》 -->
+      <div style="margin-bottom: 1.5rem;">
+        <h4 style="color: var(--primary); font-size: 1.05rem; margin-bottom: 0.5rem;">🎬 專題影音一：【愛悅讀】搶救寂靜——范欽慧專訪</h4>
+        <div class="video-container">
+          <iframe src="https://www.youtube.com/embed/cWmv7zMRx8I" title="【愛悅讀】搶救寂靜 - 范欽慧" allowfullscreen></iframe>
+        </div>
+      </div>
+
+      <div class="question-item">
+        <div class="question-title">1. 《搶救寂靜》與聲景探索：</div>
+        <p style="font-size: 0.95rem; color: var(--text-muted); margin-bottom: 0.5rem;">(1) 本書作者范欽慧推動成立世界第一條認證國家級「寂靜山徑」，位於台灣宜蘭縣的哪一座山？</p>
+        <div style="max-width: 320px; margin-bottom: 0.8rem;">
+          <input type="text" id="w10_q1_mountain" class="form-control" placeholder="請填寫山名（如：太平）山翠峰湖環山步道">
+        </div>
+
+        <p style="font-size: 0.95rem; color: var(--text-muted); margin-bottom: 0.5rem;">(2) 科學家將環境聲音分為三種，請依說明填入正確聲音類別名稱（請填：生物音 / 環境音 / 人為音）：</p>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.6rem;">
+          <div>
+            <label style="font-size: 0.85rem; font-weight: 700; color: var(--primary);">鳥叫蟲鳴屬於</label>
+            <input type="text" id="w10_q1_bio" class="form-control" placeholder="例如：生物音">
+          </div>
+          <div>
+            <label style="font-size: 0.85rem; font-weight: 700; color: var(--primary);">風聲雨聲屬於</label>
+            <input type="text" id="w10_q1_geo" class="form-control" placeholder="例如：環境音">
+          </div>
+          <div>
+            <label style="font-size: 0.85rem; font-weight: 700; color: var(--primary);">車流機械屬於</label>
+            <input type="text" id="w10_q1_anthro" class="form-control" placeholder="例如：人為音">
+          </div>
+        </div>
+      </div>
+
+      <!-- 影音 2：《賴桑的千年之約》 -->
+      <div style="margin-top: 1.8rem; margin-bottom: 1.5rem;">
+        <h4 style="color: var(--primary); font-size: 1.05rem; margin-bottom: 0.5rem;">🌲 專題影音二：遠見叢書——《賴桑的千年之約》紀錄片</h4>
+        <div class="video-container">
+          <iframe src="https://www.youtube.com/embed/b71ib3aSlAs" title="遠見叢書 — 《賴桑的千年之約》" allowfullscreen></iframe>
+        </div>
+      </div>
+
+      <div class="question-item">
+        <div class="question-title">2. 《賴桑的千年之約》與綠色傳奇：</div>
+        <p style="font-size: 0.95rem; color: var(--text-muted); margin-bottom: 0.5rem;">賴倍元（賴桑）三十餘年如一日，在台中山區親手種下三十餘萬棵珍貴原生樹木。賴桑堅守的「三不政策」指的是哪三不？</p>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.6rem;">
+          <div>
+            <label style="font-size: 0.85rem; font-weight: 700; color: var(--primary);">第一不</label>
+            <input type="text" id="w10_q2_policy1" class="form-control" placeholder="例如：不砍伐">
+          </div>
+          <div>
+            <label style="font-size: 0.85rem; font-weight: 700; color: var(--primary);">第二不</label>
+            <input type="text" id="w10_q2_policy2" class="form-control" placeholder="例如：不買賣">
+          </div>
+          <div>
+            <label style="font-size: 0.85rem; font-weight: 700; color: var(--primary);">第三不（不留給誰私有）</label>
+            <input type="text" id="w10_q2_policy3" class="form-control" placeholder="例如：不傳子孫後代（公益信託）">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 任務二：深度思辨與小組生態共讀選書 -->
+    <div class="card">
+      <h3 class="card-title">🌲 任務二：深度思辨與小組生態共讀選書</h3>
+      
+      <div class="question-item">
+        <div class="question-title">1. 深度思辨：守護自然的心靈與行動啟發</div>
+        <p style="font-size: 0.95rem; color: var(--text-muted); margin-bottom: 0.5rem;">《搶救寂靜》守護無形的「自然寧靜權」，《賴桑的千年之約》堅持「傻子般的造林夢」。面對經濟開發與生態保育的衝突，這兩位實踐者帶給你什麼深刻的心靈啟發？我們能學到什麼尊重生命與自然的態度？</p>
+        <textarea id="w10_reflection" class="form-control" placeholder="請寫下你的深入心得與省思（建議 15 字以上）..."></textarea>
+      </div>
+
+      <div class="question-item">
+        <div class="question-title">2. 小組共讀書目選定（為第 11～12 週共讀發表做準備）：</div>
+        <p style="font-size: 0.95rem; color: var(--text-muted); margin-bottom: 0.5rem;">請與小組組員充分討論，從推薦書單或圖書數位館藏中選定一本生態專書：</p>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.8rem; margin-bottom: 0.8rem;">
+          <div>
+            <label style="font-size: 0.85rem; font-weight: 700; color: var(--primary);">本組選定書名</label>
+            <input type="text" id="w10_book_title" class="form-control" placeholder="例如：《搶救寂靜》或《種樹的男人》">
+          </div>
+          <div>
+            <label style="font-size: 0.85rem; font-weight: 700; color: var(--primary);">作者 / 譯者</label>
+            <input type="text" id="w10_book_author" class="form-control" placeholder="例如：范欽慧 / 遠流出版">
+          </div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 0.6rem;">
+          <div>
+            <label style="font-size: 0.85rem; font-weight: 700; color: var(--primary);">選擇理由 ①</label>
+            <input type="text" id="w10_book_reason1" class="form-control" placeholder="請說明第一個吸引本組的原因...">
+          </div>
+          <div>
+            <label style="font-size: 0.85rem; font-weight: 700; color: var(--primary);">選擇理由 ②</label>
+            <input type="text" id="w10_book_reason2" class="form-control" placeholder="請說明第二個吸引本組的原因...">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 任務三：我與自然的未來約定 -->
+    <div class="card">
+      <h3 class="card-title">🌱 任務三：我與自然的未來約定（請勾選至少 2 項生活綠色承諾）</h3>
+      <p class="question-desc">身為負責任的地球公民，我願意在生活中落實以下承諾：</p>
+
+      <div class="checkbox-group">
+        <label class="checkbox-label"><input type="checkbox" name="w10_actions" value="拓展環境視野"> 📚 <strong>拓展環境視野</strong>：每月至少閱讀 1 篇生態環境報導或借閱 1 本自然科普好書，深化生態素養</label>
+        <label class="checkbox-label"><input type="checkbox" name="w10_actions" value="走入山林靜心"> 🌲 <strong>走入山林靜心</strong>：走入森林步道時放輕腳步、放低音量，學習用耳朵聆聽微風與鳥鳴，不喧嘩吵鬧</label>
+        <label class="checkbox-label"><input type="checkbox" name="w10_actions" value="支持在地植樹"> 🌿 <strong>支持在地植樹</strong>：支持台灣原生樹種復育與造林計畫，愛惜身邊每一棵綠樹，推動綠美化生活</label>
+        <label class="checkbox-label"><input type="checkbox" name="w10_actions" value="同儕共讀推廣"> 🗣️ <strong>同儕共讀推廣</strong>：積極參與下週小組共讀與觀點整理，主動向家人同學分享專書中的動人故事</label>
+      </div>
+    </div>
+
+    <!-- 自我檢核表 -->
+    <div class="card">
+      <h3 class="card-title">📝 學習表現自我檢核表</h3>
+      <p class="question-desc">請誠實回顧本節課的學習狀態，為自己進行自評：</p>
+      <table class="check-table">
+        <thead>
+          <tr>
+            <th>檢核項目</th>
+            <th>自評結果</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1. 我能專注聆聽專書導讀與觀賞紀錄片，理解聲景守護與賴桑三不政策之生態價值。</td>
+            <td>
+              <label><input type="radio" name="check1" value="yes"> 是</label>&nbsp;&nbsp;
+              <label><input type="radio" name="check1" value="need_work"> 需加油</label>
+            </td>
+          </tr>
+          <tr>
+            <td>2. 我能同理兩位環境實踐者的無私情操，並積極參與小組選書討論。</td>
+            <td>
+              <label><input type="radio" name="check2" value="yes"> 是</label>&nbsp;&nbsp;
+              <label><input type="radio" name="check2" value="need_work"> 需加油</label>
+            </td>
+          </tr>
+          <tr>
+            <td>3. 我願意落實生活綠色閱讀與自然靜心行動，並為下週共讀做好準備。</td>
+            <td>
+              <label><input type="radio" name="check3" value="yes"> 是</label>&nbsp;&nbsp;
+              <label><input type="radio" name="check3" value="need_work"> 需加油</label>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 送出按鈕 -->
+    <div class="submit-section">
+      <button id="submitBtn" class="btn-submit" onclick="handleSubmit()">🚀 送出第 10 週學習單</button>
+    </div>
+
+  </div>
+
+  <script src="assets/js/common.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      initStudentInfoForm('10');
+    });
+
+    function handleSubmit() {
+      submitWorksheet('10', (answers) => {
+        return evaluateUnitWorksheet('10', answers);
+      });
+    }
+  </script>
+
+</body>
+</html>
