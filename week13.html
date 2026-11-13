@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>【行動方程式】第 13 週：與自然有約之『小組會議（二）』——創意發表策劃與彩排演練</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+  <script src="assets/js/qrcode.min.js"></script>
+</head>
+<body>
+
+  <!-- 頂部導覽列 -->
+  <header class="navbar">
+    <a href="index.html" class="navbar-brand">
+      <span>🌱 行動方程式</span>
+      <span class="navbar-badge">第 13 週</span>
+    </a>
+    <div class="nav-actions">
+      <button type="button" class="btn-nav btn-nav-qr" onclick="showCurrentPageQrModal()">📱 投影派卷 QR Code</button>
+      <span id="saveStatus" class="save-status">💾 本地暫存安全</span>
+      <a href="index.html" class="btn-nav">🏠 回課程首頁</a>
+    </div>
+  </header>
+
+  <div class="container">
+
+    <!-- 頁面標題 -->
+    <div class="page-header">
+      <div class="school-title">桃園市楊光國民中學 115 學年度第一學期 彈性學習課程學習單</div>
+      <h1 class="unit-title">【行動方程式】第 13 週：與自然有約之『小組會議（二）』——創意發表策劃與彩排演練</h1>
+      <p class="unit-desc">授課日期：11/22 - 11/28 | 主題：4 分鐘時間規劃 · 登台角色責任簽核 · 計時彩排自檢</p>
+    </div>
+
+    <!-- 學生基本資料卡片 -->
+    <div class="card">
+      <h3 class="card-title">👤 學生基本資料</h3>
+      <div class="student-bar">
+        <div class="form-group">
+          <label class="form-label required" for="studentClass">班級</label>
+          <select id="studentClass" class="form-control" required>
+            <option value="" disabled selected>載入中...</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label required" for="studentSeat">座號</label>
+          <select id="studentSeat" class="form-control" required>
+            <option value="" disabled selected>載入中...</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label required" for="studentName">姓名</label>
+          <input type="text" id="studentName" class="form-control" placeholder="請輸入全名" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label required" for="studentGroup">組別</label>
+          <select id="studentGroup" class="form-control" required>
+            <option value="" disabled selected>載入中...</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- 任務一：本組發表形式與 4 分鐘時間規劃 -->
+    <div class="card">
+      <h3 class="card-title">🎭 任務一：本組發表形式與 4 分鐘時間規劃</h3>
+      <p class="question-desc">請組內共同確認發表型態與 4 分鐘節奏時間規劃：</p>
+
+      <div class="question-item">
+        <div class="question-title">1. 本組選定專書與發表模式：</div>
+        <div style="display: grid; grid-template-columns: 1fr 200px; gap: 0.8rem; margin-bottom: 0.8rem;">
+          <input type="text" id="w13_book_title" class="form-control" placeholder="請輸入發表書名">
+          <select id="w13_format" class="form-control">
+            <option value="生態 TED Talk">🎤 生態 TED Talk</option>
+            <option value="綠色 Podcast 對談">🎙️ 綠色 Podcast 對談</option>
+            <option value="說書人情境短劇">🎭 說書人情境短劇</option>
+            <option value="圖文視覺簡報">💻 圖文視覺簡報</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="question-item">
+        <div class="question-title">2. ① 開場故事規劃（約 45 秒）：</div>
+        <textarea id="w13_plan_intro" class="form-control" placeholder="請寫下開場破冰引言、懸念提問或背景故事規劃（建議 15 字以上）..."></textarea>
+      </div>
+
+      <div class="question-item">
+        <div class="question-title">3. ② 核心論點規劃（約 120 秒）：</div>
+        <textarea id="w13_plan_core" class="form-control" placeholder="請寫下 ORID 萃取的專書核心生態危機、重大數據或感動情節之呈現規劃（建議 15 字以上）..."></textarea>
+      </div>
+
+      <div class="question-item">
+        <div class="question-title">4. ③ 生活行動反思與 ④ 互動提問（約 75 秒）：</div>
+        <textarea id="w13_plan_action" class="form-control" placeholder="請寫下對國中生的生活綠色實踐啟發，以及向台下同儕拋出的互動問題（建議 15 字以上）..."></textarea>
+      </div>
+    </div>
+
+    <!-- 任務二：登台四角責任分工簽核 -->
+    <div class="card">
+      <h3 class="card-title">🤝 任務二：登台四角責任分工簽核（全員參與，拒絕搭便車）</h3>
+      <p class="question-desc">發表當天全員必須登台，請確認各項角色與負責同學姓名：</p>
+
+      <table class="check-table" style="margin-bottom: 1.2rem;">
+        <thead>
+          <tr>
+            <th style="width: 28%;">登台角色分工</th>
+            <th style="width: 24%;">組員姓名</th>
+            <th style="width: 48%;">台上的具體發言或操作任務</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>🎤 開場主講人</strong></td>
+            <td><input type="text" id="w13_role_intro" class="form-control" placeholder="主講人姓名"></td>
+            <td style="font-size: 0.9rem; color: var(--text-muted);">負責開場破冰、介紹書名與背景故事、拋出懸念</td>
+          </tr>
+          <tr>
+            <td><strong>🌲 核心分析員</strong></td>
+            <td><input type="text" id="w13_role_analyst" class="form-control" placeholder="分析員姓名"></td>
+            <td style="font-size: 0.9rem; color: var(--text-muted);">主講專書 3 大核心生態危機與數據、最觸動章節</td>
+          </tr>
+          <tr>
+            <td><strong>💻 設備/道具員</strong></td>
+            <td><input type="text" id="w13_role_tech" class="form-control" placeholder="設備道具員姓名"></td>
+            <td style="font-size: 0.9rem; color: var(--text-muted);">操控簡報投影、播放音效或展示實體道具書本</td>
+          </tr>
+          <tr>
+            <td><strong>❓ 互動提問官</strong></td>
+            <td><input type="text" id="w13_role_qa" class="form-control" placeholder="提問官姓名"></td>
+            <td style="font-size: 0.9rem; color: var(--text-muted);">主講生活行動建議、主持台下互動問答與結語</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="question-item">
+        <div class="question-title">5. 我在發表當天台上負責的最主要一句話或段落是：</div>
+        <textarea id="w13_my_speech" class="form-control" placeholder="請寫下你當天在台上負責講出的關鍵台詞、分析段落或操作工作（建議 15 字以上）..."></textarea>
+      </div>
+    </div>
+
+    <!-- 任務三：彩排自檢與完備度確認 -->
+    <div class="card">
+      <h3 class="card-title">⏱️ 任務三：彩排自檢與完備度確認</h3>
+      
+      <div class="question-item">
+        <div class="question-title">1. 本組今日彩排實測時間（分與秒）：</div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.8rem; margin-bottom: 0.8rem;">
+          <input type="text" id="w13_rehearsal_min" class="form-control" placeholder="實測分鐘（例如：3）">
+          <input type="text" id="w13_rehearsal_sec" class="form-control" placeholder="實測秒數（例如：45）">
+        </div>
+      </div>
+
+      <div class="question-item">
+        <div class="question-title">2. 彩排後發現需要微調或加強的地方：</div>
+        <textarea id="w13_rehearsal_note" class="form-control" placeholder="例如：講得太快需要放慢、某頁投影片切換時機要更早、音量需要再放大...（建議 15 字以上）"></textarea>
+      </div>
+    </div>
+
+    <!-- 自我檢核表 -->
+    <div class="card">
+      <h3 class="card-title">📝 學習表現自我檢核表</h3>
+      <p class="question-desc">請誠實回顧本節課的學習狀態，為自己進行自評：</p>
+      <table class="check-table">
+        <thead>
+          <tr>
+            <th>檢核項目</th>
+            <th>自評結果</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1. 我清楚自己在發表當天台上的職責，並已完成演練。</td>
+            <td>
+              <label><input type="radio" name="check1" value="yes"> 是</label>&nbsp;&nbsp;
+              <label><input type="radio" name="check1" value="need_work"> 需加油</label>
+            </td>
+          </tr>
+          <tr>
+            <td>2. 全組已完成至少 1 次完整計時彩排，時間控制良好。</td>
+            <td>
+              <label><input type="radio" name="check2" value="yes"> 是</label>&nbsp;&nbsp;
+              <label><input type="radio" name="check2" value="need_work"> 需加油</label>
+            </td>
+          </tr>
+          <tr>
+            <td>3. 簡報、海報或實體展示道具已具備 80% 以上完備度。</td>
+            <td>
+              <label><input type="radio" name="check3" value="yes"> 是</label>&nbsp;&nbsp;
+              <label><input type="radio" name="check3" value="need_work"> 需加油</label>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 送出按鈕 -->
+    <div class="submit-section">
+      <button id="submitBtn" class="btn-submit" onclick="handleSubmit()">🚀 送出第 13 週學習單</button>
+    </div>
+
+  </div>
+
+  <script src="assets/js/common.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      initStudentInfoForm('13');
+    });
+
+    function handleSubmit() {
+      submitWorksheet('13', (answers) => {
+        return evaluateUnitWorksheet('13', answers);
+      });
+    }
+  </script>
+
+</body>
+</html>

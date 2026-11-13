@@ -986,6 +986,45 @@ const UNIT_EVALUATION_CONFIG = {
     ],
     actionsId: 'w12_actions'
   }
+,
+
+  '13': {
+    name: '第 13 週：與自然有約之『小組會議（二）』——創意發表策劃與彩排演練',
+    baseScore: 78,
+    questions: [
+      {
+        id: 'w13_plan_flow',
+        name: '任務一 [4分鐘流程規劃]',
+        isCombo: true,
+        subIds: ['w13_plan_intro', 'w13_plan_core', 'w13_plan_action'],
+        keywords: ['開場', '故事', '核心', '生態', '危機', '行動', '生活', '分享', '提問', '問題', '數據', '啟發'],
+        weight: 3.5
+      },
+      {
+        id: 'w13_roles',
+        name: '任務二 [登台四角責任分工簽核]',
+        isRoleCheck: true,
+        roleKeys: ['w13_role_intro', 'w13_role_analyst', 'w13_role_tech', 'w13_role_qa'],
+        weight: 3.5
+      },
+      {
+        id: 'w13_speech',
+        name: '任務二 [個人登台台詞與任務]',
+        minLen: 15,
+        keywords: ['負責', '台上', '講', '分享', '說明', '開場', '介紹', '操作', '提問', '簡報', '重點'],
+        weight: 3
+      },
+      {
+        id: 'w13_rehearsal',
+        name: '任務三 [彩排時間與微調檢核]',
+        isCombo: true,
+        subIds: ['w13_rehearsal_min', 'w13_rehearsal_sec', 'w13_rehearsal_note'],
+        keywords: ['時間', '放慢', '音量', '切換', '流暢', '太快', '超時', '加強', '簡報', '聲音'],
+        weight: 2.5
+      }
+    ],
+    actionsId: 'w13_actions'
+  }
 };
 
 /**
