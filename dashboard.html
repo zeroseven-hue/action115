@@ -734,13 +734,29 @@
       <h3 style="font-size: 1.3rem; color: var(--dash-primary); font-weight: 800; margin-bottom: 1rem;">✍️ 手動補登學生成績</h3>
       
       <div class="form-group" style="margin-bottom: 0.8rem;">
-        <label class="form-label required">座號 (01~30)</label>
+        <label class="form-label required">班級</label>
+        <select id="manualClass" class="form-control">
+          <option value="701">701 班</option>
+          <option value="702">702 班</option>
+          <option value="703">703 班</option>
+          <option value="704">704 班</option>
+          <option value="705">705 班</option>
+          <option value="706">706 班</option>
+          <option value="707">707 班</option>
+          <option value="708">708 班</option>
+          <option value="709">709 班</option>
+          <option value="710">710 班</option>
+        </select>
+      </div>
+
+      <div class="form-group" style="margin-bottom: 0.8rem;">
+        <label class="form-label required">座號 (01~35)</label>
         <input type="text" id="manualSeat" class="form-control" placeholder="例如：05">
       </div>
 
       <div class="form-group" style="margin-bottom: 0.8rem;">
-        <label class="form-label required">學生姓名</label>
-        <input type="text" id="manualName" class="form-control" placeholder="例如：王小明">
+        <label class="form-label">學生姓名 (選填，留空將自動帶出)</label>
+        <input type="text" id="manualName" class="form-control" placeholder="留空預設為「70105生」或已有名稱">
       </div>
 
       <div class="form-group" style="margin-bottom: 1.2rem;">
@@ -770,6 +786,10 @@
     let currentLiveRecords = [];
     let absentSeatsSet = new Set();
     let isScoreHidden = false;
+    // 記憶各班級應到人數設定 (優先從 localStorage 讀取或依班級保存)
+    let classExpectedMap = JSON.parse(localStorage.getItem('action115_class_expected') || '{}');
+    // 記憶各班級請假名單 (班級+週次快取，避免切換或背景輪詢洗掉)
+    let classAbsentCache = JSON.parse(localStorage.getItem('action115_class_absent') || '{}');
 
     // ⏱️ 自動定時更新狀態管理 (預設每 5 秒即時輪詢一次)
     const AUTO_REFRESH_INTERVAL_SECONDS = 5;
@@ -783,6 +803,14 @@
       const savedTheme = localStorage.getItem('action115_theme') || 'emerald';
       document.getElementById('selectTheme').value = savedTheme;
       changeDashboardTheme(savedTheme);
+
+      // 還原當前班級應到人數設定 (若未設定則預設 26 人)
+      const currentClass = document.getElementById('selectClass').value;
+      if (classExpectedMap[currentClass]) {
+        document.getElementById('inputExpectedCount').value = classExpectedMap[currentClass];
+      } else {
+        document.getElementById('inputExpectedCount').value = 26;
+      }
 
       // 生成 01 ~ 30 號座號卡
       renderEmptySeatCards();
@@ -907,7 +935,23 @@
     // 6. 切換班級或週次
     function handleClassOrWeekChange() {
       const classVal = document.getElementById('selectClass').value;
+      const weekVal = document.getElementById('selectWeek').value;
       document.getElementById('displayClassTitle').textContent = classVal;
+      
+      // 從本地快取或預設值還原該班應到人數
+      const savedExpected = classExpectedMap[classVal] || 26;
+      document.getElementById('inputExpectedCount').value = savedExpected;
+
+      // 還原該班該週之請假快取
+      const cacheKey = classVal + '_' + weekVal;
+      if (classAbsentCache[cacheKey]) {
+        absentSeatsSet = new Set(classAbsentCache[cacheKey]);
+        document.getElementById('inputAbsentSeats').value = Array.from(absentSeatsSet).join(', ');
+      } else {
+        absentSeatsSet.clear();
+        document.getElementById('inputAbsentSeats').value = '';
+      }
+
       autoRefreshCountdown = AUTO_REFRESH_INTERVAL_SECONDS;
       updateAutoRefreshUi();
       fetchLiveDataFromGAS(false);
@@ -977,14 +1021,20 @@
           currentSeatDataMap = processed.seatDataMap;
           currentLiveRecords = processed.cleanList;
           
-          // 還原試算表中的請假名單與應到人數
+          // 還原試算表中的請假名單與應到人數 (若本地有主動調整偏好則以本地為準，否則以試算表為準)
+          const cacheKey = classVal + '_' + weekVal;
           if (data.attendance) {
             if (data.attendance.expectedCount) {
-              document.getElementById('inputExpectedCount').value = data.attendance.expectedCount;
+              if (!classExpectedMap[classVal]) {
+                document.getElementById('inputExpectedCount').value = data.attendance.expectedCount;
+              }
             }
-            if (Array.isArray(data.attendance.absentSeats)) {
-              absentSeatsSet = new Set(data.attendance.absentSeats);
-              document.getElementById('inputAbsentSeats').value = Array.from(absentSeatsSet).join(', ');
+            if (Array.isArray(data.attendance.absentSeats) && data.attendance.absentSeats.length > 0) {
+              // 僅在本地尚未手動編輯此班此週請假時才覆蓋
+              if (!classAbsentCache[cacheKey]) {
+                absentSeatsSet = new Set(data.attendance.absentSeats);
+                document.getElementById('inputAbsentSeats').value = Array.from(absentSeatsSet).join(', ');
+              }
             }
           }
 
@@ -1110,6 +1160,7 @@
 
     // 9. 將讀取的資料繪製上 30 人卡片矩陣 (支援同號衝突警示與姓名核對)
     function renderLiveDataToMatrix() {
+      // 生成 01 ~ 30 號座號卡
       renderEmptySeatCards();
 
       for (let i = 1; i <= COURSE_CONFIG.maxSeatNumber; i++) {
@@ -1160,7 +1211,12 @@
 
     // 9. 更新頂部參與率進度條
     function updateDashboardStats() {
-      const expectedTotal = parseInt(document.getElementById('inputExpectedCount').value) || 28;
+      const classVal = document.getElementById('selectClass').value;
+      const expectedTotal = parseInt(document.getElementById('inputExpectedCount').value) || 26;
+      // 記憶此班級的應到人數設定至 localStorage
+      classExpectedMap[classVal] = expectedTotal;
+      localStorage.setItem('action115_class_expected', JSON.stringify(classExpectedMap));
+
       const absentCount = absentSeatsSet.size;
       const actualExpected = Math.max(1, expectedTotal - absentCount);
       document.getElementById('actualExpectedCount').textContent = actualExpected;
@@ -1180,20 +1236,38 @@
 
     // 10. 點擊座號卡：切換請假或手動補登
     function handleSeatCardClick(seatStr) {
+      const classVal = document.getElementById('selectClass').value;
+      const weekVal = document.getElementById('selectWeek').value;
+      const cacheKey = classVal + '_' + weekVal;
+
       if (absentSeatsSet.has(seatStr)) {
         absentSeatsSet.delete(seatStr);
       } else {
         absentSeatsSet.add(seatStr);
       }
       document.getElementById('inputAbsentSeats').value = Array.from(absentSeatsSet).join(', ');
+
+      // 同步寫入快取，避免被背景輪詢覆蓋
+      classAbsentCache[cacheKey] = Array.from(absentSeatsSet);
+      localStorage.setItem('action115_class_absent', JSON.stringify(classAbsentCache));
+
       renderLiveDataToMatrix();
     }
 
     // 11. 手動輸入請假座號變更
     function handleAbsentInputChange() {
+      const classVal = document.getElementById('selectClass').value;
+      const weekVal = document.getElementById('selectWeek').value;
+      const cacheKey = classVal + '_' + weekVal;
+
       const raw = document.getElementById('inputAbsentSeats').value;
       const parts = raw.split(/[,\s]+/).map(s => s.trim().padStart(2, '0')).filter(s => s && s !== '00');
       absentSeatsSet = new Set(parts);
+
+      // 同步寫入快取
+      classAbsentCache[cacheKey] = Array.from(absentSeatsSet);
+      localStorage.setItem('action115_class_absent', JSON.stringify(classAbsentCache));
+
       renderLiveDataToMatrix();
     }
 
@@ -1308,21 +1382,38 @@
 
     // 15. 手動補登成績 Modal 控制
     function openManualGradeModal() {
+      // 自動同步上方當前所選班級
+      const currentClass = document.getElementById('selectClass').value;
+      const modalClassSelect = document.getElementById('manualClass');
+      if (modalClassSelect && currentClass) {
+        modalClassSelect.value = currentClass;
+      }
+      document.getElementById('manualSeat').value = '';
+      document.getElementById('manualName').value = '';
       document.getElementById('manualGradeModal').classList.add('active');
+      setTimeout(() => document.getElementById('manualSeat')?.focus(), 200);
     }
     function closeManualGradeModal() {
       document.getElementById('manualGradeModal').classList.remove('active');
     }
     async function submitManualGrade() {
-      const classVal = document.getElementById('selectClass').value;
+      const classSelect = document.getElementById('manualClass');
+      const classVal = classSelect ? classSelect.value : document.getElementById('selectClass').value;
       const weekVal = document.getElementById('selectWeek').value;
-      const seat = document.getElementById('manualSeat').value.trim().padStart(2, '0');
-      const name = document.getElementById('manualName').value.trim();
-      const score = parseInt(document.getElementById('manualScore').value) || 95;
+      const rawSeat = document.getElementById('manualSeat').value.trim();
+      const seat = rawSeat ? String(parseInt(rawSeat, 10)).padStart(2, '0') : '';
+      let name = document.getElementById('manualName').value.trim();
+      const score = parseInt(document.getElementById('manualScore').value) || 100;
 
-      if (!seat || !name) {
-        alert('請填寫座號與姓名！');
+      if (!seat || isNaN(parseInt(seat, 10)) || parseInt(seat, 10) < 1 || parseInt(seat, 10) > 35) {
+        alert('請輸入有效的座號 (01~35)！');
+        document.getElementById('manualSeat').focus();
         return;
+      }
+
+      // 若老師未輸入姓名，自動補上「座號生」或預設名稱
+      if (!name) {
+        name = `${classVal}${seat}生`;
       }
 
       const payload = {
@@ -1343,9 +1434,15 @@
           body: JSON.stringify(payload),
           mode: 'no-cors'
         });
-        alert('✅ 已為 ' + classVal + ' 班 ' + seat + ' 號 ' + name + ' 補登成績，並同步回傳試算表！');
+        alert('✅ 已成功為 ' + classVal + ' 班 ' + seat + ' 號 (' + name + ') 補登 ' + score + ' 分，並同步回傳雲端試算表！');
         closeManualGradeModal();
-        fetchLiveDataFromGAS();
+        // 若補登班級與當前顯示班級不同，自動切換至該班級方便檢視
+        if (document.getElementById('selectClass').value !== classVal) {
+          document.getElementById('selectClass').value = classVal;
+          handleClassOrWeekChange();
+        } else {
+          fetchLiveDataFromGAS();
+        }
       } catch (e) {
         alert('補登完成！');
       }
